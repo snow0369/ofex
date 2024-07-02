@@ -1,0 +1,12 @@
+h5py==3.10.0
+numpy==1.25.2
+pyscf==2.4.0
+scipy==1.13.1
+openfermion~=1.6.0
+openfermionpsi4~=0.5
+openfermionpyscf~=0.5
+galois~=0.3.7
+qiskit~=0.45.1
+filelock~=3.13.1
+matplotlib~=3.8.2
+qiskit-aer~=0.13.2

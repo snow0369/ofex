@@ -1,0 +1,773 @@
+n_qubits: 2, weight_operator: 1, density_state: 1
+numpy state mult took 0.04754996299743652 (average: 4.754996299743652e-05)
+Conversion to sparse matrix took 0.000827789306640625
+scipy state mult took 0.164839506149292 (average: 0.00016483950614929198)
+dict state mult took 0.0036652088165283203 (average: 3.66520881652832e-06)
+
+n_qubits: 2, weight_operator: 1, density_state: 2
+numpy state mult took 0.04157376289367676 (average: 4.1573762893676756e-05)
+Conversion to sparse matrix took 0.0007722377777099609
+scipy state mult took 0.16443157196044922 (average: 0.00016443157196044923)
+dict state mult took 0.0066068172454833984 (average: 6.606817245483398e-06)
+
+n_qubits: 2, weight_operator: 1, density_state: 4
+numpy state mult took 0.03561711311340332 (average: 3.561711311340332e-05)
+Conversion to sparse matrix took 0.0008172988891601562
+scipy state mult took 0.16413283348083496 (average: 0.00016413283348083496)
+dict state mult took 0.011971235275268555 (average: 1.1971235275268554e-05)
+
+n_qubits: 2, weight_operator: 10, density_state: 1
+numpy state mult took 0.2698831558227539 (average: 0.0002698831558227539)
+Conversion to sparse matrix took 0.005570411682128906
+scipy state mult took 0.1635587215423584 (average: 0.0001635587215423584)
+dict state mult took 0.02979588508605957 (average: 2.979588508605957e-05)
+
+n_qubits: 2, weight_operator: 10, density_state: 2
+numpy state mult took 0.2915036678314209 (average: 0.0002915036678314209)
+Conversion to sparse matrix took 0.0058629512786865234
+scipy state mult took 0.1665515899658203 (average: 0.0001665515899658203)
+dict state mult took 0.062334299087524414 (average: 6.233429908752442e-05)
+
+n_qubits: 2, weight_operator: 10, density_state: 4
+numpy state mult took 0.30455446243286133 (average: 0.00030455446243286133)
+Conversion to sparse matrix took 0.005758523941040039
+scipy state mult took 0.16323423385620117 (average: 0.00016323423385620117)
+dict state mult took 0.12171125411987305 (average: 0.00012171125411987305)
+
+n_qubits: 4, weight_operator: 1, density_state: 1
+numpy state mult took 0.13299798965454102 (average: 0.000132997989654541)
+Conversion to sparse matrix took 0.0012888908386230469
+scipy state mult took 0.17743635177612305 (average: 0.00017743635177612304)
+dict state mult took 0.003715991973876953 (average: 3.715991973876953e-06)
+
+n_qubits: 4, weight_operator: 1, density_state: 2
+numpy state mult took 0.12803339958190918 (average: 0.00012803339958190917)
+Conversion to sparse matrix took 0.0013275146484375
+scipy state mult took 0.16736793518066406 (average: 0.00016736793518066405)
+dict state mult took 0.007085561752319336 (average: 7.085561752319336e-06)
+
+n_qubits: 4, weight_operator: 1, density_state: 4
+numpy state mult took 0.08024215698242188 (average: 8.024215698242188e-05)
+Conversion to sparse matrix took 0.00128173828125
+scipy state mult took 0.16394829750061035 (average: 0.00016394829750061035)
+dict state mult took 0.014208793640136719 (average: 1.4208793640136718e-05)
+
+n_qubits: 4, weight_operator: 1, density_state: 8
+numpy state mult took 0.14354348182678223 (average: 0.00014354348182678224)
+Conversion to sparse matrix took 0.0013041496276855469
+scipy state mult took 0.17106986045837402 (average: 0.00017106986045837402)
+dict state mult took 0.02898406982421875 (average: 2.898406982421875e-05)
+
+n_qubits: 4, weight_operator: 1, density_state: 16
+numpy state mult took 0.1310405731201172 (average: 0.0001310405731201172)
+Conversion to sparse matrix took 0.0013191699981689453
+scipy state mult took 0.16715073585510254 (average: 0.00016715073585510254)
+dict state mult took 0.05504584312438965 (average: 5.5045843124389646e-05)
+
+n_qubits: 4, weight_operator: 10, density_state: 1
+numpy state mult took 1.1486685276031494 (average: 0.0011486685276031494)
+Conversion to sparse matrix took 0.010530710220336914
+scipy state mult took 0.16496896743774414 (average: 0.00016496896743774413)
+dict state mult took 0.0337069034576416 (average: 3.3706903457641604e-05)
+
+n_qubits: 4, weight_operator: 10, density_state: 2
+numpy state mult took 1.083484172821045 (average: 0.001083484172821045)
+Conversion to sparse matrix took 0.009716987609863281
+scipy state mult took 0.1649608612060547 (average: 0.00016496086120605468)
+dict state mult took 0.0656137466430664 (average: 6.561374664306641e-05)
+
+n_qubits: 4, weight_operator: 10, density_state: 4
+numpy state mult took 1.0981323719024658 (average: 0.0010981323719024658)
+Conversion to sparse matrix took 0.010206460952758789
+scipy state mult took 0.1637113094329834 (average: 0.0001637113094329834)
+dict state mult took 0.13457489013671875 (average: 0.00013457489013671875)
+
+n_qubits: 4, weight_operator: 10, density_state: 8
+numpy state mult took 1.0659656524658203 (average: 0.0010659656524658204)
+Conversion to sparse matrix took 0.010384321212768555
+scipy state mult took 0.16567230224609375 (average: 0.00016567230224609375)
+dict state mult took 0.2774994373321533 (average: 0.0002774994373321533)
+
+n_qubits: 4, weight_operator: 10, density_state: 16
+numpy state mult took 1.1798982620239258 (average: 0.0011798982620239257)
+Conversion to sparse matrix took 0.010674476623535156
+scipy state mult took 0.16355681419372559 (average: 0.00016355681419372557)
+dict state mult took 0.5483055114746094 (average: 0.0005483055114746094)
+
+n_qubits: 4, weight_operator: 100, density_state: 1
+numpy state mult took 10.52368688583374 (average: 0.01052368688583374)
+Conversion to sparse matrix took 0.09940457344055176
+scipy state mult took 0.16484785079956055 (average: 0.00016484785079956055)
+dict state mult took 0.3321843147277832 (average: 0.0003321843147277832)
+
+n_qubits: 4, weight_operator: 100, density_state: 2
+numpy state mult took 10.527567863464355 (average: 0.010527567863464355)
+Conversion to sparse matrix took 0.09898066520690918
+scipy state mult took 0.16521978378295898 (average: 0.00016521978378295898)
+dict state mult took 0.6685128211975098 (average: 0.0006685128211975097)
+
+n_qubits: 4, weight_operator: 100, density_state: 4
+numpy state mult took 10.072662353515625 (average: 0.010072662353515624)
+Conversion to sparse matrix took 0.09946775436401367
+scipy state mult took 0.1650075912475586 (average: 0.0001650075912475586)
+dict state mult took 1.3318114280700684 (average: 0.0013318114280700683)
+
+n_qubits: 4, weight_operator: 100, density_state: 8
+numpy state mult took 10.353416442871094 (average: 0.010353416442871093)
+Conversion to sparse matrix took 0.09987807273864746
+scipy state mult took 0.16479921340942383 (average: 0.00016479921340942382)
+dict state mult took 2.654839038848877 (average: 0.002654839038848877)
+
+n_qubits: 4, weight_operator: 100, density_state: 16
+numpy state mult took 10.668696403503418 (average: 0.010668696403503418)
+Conversion to sparse matrix took 0.09947919845581055
+scipy state mult took 0.1664888858795166 (average: 0.0001664888858795166)
+dict state mult took 5.489276885986328 (average: 0.005489276885986328)
+
+n_qubits: 6, weight_operator: 1, density_state: 1
+numpy state mult took 0.5295121669769287 (average: 0.0005295121669769287)
+Conversion to sparse matrix took 0.001798868179321289
+scipy state mult took 0.16771531105041504 (average: 0.00016771531105041503)
+dict state mult took 0.004235744476318359 (average: 4.235744476318359e-06)
+
+n_qubits: 6, weight_operator: 1, density_state: 2
+numpy state mult took 0.44460225105285645 (average: 0.00044460225105285645)
+Conversion to sparse matrix took 0.0018301010131835938
+scipy state mult took 0.16541194915771484 (average: 0.00016541194915771485)
+dict state mult took 0.00750732421875 (average: 7.50732421875e-06)
+
+n_qubits: 6, weight_operator: 1, density_state: 4
+numpy state mult took 0.5185611248016357 (average: 0.0005185611248016358)
+Conversion to sparse matrix took 0.001771688461303711
+scipy state mult took 0.16490960121154785 (average: 0.00016490960121154786)
+dict state mult took 0.015806913375854492 (average: 1.5806913375854494e-05)
+
+n_qubits: 6, weight_operator: 1, density_state: 8
+numpy state mult took 0.523801326751709 (average: 0.000523801326751709)
+Conversion to sparse matrix took 0.0017321109771728516
+scipy state mult took 0.16562342643737793 (average: 0.00016562342643737792)
+dict state mult took 0.03262615203857422 (average: 3.262615203857422e-05)
+
+n_qubits: 6, weight_operator: 1, density_state: 16
+numpy state mult took 0.07436513900756836 (average: 7.436513900756837e-05)
+Conversion to sparse matrix took 0.0013208389282226562
+scipy state mult took 0.16585636138916016 (average: 0.00016585636138916017)
+dict state mult took 0.05784893035888672 (average: 5.784893035888672e-05)
+
+n_qubits: 6, weight_operator: 1, density_state: 32
+numpy state mult took 0.12978696823120117 (average: 0.00012978696823120117)
+Conversion to sparse matrix took 0.0015180110931396484
+scipy state mult took 0.16681218147277832 (average: 0.0001668121814727783)
+dict state mult took 0.12184858322143555 (average: 0.00012184858322143555)
+
+n_qubits: 6, weight_operator: 1, density_state: 64
+numpy state mult took 0.07533383369445801 (average: 7.533383369445801e-05)
+Conversion to sparse matrix took 0.0012500286102294922
+scipy state mult took 0.16660046577453613 (average: 0.00016660046577453614)
+dict state mult took 0.23594260215759277 (average: 0.00023594260215759278)
+
+n_qubits: 6, weight_operator: 10, density_state: 1
+numpy state mult took 3.5784499645233154 (average: 0.0035784499645233154)
+Conversion to sparse matrix took 0.014606237411499023
+scipy state mult took 0.16504549980163574 (average: 0.00016504549980163574)
+dict state mult took 0.036588191986083984 (average: 3.658819198608398e-05)
+
+n_qubits: 6, weight_operator: 10, density_state: 2
+numpy state mult took 3.744929313659668 (average: 0.003744929313659668)
+Conversion to sparse matrix took 0.01492166519165039
+scipy state mult took 0.16591572761535645 (average: 0.00016591572761535643)
+dict state mult took 0.07678699493408203 (average: 7.678699493408203e-05)
+
+n_qubits: 6, weight_operator: 10, density_state: 4
+numpy state mult took 4.526333570480347 (average: 0.0045263335704803466)
+Conversion to sparse matrix took 0.016769886016845703
+scipy state mult took 0.1728506088256836 (average: 0.0001728506088256836)
+dict state mult took 0.15735268592834473 (average: 0.00015735268592834473)
+
+n_qubits: 6, weight_operator: 10, density_state: 8
+numpy state mult took 4.072040319442749 (average: 0.004072040319442749)
+Conversion to sparse matrix took 0.01445627212524414
+scipy state mult took 0.1658318042755127 (average: 0.0001658318042755127)
+dict state mult took 0.3079652786254883 (average: 0.0003079652786254883)
+
+n_qubits: 6, weight_operator: 10, density_state: 16
+numpy state mult took 4.146546125411987 (average: 0.004146546125411987)
+Conversion to sparse matrix took 0.014484405517578125
+scipy state mult took 0.16654348373413086 (average: 0.00016654348373413086)
+dict state mult took 0.6301059722900391 (average: 0.0006301059722900391)
+
+n_qubits: 6, weight_operator: 10, density_state: 32
+numpy state mult took 4.44248628616333 (average: 0.00444248628616333)
+Conversion to sparse matrix took 0.014814376831054688
+scipy state mult took 0.16820216178894043 (average: 0.00016820216178894043)
+dict state mult took 1.2530691623687744 (average: 0.0012530691623687743)
+
+n_qubits: 6, weight_operator: 10, density_state: 64
+numpy state mult took 3.855869770050049 (average: 0.003855869770050049)
+Conversion to sparse matrix took 0.014368534088134766
+scipy state mult took 0.1889185905456543 (average: 0.00018891859054565428)
+dict state mult took 2.4715421199798584 (average: 0.0024715421199798583)
+
+n_qubits: 6, weight_operator: 100, density_state: 1
+numpy state mult took 40.45126271247864 (average: 0.04045126271247864)
+Conversion to sparse matrix took 0.14505267143249512
+scipy state mult took 0.166795015335083 (average: 0.00016679501533508302)
+dict state mult took 0.3860774040222168 (average: 0.0003860774040222168)
+
+n_qubits: 6, weight_operator: 100, density_state: 2
+numpy state mult took 41.14309310913086 (average: 0.04114309310913086)
+Conversion to sparse matrix took 0.14632701873779297
+scipy state mult took 0.1667160987854004 (average: 0.0001667160987854004)
+dict state mult took 0.7669498920440674 (average: 0.0007669498920440674)
+
+n_qubits: 6, weight_operator: 100, density_state: 4
+numpy state mult took 39.62199687957764 (average: 0.03962199687957764)
+Conversion to sparse matrix took 0.14301061630249023
+scipy state mult took 0.16498112678527832 (average: 0.00016498112678527832)
+dict state mult took 1.5419373512268066 (average: 0.0015419373512268067)
+
+n_qubits: 6, weight_operator: 100, density_state: 8
+numpy state mult took 40.53724765777588 (average: 0.04053724765777588)
+Conversion to sparse matrix took 0.1437981128692627
+scipy state mult took 0.1664438247680664 (average: 0.0001664438247680664)
+dict state mult took 3.0897204875946045 (average: 0.0030897204875946047)
+
+n_qubits: 6, weight_operator: 100, density_state: 16
+numpy state mult took 40.82295107841492 (average: 0.04082295107841492)
+Conversion to sparse matrix took 0.14557433128356934
+scipy state mult took 0.17051458358764648 (average: 0.0001705145835876465)
+dict state mult took 6.2328407764434814 (average: 0.0062328407764434815)
+
+n_qubits: 6, weight_operator: 100, density_state: 32
+numpy state mult took 40.232229709625244 (average: 0.04023222970962524)
+Conversion to sparse matrix took 0.14549612998962402
+scipy state mult took 0.17681312561035156 (average: 0.00017681312561035155)
+dict state mult took 12.706424951553345 (average: 0.012706424951553344)
+
+n_qubits: 6, weight_operator: 100, density_state: 64
+numpy state mult took 39.85758113861084 (average: 0.03985758113861084)
+Conversion to sparse matrix took 0.14623045921325684
+scipy state mult took 0.17822909355163574 (average: 0.00017822909355163575)
+dict state mult took 24.805265426635742 (average: 0.02480526542663574)
+
+n_qubits: 6, weight_operator: 1000, density_state: 1
+numpy state mult took 407.7519624233246 (average: 0.40775196242332457)
+Conversion to sparse matrix took 1.4442946910858154
+scipy state mult took 0.1654045581817627 (average: 0.00016540455818176268)
+dict state mult took 3.840269088745117 (average: 0.003840269088745117)
+
+n_qubits: 6, weight_operator: 1000, density_state: 2
+numpy state mult took 399.685240983963 (average: 0.399685240983963)
+Conversion to sparse matrix took 1.455125331878662
+scipy state mult took 0.1685316562652588 (average: 0.0001685316562652588)
+dict state mult took 7.762470960617065 (average: 0.0077624709606170655)
+
+n_qubits: 6, weight_operator: 1000, density_state: 4
+numpy state mult took 409.3951590061188 (average: 0.4093951590061188)
+Conversion to sparse matrix took 1.4650530815124512
+scipy state mult took 0.167189359664917 (average: 0.000167189359664917)
+dict state mult took 15.513632774353027 (average: 0.015513632774353027)
+
+n_qubits: 6, weight_operator: 1000, density_state: 8
+numpy state mult took 403.689439535141 (average: 0.40368943953514097)
+Conversion to sparse matrix took 1.4505870342254639
+scipy state mult took 0.16747474670410156 (average: 0.00016747474670410158)
+dict state mult took 31.09409499168396 (average: 0.03109409499168396)
+
+n_qubits: 6, weight_operator: 1000, density_state: 16
+numpy state mult took 403.6276264190674 (average: 0.4036276264190674)
+Conversion to sparse matrix took 1.454030990600586
+scipy state mult took 0.17025423049926758 (average: 0.00017025423049926757)
+dict state mult took 62.45227313041687 (average: 0.06245227313041687)
+
+n_qubits: 6, weight_operator: 1000, density_state: 32
+numpy state mult took 399.4439973831177 (average: 0.3994439973831177)
+Conversion to sparse matrix took 1.4488286972045898
+scipy state mult took 0.1774749755859375 (average: 0.0001774749755859375)
+dict state mult took 122.52570247650146 (average: 0.12252570247650146)
+
+n_qubits: 6, weight_operator: 1000, density_state: 64
+numpy state mult took 396.47547793388367 (average: 0.39647547793388366)
+Conversion to sparse matrix took 1.4437332153320312
+scipy state mult took 0.18104100227355957 (average: 0.00018104100227355957)
+dict state mult took 251.11479115486145 (average: 0.25111479115486146)
+
+n_qubits: 8, weight_operator: 1, density_state: 1
+numpy state mult took 1.7329912185668945 (average: 0.0017329912185668945)
+Conversion to sparse matrix took 0.0020155906677246094
+scipy state mult took 0.16956067085266113 (average: 0.00016956067085266112)
+dict state mult took 0.0042798519134521484 (average: 4.2798519134521486e-06)
+
+n_qubits: 8, weight_operator: 1, density_state: 2
+numpy state mult took 2.0257041454315186 (average: 0.0020257041454315185)
+Conversion to sparse matrix took 0.002264261245727539
+scipy state mult took 0.1695113182067871 (average: 0.0001695113182067871)
+dict state mult took 0.00891876220703125 (average: 8.91876220703125e-06)
+
+n_qubits: 8, weight_operator: 1, density_state: 4
+numpy state mult took 2.152554750442505 (average: 0.0021525547504425047)
+Conversion to sparse matrix took 0.0022094249725341797
+scipy state mult took 0.16938042640686035 (average: 0.00016938042640686035)
+dict state mult took 0.01791524887084961 (average: 1.791524887084961e-05)
+
+n_qubits: 8, weight_operator: 1, density_state: 8
+numpy state mult took 1.4719350337982178 (average: 0.0014719350337982179)
+Conversion to sparse matrix took 0.002059459686279297
+scipy state mult took 0.1692652702331543 (average: 0.0001692652702331543)
+dict state mult took 0.03393292427062988 (average: 3.393292427062988e-05)
+
+n_qubits: 8, weight_operator: 1, density_state: 16
+numpy state mult took 2.1618776321411133 (average: 0.0021618776321411133)
+Conversion to sparse matrix took 0.0023822784423828125
+scipy state mult took 0.17041563987731934 (average: 0.00017041563987731933)
+dict state mult took 0.07374930381774902 (average: 7.374930381774902e-05)
+
+n_qubits: 8, weight_operator: 1, density_state: 32
+numpy state mult took 1.9437446594238281 (average: 0.0019437446594238281)
+Conversion to sparse matrix took 0.00223541259765625
+scipy state mult took 0.16933226585388184 (average: 0.00016933226585388183)
+dict state mult took 0.14234709739685059 (average: 0.0001423470973968506)
+
+n_qubits: 8, weight_operator: 1, density_state: 64
+numpy state mult took 0.5459957122802734 (average: 0.0005459957122802735)
+Conversion to sparse matrix took 0.0020744800567626953
+scipy state mult took 0.17174673080444336 (average: 0.00017174673080444335)
+dict state mult took 0.2635047435760498 (average: 0.0002635047435760498)
+
+n_qubits: 8, weight_operator: 1, density_state: 128
+numpy state mult took 2.1576812267303467 (average: 0.0021576812267303466)
+Conversion to sparse matrix took 0.002259492874145508
+scipy state mult took 0.17581748962402344 (average: 0.00017581748962402344)
+dict state mult took 0.5688936710357666 (average: 0.0005688936710357666)
+
+n_qubits: 8, weight_operator: 1, density_state: 256
+numpy state mult took 2.0357296466827393 (average: 0.002035729646682739)
+Conversion to sparse matrix took 0.001829385757446289
+scipy state mult took 0.17855286598205566 (average: 0.00017855286598205566)
+dict state mult took 1.038743019104004 (average: 0.001038743019104004)
+
+n_qubits: 8, weight_operator: 10, density_state: 1
+numpy state mult took 15.150651216506958 (average: 0.015150651216506958)
+Conversion to sparse matrix took 0.019411802291870117
+scipy state mult took 0.16837716102600098 (average: 0.00016837716102600098)
+dict state mult took 0.04178786277770996 (average: 4.178786277770996e-05)
+
+n_qubits: 8, weight_operator: 10, density_state: 2
+numpy state mult took 14.816636323928833 (average: 0.014816636323928833)
+Conversion to sparse matrix took 0.02008819580078125
+scipy state mult took 0.16860246658325195 (average: 0.00016860246658325194)
+dict state mult took 0.08271932601928711 (average: 8.27193260192871e-05)
+
+n_qubits: 8, weight_operator: 10, density_state: 4
+numpy state mult took 18.49943733215332 (average: 0.01849943733215332)
+Conversion to sparse matrix took 0.02053976058959961
+scipy state mult took 0.16891932487487793 (average: 0.00016891932487487794)
+dict state mult took 0.16416025161743164 (average: 0.00016416025161743164)
+
+n_qubits: 8, weight_operator: 10, density_state: 8
+numpy state mult took 15.569955825805664 (average: 0.015569955825805663)
+Conversion to sparse matrix took 0.01924443244934082
+scipy state mult took 0.17618179321289062 (average: 0.00017618179321289063)
+dict state mult took 0.3312251567840576 (average: 0.0003312251567840576)
+
+n_qubits: 8, weight_operator: 10, density_state: 16
+numpy state mult took 16.365976810455322 (average: 0.016365976810455322)
+Conversion to sparse matrix took 0.019808530807495117
+scipy state mult took 0.1716597080230713 (average: 0.0001716597080230713)
+dict state mult took 0.6816771030426025 (average: 0.0006816771030426026)
+
+n_qubits: 8, weight_operator: 10, density_state: 32
+numpy state mult took 15.19516897201538 (average: 0.015195168972015382)
+Conversion to sparse matrix took 0.018970012664794922
+scipy state mult took 0.17335152626037598 (average: 0.000173351526260376)
+dict state mult took 1.355947494506836 (average: 0.001355947494506836)
+
+n_qubits: 8, weight_operator: 10, density_state: 64
+numpy state mult took 14.867015361785889 (average: 0.014867015361785888)
+Conversion to sparse matrix took 0.02006244659423828
+scipy state mult took 0.17815351486206055 (average: 0.00017815351486206055)
+dict state mult took 2.7500996589660645 (average: 0.0027500996589660646)
+
+n_qubits: 8, weight_operator: 10, density_state: 128
+numpy state mult took 18.365306854248047 (average: 0.018365306854248045)
+Conversion to sparse matrix took 0.02074146270751953
+scipy state mult took 0.1843404769897461 (average: 0.00018434047698974608)
+dict state mult took 5.559112787246704 (average: 0.005559112787246704)
+
+n_qubits: 8, weight_operator: 10, density_state: 256
+numpy state mult took 16.945839881896973 (average: 0.016945839881896973)
+Conversion to sparse matrix took 0.019685029983520508
+scipy state mult took 0.1852130889892578 (average: 0.00018521308898925782)
+dict state mult took 11.246172428131104 (average: 0.011246172428131104)
+
+n_qubits: 8, weight_operator: 100, density_state: 1
+numpy state mult took 159.22709941864014 (average: 0.15922709941864013)
+Conversion to sparse matrix took 0.1904923915863037
+scipy state mult took 0.16881704330444336 (average: 0.00016881704330444337)
+dict state mult took 0.4159862995147705 (average: 0.0004159862995147705)
+
+n_qubits: 8, weight_operator: 100, density_state: 2
+numpy state mult took 154.87205123901367 (average: 0.15487205123901368)
+Conversion to sparse matrix took 0.19284701347351074
+scipy state mult took 0.16909337043762207 (average: 0.00016909337043762208)
+dict state mult took 0.8378932476043701 (average: 0.0008378932476043701)
+
+n_qubits: 8, weight_operator: 100, density_state: 4
+numpy state mult took 156.2827112674713 (average: 0.1562827112674713)
+Conversion to sparse matrix took 0.19916105270385742
+scipy state mult took 0.17146015167236328 (average: 0.00017146015167236327)
+dict state mult took 1.7181811332702637 (average: 0.0017181811332702636)
+
+n_qubits: 8, weight_operator: 100, density_state: 8
+numpy state mult took 155.93279004096985 (average: 0.15593279004096985)
+Conversion to sparse matrix took 0.19329571723937988
+scipy state mult took 0.17475366592407227 (average: 0.00017475366592407227)
+dict state mult took 3.4129719734191895 (average: 0.0034129719734191893)
+
+n_qubits: 8, weight_operator: 100, density_state: 16
+numpy state mult took 159.38447332382202 (average: 0.15938447332382202)
+Conversion to sparse matrix took 0.1960294246673584
+scipy state mult took 0.18038082122802734 (average: 0.00018038082122802734)
+dict state mult took 6.977808237075806 (average: 0.0069778082370758054)
+
+n_qubits: 8, weight_operator: 100, density_state: 32
+numpy state mult took 159.02879214286804 (average: 0.15902879214286805)
+Conversion to sparse matrix took 0.194504976272583
+scipy state mult took 0.1838533878326416 (average: 0.0001838533878326416)
+dict state mult took 13.963646173477173 (average: 0.013963646173477173)
+
+n_qubits: 8, weight_operator: 100, density_state: 64
+numpy state mult took 158.50890231132507 (average: 0.15850890231132508)
+Conversion to sparse matrix took 0.19298624992370605
+scipy state mult took 0.1942000389099121 (average: 0.0001942000389099121)
+dict state mult took 27.599321842193604 (average: 0.027599321842193603)
+
+n_qubits: 8, weight_operator: 100, density_state: 128
+numpy state mult took 159.66055464744568 (average: 0.1596605546474457)
+Conversion to sparse matrix took 0.1917715072631836
+scipy state mult took 0.21836018562316895 (average: 0.00021836018562316895)
+dict state mult took 55.532520055770874 (average: 0.055532520055770876)
+
+n_qubits: 8, weight_operator: 100, density_state: 256
+numpy state mult took 159.496324300766 (average: 0.159496324300766)
+Conversion to sparse matrix took 0.19434714317321777
+scipy state mult took 0.24860382080078125 (average: 0.00024860382080078126)
+dict state mult took 110.56216859817505 (average: 0.11056216859817505)
+
+n_qubits: 8, weight_operator: 1000, density_state: 1
+numpy state mult took 1558.0871095657349 (average: 1.558087109565735)
+Conversion to sparse matrix took 1.9300642013549805
+scipy state mult took 0.17051267623901367 (average: 0.00017051267623901368)
+dict state mult took 4.267107009887695 (average: 0.004267107009887696)
+
+n_qubits: 8, weight_operator: 1000, density_state: 2
+numpy state mult took 1589.5548620224 (average: 1.5895548620223998)
+Conversion to sparse matrix took 1.9401254653930664
+scipy state mult took 0.17297720909118652 (average: 0.00017297720909118652)
+dict state mult took 8.623902320861816 (average: 0.008623902320861816)
+
+n_qubits: 8, weight_operator: 1000, density_state: 4
+numpy state mult took 1589.6300320625305 (average: 1.5896300320625305)
+Conversion to sparse matrix took 1.961378812789917
+scipy state mult took 0.1742711067199707 (average: 0.0001742711067199707)
+dict state mult took 17.314369440078735 (average: 0.017314369440078737)
+
+n_qubits: 8, weight_operator: 1000, density_state: 8
+numpy state mult took 1590.7462503910065 (average: 1.5907462503910064)
+Conversion to sparse matrix took 1.9565303325653076
+scipy state mult took 0.17845892906188965 (average: 0.00017845892906188964)
+dict state mult took 34.51648950576782 (average: 0.03451648950576782)
+
+n_qubits: 8, weight_operator: 1000, density_state: 16
+numpy state mult took 1577.8369426727295 (average: 1.5778369426727294)
+Conversion to sparse matrix took 1.9536867141723633
+scipy state mult took 0.1843557357788086 (average: 0.0001843557357788086)
+dict state mult took 69.4345064163208 (average: 0.0694345064163208)
+
+n_qubits: 8, weight_operator: 1000, density_state: 32
+numpy state mult took 1576.1475658416748 (average: 1.5761475658416748)
+Conversion to sparse matrix took 2.002117156982422
+scipy state mult took 0.19997072219848633 (average: 0.00019997072219848634)
+dict state mult took 139.7805209159851 (average: 0.1397805209159851)
+
+n_qubits: 8, weight_operator: 1000, density_state: 64
+numpy state mult took 1603.1603956222534 (average: 1.6031603956222533)
+Conversion to sparse matrix took 1.9744634628295898
+scipy state mult took 0.23237133026123047 (average: 0.00023237133026123046)
+dict state mult took 279.60568594932556 (average: 0.27960568594932556)
+
+n_qubits: 8, weight_operator: 1000, density_state: 128
+numpy state mult took 1603.8312063217163 (average: 1.6038312063217164)
+Conversion to sparse matrix took 1.9652705192565918
+scipy state mult took 0.28603267669677734 (average: 0.00028603267669677736)
+dict state mult took 556.3569839000702 (average: 0.5563569839000702)
+
+n_qubits: 8, weight_operator: 1000, density_state: 256
+numpy state mult took 1584.5374207496643 (average: 1.5845374207496643)
+Conversion to sparse matrix took 1.9743037223815918
+scipy state mult took 0.3947715759277344 (average: 0.00039477157592773436)
+dict state mult took 1112.5134389400482 (average: 1.1125134389400482)
+
+n_qubits: 10, weight_operator: 1, density_state: 1
+numpy state mult took 7.988358020782471 (average: 0.00798835802078247)
+Conversion to sparse matrix took 0.002950906753540039
+scipy state mult took 0.18858909606933594 (average: 0.00018858909606933594)
+dict state mult took 0.004706621170043945 (average: 4.706621170043945e-06)
+
+n_qubits: 10, weight_operator: 1, density_state: 2
+numpy state mult took 7.389336347579956 (average: 0.007389336347579956)
+Conversion to sparse matrix took 0.0026695728302001953
+scipy state mult took 0.185164213180542 (average: 0.000185164213180542)
+dict state mult took 0.009449481964111328 (average: 9.449481964111328e-06)
+
+n_qubits: 10, weight_operator: 1, density_state: 4
+numpy state mult took 8.284697532653809 (average: 0.008284697532653809)
+Conversion to sparse matrix took 0.0024597644805908203
+scipy state mult took 0.18715262413024902 (average: 0.00018715262413024903)
+dict state mult took 0.01853775978088379 (average: 1.853775978088379e-05)
+
+n_qubits: 10, weight_operator: 1, density_state: 8
+numpy state mult took 7.490941286087036 (average: 0.007490941286087036)
+Conversion to sparse matrix took 0.0028541088104248047
+scipy state mult took 0.1862194538116455 (average: 0.00018621945381164552)
+dict state mult took 0.039252281188964844 (average: 3.925228118896484e-05)
+
+n_qubits: 10, weight_operator: 1, density_state: 16
+numpy state mult took 6.368613004684448 (average: 0.0063686130046844485)
+Conversion to sparse matrix took 0.002674102783203125
+scipy state mult took 0.1850440502166748 (average: 0.0001850440502166748)
+dict state mult took 0.07056570053100586 (average: 7.056570053100586e-05)
+
+n_qubits: 10, weight_operator: 1, density_state: 32
+numpy state mult took 7.067891836166382 (average: 0.0070678918361663816)
+Conversion to sparse matrix took 0.002896547317504883
+scipy state mult took 0.19118499755859375 (average: 0.00019118499755859376)
+dict state mult took 0.17447805404663086 (average: 0.00017447805404663085)
+
+n_qubits: 10, weight_operator: 1, density_state: 64
+numpy state mult took 8.00989842414856 (average: 0.00800989842414856)
+Conversion to sparse matrix took 0.0029723644256591797
+scipy state mult took 0.19094324111938477 (average: 0.00019094324111938477)
+dict state mult took 0.2947402000427246 (average: 0.0002947402000427246)
+
+n_qubits: 10, weight_operator: 1, density_state: 128
+numpy state mult took 7.877307176589966 (average: 0.007877307176589967)
+Conversion to sparse matrix took 0.0028810501098632812
+scipy state mult took 0.19618797302246094 (average: 0.00019618797302246093)
+dict state mult took 0.626295804977417 (average: 0.000626295804977417)
+
+n_qubits: 10, weight_operator: 1, density_state: 256
+numpy state mult took 1.6894714832305908 (average: 0.0016894714832305909)
+Conversion to sparse matrix took 0.0019254684448242188
+scipy state mult took 0.20296239852905273 (average: 0.00020296239852905272)
+dict state mult took 1.0797059535980225 (average: 0.0010797059535980224)
+
+n_qubits: 10, weight_operator: 1, density_state: 512
+numpy state mult took 7.179729700088501 (average: 0.007179729700088501)
+Conversion to sparse matrix took 0.0028142929077148438
+scipy state mult took 0.2188124656677246 (average: 0.0002188124656677246)
+dict state mult took 2.5011463165283203 (average: 0.00250114631652832)
+
+n_qubits: 10, weight_operator: 1, density_state: 1024
+numpy state mult took 4.032623767852783 (average: 0.004032623767852783)
+Conversion to sparse matrix took 0.0026671886444091797
+scipy state mult took 0.2194077968597412 (average: 0.00021940779685974122)
+dict state mult took 4.984080791473389 (average: 0.004984080791473389)
+
+n_qubits: 10, weight_operator: 10, density_state: 1
+numpy state mult took 67.1503095626831 (average: 0.0671503095626831)
+Conversion to sparse matrix took 0.025225162506103516
+scipy state mult took 0.1853187084197998 (average: 0.0001853187084197998)
+dict state mult took 0.04482126235961914 (average: 4.482126235961914e-05)
+
+n_qubits: 10, weight_operator: 10, density_state: 2
+numpy state mult took 71.53103232383728 (average: 0.07153103232383728)
+Conversion to sparse matrix took 0.02489304542541504
+scipy state mult took 0.1873776912689209 (average: 0.0001873776912689209)
+dict state mult took 0.09015989303588867 (average: 9.015989303588868e-05)
+
+n_qubits: 10, weight_operator: 10, density_state: 4
+numpy state mult took 69.60454726219177 (average: 0.06960454726219177)
+Conversion to sparse matrix took 0.025686264038085938
+scipy state mult took 0.18848347663879395 (average: 0.00018848347663879395)
+dict state mult took 0.17758655548095703 (average: 0.00017758655548095703)
+
+n_qubits: 10, weight_operator: 10, density_state: 8
+numpy state mult took 52.23417568206787 (average: 0.05223417568206787)
+Conversion to sparse matrix took 0.024616241455078125
+scipy state mult took 0.18725371360778809 (average: 0.00018725371360778809)
+dict state mult took 0.3560457229614258 (average: 0.0003560457229614258)
+
+n_qubits: 10, weight_operator: 10, density_state: 16
+numpy state mult took 61.758580923080444 (average: 0.061758580923080446)
+Conversion to sparse matrix took 0.025495529174804688
+scipy state mult took 0.18836116790771484 (average: 0.00018836116790771484)
+dict state mult took 0.7322123050689697 (average: 0.0007322123050689697)
+
+n_qubits: 10, weight_operator: 10, density_state: 32
+numpy state mult took 60.65213751792908 (average: 0.060652137517929076)
+Conversion to sparse matrix took 0.02556443214416504
+scipy state mult took 0.19466924667358398 (average: 0.00019466924667358397)
+dict state mult took 1.4695911407470703 (average: 0.0014695911407470704)
+
+n_qubits: 10, weight_operator: 10, density_state: 64
+numpy state mult took 67.97939801216125 (average: 0.06797939801216125)
+Conversion to sparse matrix took 0.025587081909179688
+scipy state mult took 0.2006988525390625 (average: 0.0002006988525390625)
+dict state mult took 2.984539031982422 (average: 0.002984539031982422)
+
+n_qubits: 10, weight_operator: 10, density_state: 128
+numpy state mult took 66.39682698249817 (average: 0.06639682698249817)
+Conversion to sparse matrix took 0.02524590492248535
+scipy state mult took 0.21463656425476074 (average: 0.00021463656425476074)
+dict state mult took 6.356379985809326 (average: 0.006356379985809326)
+
+n_qubits: 10, weight_operator: 10, density_state: 256
+numpy state mult took 59.14576029777527 (average: 0.05914576029777527)
+Conversion to sparse matrix took 0.026395797729492188
+scipy state mult took 0.23737144470214844 (average: 0.00023737144470214842)
+dict state mult took 12.434072256088257 (average: 0.012434072256088257)
+
+n_qubits: 10, weight_operator: 10, density_state: 512
+numpy state mult took 70.79734706878662 (average: 0.07079734706878663)
+Conversion to sparse matrix took 0.024977684020996094
+scipy state mult took 0.2638721466064453 (average: 0.0002638721466064453)
+dict state mult took 25.34409761428833 (average: 0.02534409761428833)
+
+n_qubits: 10, weight_operator: 10, density_state: 1024
+numpy state mult took 58.616658449172974 (average: 0.05861665844917297)
+Conversion to sparse matrix took 0.024653196334838867
+scipy state mult took 0.24982094764709473 (average: 0.00024982094764709474)
+dict state mult took 49.731446743011475 (average: 0.04973144674301148)
+
+n_qubits: 10, weight_operator: 100, density_state: 1
+numpy state mult took 643.6153638362885 (average: 0.6436153638362885)
+Conversion to sparse matrix took 0.25935792922973633
+scipy state mult took 0.18952178955078125 (average: 0.00018952178955078126)
+dict state mult took 0.46254754066467285 (average: 0.00046254754066467286)
+
+n_qubits: 10, weight_operator: 100, density_state: 2
+numpy state mult took 667.5458931922913 (average: 0.6675458931922913)
+Conversion to sparse matrix took 0.25211048126220703
+scipy state mult took 0.19597649574279785 (average: 0.00019597649574279785)
+dict state mult took 0.9356663227081299 (average: 0.0009356663227081299)
+
+n_qubits: 10, weight_operator: 100, density_state: 4
+numpy state mult took 640.7811152935028 (average: 0.6407811152935028)
+Conversion to sparse matrix took 0.25406527519226074
+scipy state mult took 0.19044995307922363 (average: 0.00019044995307922362)
+dict state mult took 1.8474016189575195 (average: 0.0018474016189575196)
+
+n_qubits: 10, weight_operator: 100, density_state: 8
+numpy state mult took 643.6861484050751 (average: 0.6436861484050751)
+Conversion to sparse matrix took 0.2511272430419922
+scipy state mult took 0.1963040828704834 (average: 0.0001963040828704834)
+dict state mult took 3.686403274536133 (average: 0.003686403274536133)
+
+n_qubits: 10, weight_operator: 100, density_state: 16
+numpy state mult took 659.4322566986084 (average: 0.6594322566986084)
+Conversion to sparse matrix took 0.2518157958984375
+scipy state mult took 0.20271682739257812 (average: 0.00020271682739257812)
+dict state mult took 7.737616777420044 (average: 0.007737616777420044)
+
+n_qubits: 10, weight_operator: 100, density_state: 32
+numpy state mult took 686.980833530426 (average: 0.686980833530426)
+Conversion to sparse matrix took 0.2600691318511963
+scipy state mult took 0.21686673164367676 (average: 0.00021686673164367676)
+dict state mult took 15.559932947158813 (average: 0.015559932947158813)
+
+n_qubits: 10, weight_operator: 100, density_state: 64
+numpy state mult took 666.7436182498932 (average: 0.6667436182498931)
+Conversion to sparse matrix took 0.25974202156066895
+scipy state mult took 0.23531293869018555 (average: 0.00023531293869018556)
+dict state mult took 31.02308678627014 (average: 0.03102308678627014)
+
+n_qubits: 10, weight_operator: 100, density_state: 128
+numpy state mult took 619.1891310214996 (average: 0.6191891310214996)
+Conversion to sparse matrix took 0.2485053539276123
+scipy state mult took 0.25768017768859863 (average: 0.00025768017768859863)
+dict state mult took 61.70832824707031 (average: 0.061708328247070315)
+
+n_qubits: 10, weight_operator: 100, density_state: 256
+numpy state mult took 661.325248003006 (average: 0.661325248003006)
+Conversion to sparse matrix took 0.2500340938568115
+scipy state mult took 0.3074154853820801 (average: 0.0003074154853820801)
+dict state mult took 123.89135575294495 (average: 0.12389135575294495)
+
+n_qubits: 10, weight_operator: 100, density_state: 512
+numpy state mult took 631.1517102718353 (average: 0.6311517102718354)
+Conversion to sparse matrix took 0.24898052215576172
+scipy state mult took 0.3990747928619385 (average: 0.00039907479286193845)
+dict state mult took 245.94881391525269 (average: 0.2459488139152527)
+
+n_qubits: 10, weight_operator: 100, density_state: 1024
+numpy state mult took 647.4407587051392 (average: 0.6474407587051392)
+Conversion to sparse matrix took 0.2505619525909424
+scipy state mult took 0.5492069721221924 (average: 0.0005492069721221924)
+dict state mult took 499.4737229347229 (average: 0.4994737229347229)
+
+n_qubits: 10, weight_operator: 1000, density_state: 1
+numpy state mult took 6445.034236431122 (average: 6.4450342364311215)
+Conversion to sparse matrix took 2.5836267471313477
+scipy state mult took 0.19268250465393066 (average: 0.00019268250465393066)
+dict state mult took 4.677934885025024 (average: 0.0046779348850250245)
+
+n_qubits: 10, weight_operator: 1000, density_state: 2
+numpy state mult took 6478.479054450989 (average: 6.478479054450989)
+Conversion to sparse matrix took 2.602269411087036
+scipy state mult took 0.20123815536499023 (average: 0.00020123815536499023)
+dict state mult took 9.599766969680786 (average: 0.009599766969680786)
+
+n_qubits: 10, weight_operator: 1000, density_state: 4
+numpy state mult took 6359.281388759613 (average: 6.359281388759613)
+Conversion to sparse matrix took 2.5450305938720703
+scipy state mult took 0.2118053436279297 (average: 0.00021180534362792968)
+dict state mult took 19.0020112991333 (average: 0.0190020112991333)
+
+n_qubits: 10, weight_operator: 1000, density_state: 8
+numpy state mult took 6361.667607784271 (average: 6.3616676077842715)
+Conversion to sparse matrix took 2.5734591484069824
+scipy state mult took 0.21476960182189941 (average: 0.0002147696018218994)
+dict state mult took 38.115151166915894 (average: 0.03811515116691589)
+
+n_qubits: 10, weight_operator: 1000, density_state: 16
+numpy state mult took 6452.108913660049 (average: 6.45210891366005)
+Conversion to sparse matrix took 2.6056466102600098
+scipy state mult took 0.23717284202575684 (average: 0.00023717284202575683)
+dict state mult took 77.26634860038757 (average: 0.07726634860038757)
+
+n_qubits: 10, weight_operator: 1000, density_state: 32
+numpy state mult took 6340.863214969635 (average: 6.340863214969635)
+Conversion to sparse matrix took 2.5398082733154297
+scipy state mult took 0.2644059658050537 (average: 0.0002644059658050537)
+dict state mult took 153.61437010765076 (average: 0.15361437010765075)
+
+n_qubits: 10, weight_operator: 1000, density_state: 64
+numpy state mult took 6402.525021076202 (average: 6.402525021076203)
+Conversion to sparse matrix took 2.5627098083496094
+scipy state mult took 0.34232378005981445 (average: 0.00034232378005981444)
+dict state mult took 307.9229416847229 (average: 0.3079229416847229)
+
+n_qubits: 10, weight_operator: 1000, density_state: 128
+numpy state mult took 6374.396756887436 (average: 6.374396756887436)
+Conversion to sparse matrix took 2.5350828170776367
+scipy state mult took 0.46820521354675293 (average: 0.00046820521354675295)
+dict state mult took 624.5988836288452 (average: 0.6245988836288452)
+
+n_qubits: 10, weight_operator: 1000, density_state: 256
+numpy state mult took 6418.641523361206 (average: 6.418641523361206)
+Conversion to sparse matrix took 2.547816753387451
+scipy state mult took 0.751389741897583 (average: 0.000751389741897583)
+dict state mult took 1232.3230621814728 (average: 1.2323230621814727)
+
+n_qubits: 10, weight_operator: 1000, density_state: 512
+numpy state mult took 6462.490780353546 (average: 6.462490780353546)
+Conversion to sparse matrix took 2.5765275955200195
+scipy state mult took 1.308457374572754 (average: 0.001308457374572754)
+dict state mult took 2450.5713152885437 (average: 2.4505713152885438)
+
+n_qubits: 10, weight_operator: 1000, density_state: 1024
+numpy state mult took 6273.660919189453 (average: 6.273660919189453)
+Conversion to sparse matrix took 2.53281569480896
+scipy state mult took 2.5333454608917236 (average: 0.0025333454608917234)
+dict state mult took 4935.648581027985 (average: 4.935648581027984)

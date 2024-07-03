@@ -167,6 +167,7 @@ def compare_states(state_1: State, state_2: State,
                    str_len=40, atol=EQ_TOLERANCE, fermion=False) -> str:
     def repr_state(k, c):
         return ' '.join((str(c), k.pretty_string(fermion)))
+
     state_1, state_2 = to_sparse_dict(state_1), to_sparse_dict(state_2)
     return compare_dict(state_1, state_2, repr_state,
                         str_len=str_len, atol=atol)
@@ -204,3 +205,12 @@ def normalize(state: State, inplace: bool = False) -> State:
     else:
         raise OfexTypeError(state)
     return new_state
+
+
+def is_zero(state: State) -> bool:
+    if is_sparse_state(state):
+        return len(state) == 0 or np.allclose(list(state.values()), 0.0, atol=EQ_TOLERANCE)
+    elif is_dense_state(state):
+        return np.allclose(state, 0.0, atol=EQ_TOLERANCE)
+    elif is_scipy_sparse_state(state):
+        return scipy.sparse.linalg.norm(state, ord='fro') < EQ_TOLERANCE

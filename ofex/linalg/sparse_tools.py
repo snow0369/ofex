@@ -8,7 +8,7 @@ from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator
 
 from ofex.state.binary_fock import STATE_LSB_FIRST
-from ofex.state.state_tools import to_scipy_sparse, get_num_qubits, state_type_transform, to_dense
+from ofex.state.state_tools import to_scipy_sparse, get_num_qubits, state_type_transform, to_dense, is_zero
 from ofex.state.types import is_sparse_state, State, is_dense_state, type_state, ScipySparse
 from ofex.utils.binary import hamming_weight
 
@@ -45,6 +45,8 @@ def expectation(operator: Union[QubitOperator, spmatrix, LinearOperator],
 
 def apply_operator(operator: Union[QubitOperator, spmatrix, LinearOperator],
                    state: State) -> State:
+    if is_zero(state):
+        return state
     input_type = type_state(state)
     if isinstance(operator, QubitOperator):
         # This generally takes a long time.
@@ -114,6 +116,8 @@ def sparse_apply_operator(operator: QubitOperator,
 
 
 def state_dot(state_1: State, state_2: State) -> complex:
+    if is_zero(state_1) or is_zero(state_2):
+        return 0.0
     dense_1, dense_2 = is_dense_state(state_1), is_dense_state(state_2)
     if (not dense_1) and (not dense_2):
         state_1, state_2 = to_scipy_sparse(state_1), to_scipy_sparse(state_2)

@@ -143,9 +143,9 @@ def run_driver(molecule: MolecularData,
                run_fci: bool = False,
                driver: str = 'pyscf',
                **kwargs) -> MolecularData:
-    if driver == 'psi4':
+    if driver.lower() == 'psi4':
         return run_psi4(molecule, run_scf, run_mp2, run_cisd, run_ccsd, run_fci, **kwargs)
-    elif driver == 'pyscf':
+    elif driver.lower() == 'pyscf':
         from openfermionpyscf import run_pyscf
         return run_pyscf(molecule, run_scf, run_mp2, run_cisd, run_ccsd, run_fci, **kwargs)
     else:

@@ -34,7 +34,9 @@ def hadamard_test_general(overlap: complex,
 def hadamard_test_qubit_operator(ref_state_1: State,
                                  ref_state_2: State,
                                  unitary: Optional[QubitOperator] = None,
-                                 coeff=1.0) \
+                                 coeff=1.0,
+                                 sparse_1: bool = False,
+                                 sparse_2: bool = False,) \
         -> Tuple[ProbDist, ProbDist]:
     """
     Generate probability distributions for a Hadamard Test whose expectation value is c * <φ1|U|φ2>.
@@ -51,7 +53,7 @@ def hadamard_test_qubit_operator(ref_state_1: State,
         probdist_imag = ProbDist({coeff: 1})
         return probdist_real, probdist_imag
     if unitary is not None:
-        overlap = transition_amplitude(unitary, ref_state_1, ref_state_2)
+        overlap = transition_amplitude(unitary, ref_state_1, ref_state_2, sparse_1, sparse_2)
     else:
         overlap = state_dot(ref_state_1, ref_state_2)
     return hadamard_test_general(overlap, coeff)

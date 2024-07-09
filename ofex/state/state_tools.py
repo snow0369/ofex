@@ -29,6 +29,17 @@ def get_state_dim(state: State) -> int:
     return 2 ** get_num_qubits(state)
 
 
+def get_sparsity(state: State) -> int:
+    if is_sparse_state(state):
+        return len(state)
+    elif is_dense_state(state):
+        return len(state)
+    elif is_scipy_sparse_state(state):
+        return len(state.nonzero())
+    else:
+        raise OfexTypeError(state)
+
+
 def pretty_print_state(state: State, fermion=False) -> str:
     output = list()
     num_qubits = get_num_qubits(state)
@@ -187,6 +198,8 @@ def norm(state: State) -> float:
 
 def normalize(state: State, inplace: bool = False) -> State:
     norm_before = norm(state)
+    if norm_before < EQ_TOLERANCE:
+        raise ValueError("Cannot normalize zero state.")
     if is_sparse_state(state):
         new_state = deepcopy(state)
         for k in state.keys():

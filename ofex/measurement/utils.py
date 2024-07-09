@@ -1,41 +1,42 @@
+import numpy as np
+
 from ofex.linalg.sparse_tools import transition_amplitude, expectation
 
 
-def buf_transition_amplitude(op, state1, state2, key, buffer):
+def buf_transition_amplitude(op, state1, state2, ph, key, buffer):
     if buffer is None:
-        return transition_amplitude(op, state1, state2)
+        return transition_amplitude(op, state1, state2, sparse1=True) * np.exp(-1j * ph)
     elif key in buffer:
-        return buffer[key]
+        return buffer[key] * np.exp(-1j * ph)
     else:
-        ov = transition_amplitude(op, state1, state2)
+        ov = transition_amplitude(op, state1, state2, sparse1=True)
         buffer[key] = ov
-        return ov
+        return ov * np.exp(-1j * ph)
 
 
 def buf_diag_expectation(op, state1, state2, key, buffer):
     if buffer is None:
-        return 0.5 * (expectation(op, state1) + expectation(op, state2))
+        return 0.5 * (expectation(op, state1, sparse=True) + expectation(op, state2, sparse=True))
     elif key in buffer:
         return buffer[key]
     else:
-        ex = 0.5 * (expectation(op, state1) + expectation(op, state2))
+        ex = 0.5 * (expectation(op, state1, sparse=True) + expectation(op, state2, sparse=True))
         buffer[key] = ex
         return ex
 
 
 def buf_expectation(op, state, key, buffer):
     if buffer is None:
-        return expectation(op, state)
+        return expectation(op, state, sparse=True)
     elif key in buffer:
         return buffer[key]
     else:
-        ex = expectation(op, state)
+        ex = expectation(op, state, sparse=True)
         buffer[key] = ex
         return ex
 
 
 def weight_sum_dict(ov_dict_1: dict, ov_dict_2: dict):
-    # TODO: After finishing empirical ics, move it to the related file.
     ov_dict_merged = dict()
     tot_keys = set(ov_dict_1.keys()).union(ov_dict_2.keys())
     for k in tot_keys:

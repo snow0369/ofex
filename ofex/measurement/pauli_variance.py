@@ -4,14 +4,14 @@ import pickle
 from itertools import product
 from multiprocessing import Manager, Pool
 from time import time
-from typing import Optional, List, Union, Tuple
+from typing import Optional, List, Union, Tuple, Dict
 
 import numpy as np
 from filelock import FileLock
 from openfermion import QubitOperator, LinearQubitOperator
 
 from ofex.linalg.sparse_tools import expectation, apply_operator, state_dot
-from ofex.measurement.types import PauliCovDict, TransitionPauliCovDict
+from ofex.measurement.types import PauliCovDict, TransitionPauliCovDict, PhasedTransitionalPauliCovDict
 from ofex.measurement.utils import buf_transition_amplitude, buf_diag_expectation, buf_expectation
 from ofex.operators.symbolic_operator_tools import operator, coeff
 from ofex.state.state_tools import get_num_qubits
@@ -21,12 +21,20 @@ from ofex.state.types import State
 def pauli_variance(true_ref1: Optional[State],
                    true_ref2: Optional[State],
                    grp_ham: List[QubitOperator],
-                   m_opt_real: np.ndarray,
-                   m_opt_imag: Optional[np.ndarray],
+                   shots: np.ndarray,
                    true_cov_dict: Optional[Union[PauliCovDict, TransitionPauliCovDict]] = None,
                    anticommute: bool = False,
                    ) -> float:
-    transition = m_opt_imag is not None
+    if shots.ndim == 2:
+        shots_real = shots[:, 0]
+        shots_imag = shots[:, 1]
+        transition = True
+    elif shots.ndim == 1:
+        shots_real = shots[:, ]
+        shots_imag = None
+        transition = False
+    else:
+        raise ValueError
     tot_var = 0.0
     if true_cov_dict is not None:
         for idx, grp in enumerate(grp_ham):
@@ -40,10 +48,10 @@ def pauli_variance(true_ref1: Optional[State],
                 assert np.isclose(coeff_p.imag, 0.0)
                 assert np.isclose(coeff_q.imag, 0.0)
                 if not transition:
-                    tot_var += 0.5 * coeff_p.real * coeff_q.real * true_cov_dict[cov_key] / m_opt_real[idx]
+                    tot_var += 0.5 * coeff_p.real * coeff_q.real * true_cov_dict[cov_key] / shots_real[idx]
                 else:
                     re, im = true_cov_dict[cov_key]
-                    tot_var += 0.5 * coeff_p.real * coeff_q.real * (re / m_opt_real[idx] + im / m_opt_imag[idx])
+                    tot_var += 0.5 * coeff_p.real * coeff_q.real * (re / shots_real[idx] + im / shots_imag[idx])
     else:
         assert true_ref1 is not None
         assert transition == (true_ref2 is not None)
@@ -60,7 +68,7 @@ def pauli_variance(true_ref1: Optional[State],
                     ov2 = expectation(op_grp2, true_ref1)
                     assert np.isclose(ov.imag, 0.0)
                     assert np.isclose(ov2.imag, 0.0)
-                tot_var += (ov2.real - ov.real ** 2) / m_opt_real[idx]
+                tot_var += (ov2.real - ov.real ** 2) / shots_real[idx]
             else:
                 app_ref1 = apply_operator(op_grp, true_ref1)
                 app_ref2 = apply_operator(op_grp, true_ref2)
@@ -69,7 +77,7 @@ def pauli_variance(true_ref1: Optional[State],
                     ov2 = grp.induced_norm(order=2) ** 2
                 else:
                     ov2 = 0.5 * (state_dot(app_ref1, app_ref1) + state_dot(app_ref2, app_ref2))
-                mr, mi = m_opt_real[idx], m_opt_imag[idx]
+                mr, mi = shots_real[idx], shots_imag[idx]
                 assert np.isclose(ov2.imag, 0.0)
                 ov2 = ov2.real
                 tot_var += 0.5 * ((ov2 - ov.real ** 2) / mr + (ov2 - ov.imag ** 2) / mi)
@@ -81,9 +89,10 @@ def pauli_covariance(initial_grp: Tuple[List[QubitOperator], List[List[int]], Li
                      ref2: Optional[State],
                      num_workers=1,
                      anticommute=False,
-                     cov_buf_path: Optional[str] = None,
+                     cov_buf_dir: Optional[str] = None,
+                     phase_list: Optional[List[float]] = None,
                      debug: bool = False) \
-        -> Union[PauliCovDict, TransitionPauliCovDict]:
+        -> Union[PauliCovDict, TransitionPauliCovDict, PhasedTransitionalPauliCovDict]:
     """
     Calculates Pauli covariance and optionally saves it as a pickle file(if cov_buf_path provided).
     Parallelism can be used for each group of Pauli terms.
@@ -107,37 +116,52 @@ def pauli_covariance(initial_grp: Tuple[List[QubitOperator], List[List[int]], Li
     """
     pauli_list, grp_pauli_list, pauli_grp_list = initial_grp
 
+    was_ph_none = False
+    if phase_list is None:
+        phase_list = [0.0]
+        was_ph_none = True
+
     t = time()
     mngr = Manager()
-    cov_dict = mngr.dict()
-    if cov_buf_path is not None and os.path.isfile(cov_buf_path):
-        with open(cov_buf_path, "rb") as f:
-            loaded_cov_dict = pickle.load(f)
-        cov_dict.update(loaded_cov_dict)
-        if debug:
-            print(f"cov_dict Loaded from {cov_buf_path}")
+    cov_dict_list = {p: mngr.dict() for p in phase_list}
+    fname_list = None
+    if cov_buf_dir is not None:
+        fname_list = {p: os.path.join(cov_buf_dir, "phase={:.2f}.pkl".format(p)) for p in phase_list}
+        if not os.path.isdir(cov_buf_dir):
+            os.mkdir(cov_buf_dir)
+        for p, fname in fname_list.items():
+            if os.path.isfile(fname):
+                with open(fname, 'rb') as f:
+                    loaded_cov_dict = pickle.load(f)
+                cov_dict_list[p].update(loaded_cov_dict)
+                if debug:
+                    print(f"cov_dict Loaded from {fname}")
 
     prod_dict1, prod_dict2 = mngr.dict(), mngr.dict()
     pool = Pool(processes=num_workers)
-    pool.starmap(_pauli_covariance_sub, [(idx, cov_dict, (prod_dict1, prod_dict2), grp, pauli_list, ref1, ref2,
-                                          anticommute, cov_buf_path, debug)
+    pool.starmap(_pauli_covariance_sub, [(idx, cov_dict_list, (prod_dict1, prod_dict2), grp, pauli_list, ref1, ref2,
+                                          anticommute, fname_list, debug)
                                          for idx, grp in enumerate(grp_pauli_list)])
     pool.close()
     pool.join()
     if debug:
         print(f"cov_dict time = {time() - t}")
-    return dict(cov_dict)
+
+    if was_ph_none:
+        return dict(cov_dict_list[0.0])
+    else:
+        return {p: dict(cov_dict_list[p]) for p in phase_list}
 
 
 def _pauli_covariance_sub(idx,
-                          cov_dict,
+                          cov_dict_list,
                           prod_dict,
                           grp: List[int],
                           pauli_list: List[QubitOperator],
                           ref1: State,
                           ref2: Optional[State],
                           anticommute: bool,
-                          buf_path: Optional[str],
+                          fname_list: Optional[Dict[float, str]],
                           debug=False):
     prod_dict_off, prod_dict_diag = prod_dict  # Contains off-diagonal and diagonal transition amplitudes of pauli.
     if debug:
@@ -150,15 +174,17 @@ def _pauli_covariance_sub(idx,
             continue
         p, q = pauli_list[idx_p], pauli_list[idx_q]
         cov_key = (operator(p), operator(q))
-        if cov_key in cov_dict:
-            continue
-        update_buf = True
-        cov_dict[cov_key] = _calc_pauli_cov(p, q, ref1, ref2, anticommute, prod_dict_off, prod_dict_diag)
-    if buf_path is not None and update_buf:
-        fl = FileLock(buf_path + ".lock")
-        with fl:
-            with open(buf_path, "wb") as f:
-                pickle.dump(dict(cov_dict), f)
+        for ph, cov_dict in cov_dict_list.items():
+            if cov_key in cov_dict:
+                continue
+            update_buf = True
+            cov_dict[cov_key] = _calc_pauli_cov(p, q, ref1, ref2, ph, anticommute, prod_dict_off, prod_dict_diag)
+    if fname_list is not None and update_buf:
+        for p, buf_path in fname_list.items():
+            fl = FileLock(buf_path + ".lock")
+            with fl:
+                with open(buf_path, "wb") as f:
+                    pickle.dump(dict(cov_dict_list[p]), f)
 
 
 def empirical_pauli_covariance(idx,
@@ -209,18 +235,18 @@ def empirical_pauli_covariance(idx,
                 print((2, idx, cov_key, cov_dict[cov_key]))
 
 
-def _calc_pauli_cov(op1, op2, ref1, ref2, anticommute,
+def _calc_pauli_cov(op1, op2, ref1, ref2, ph, anticommute,
                     prod_dict_off=None,
-                    prod_dict_diag=None,):
+                    prod_dict_diag=None, ):
     op1_key, op2_key = operator(op1), operator(op2)
     op1, op2 = QubitOperator(op1_key, 1.0), QubitOperator(op2_key, 1.0)
     if ref2 is not None:  # Transition Amplitude
         if op1_key == op2_key:  # 1 - ov^2
-            ov = buf_transition_amplitude(op1, ref1, ref2, op1_key, prod_dict_off)
+            ov = buf_transition_amplitude(op1, ref1, ref2, ph, op1_key, prod_dict_off)
             return (1 - ov.real ** 2), (1 - ov.imag ** 2)
         else:  # <p1 p2> - ov^2
-            ov_p = buf_transition_amplitude(op1, ref1, ref2, op1_key, prod_dict_off)
-            ov_q = buf_transition_amplitude(op2, ref1, ref2, op2_key, prod_dict_off)
+            ov_p = buf_transition_amplitude(op1, ref1, ref2, ph, op1_key, prod_dict_off)
+            ov_q = buf_transition_amplitude(op2, ref1, ref2, ph, op2_key, prod_dict_off)
             if anticommute:
                 return (- ov_p.real * ov_q.real), (- ov_p.imag * ov_q.imag)
             else:

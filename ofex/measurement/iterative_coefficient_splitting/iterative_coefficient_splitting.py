@@ -20,7 +20,7 @@ def run_ics(ham: QubitOperator,
             lstsq_rcond=1e-6,
             initial_c: Optional[np.ndarray] = None,
             debug: bool = False, ) \
-        -> Tuple[List[QubitOperator], np.ndarray, Optional[np.ndarray], float, Optional[np.ndarray]]:
+        -> Tuple[List[QubitOperator], np.ndarray, float, Optional[np.ndarray]]:
     """
 
     Args:
@@ -222,7 +222,15 @@ def run_ics(ham: QubitOperator,
                                 debug)  # , leftover, anticommute, debug)
     final_variance = 0.5 * c_opt.T @ tot_vmat @ c_opt
 
-    return grp_ham, m_opt_real, m_opt_imag, final_variance, c_opt
+    n_frag = len(grp_ham)
+    if transition:
+        shots = np.zeros((n_frag, 2), dtype=float)
+        shots[:, 0] = m_opt_real
+        shots[:, 1] = m_opt_imag
+    else:
+        shots = m_opt_real
+
+    return grp_ham, shots, final_variance, c_opt
 
 
 if __name__ == "__main__":
@@ -274,17 +282,17 @@ if __name__ == "__main__":
         _, initial_grp, _ = init_ics(pham, anticommute=anticommute, debug=debug)
         cov_dict = pauli_covariance(initial_grp, ref1, ref2, anticommute=anticommute, num_workers=15, debug=debug)
 
-        grp_ham, m_opt_real, m_opt_imag, final_var, c_opt = run_ics(pham,
-                                                                    initial_grp,
-                                                                    cov_dict,
-                                                                    transition=True,
-                                                                    conv_th=1e-6,
-                                                                    debug=debug)
+        grp_ham, shots, final_var, c_opt = run_ics(pham,
+                                                   initial_grp,
+                                                   cov_dict,
+                                                   transition=True,
+                                                   conv_th=1e-6,
+                                                   debug=debug)
         print(final_var)
         print("== ICS VAR ==")
-        ev_var = pauli_variance(ref1, ref2, grp_ham, m_opt_real, m_opt_imag)
+        ev_var = pauli_variance(ref1, ref2, grp_ham, shots, )
         print(ev_var)
-        print(sum(m_opt_real) + sum(m_opt_imag))
+        print(np.sum(shots))
 
         print("== SI  VAR ==")
         si_group = sorted_insertion(pham, anticommute)
@@ -292,7 +300,7 @@ if __name__ == "__main__":
         m_si_imag = np.array(m_si_real)
         div = sum(m_si_real) + sum(m_si_imag)
         m_si_real, m_si_imag = m_si_real / div, m_si_imag / div
-        ev_var_si = pauli_variance(ref1, ref2, si_group, m_si_real, m_si_imag)
+        ev_var_si = pauli_variance(ref1, ref2, si_group, shots)
         print(ev_var_si)
         print(sum(m_si_real) + sum(m_si_imag))
 

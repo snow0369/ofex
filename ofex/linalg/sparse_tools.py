@@ -8,15 +8,17 @@ from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator
 
 from ofex.state.binary_fock import STATE_LSB_FIRST
-from ofex.state.state_tools import to_scipy_sparse, get_num_qubits, state_type_transform, to_dense, is_zero
-from ofex.state.types import is_sparse_state, State, is_dense_state, type_state, ScipySparse
+from ofex.state.state_tools import to_scipy_sparse, get_num_qubits, state_type_transform, to_dense, is_zero, \
+    get_sparsity
+from ofex.state.types import State, is_dense_state, type_state, ScipySparse
 from ofex.utils.binary import hamming_weight
 
 
 def transition_amplitude(operator: Union[QubitOperator, spmatrix, LinearOperator],
                          state1: State,
                          state2: State,
-                         sparse: bool = False) -> complex:
+                         sparse1: bool = False,
+                         sparse2: bool = False) -> complex:
     """Compute the transitional amplitude, <φ1|O|φ2>.
 
     Args:
@@ -31,8 +33,17 @@ def transition_amplitude(operator: Union[QubitOperator, spmatrix, LinearOperator
     Returns:
         A complex number giving the transitional amplitude.
     """
-    if sparse:
+    if sparse1 and sparse2:
+        s1, s2 = get_sparsity(state1), get_sparsity(state2)
+        if s1 > s2:
+            sparse1 = False
+        else:
+            sparse2 = False
+
+    if sparse2:
         return state_dot(state1, sparse_apply_operator(operator, state2))
+    elif sparse1:
+        return state_dot(state2, sparse_apply_operator(operator, state1)).conjugate()
     else:
         return state_dot(state1, apply_operator(operator, state2))
 
@@ -57,7 +68,7 @@ def apply_operator(operator: Union[QubitOperator, spmatrix, LinearOperator],
         app_st = (operator @ state).T  # This goes to mat-vec mult in scipy.sparse.linalg
         return state_type_transform(app_st, input_type)
     elif input_type == 'dense':
-        return state_type_transform(operator @ state, input_type)  # This goes to numpy mat-vec.
+        return operator @ state  # This goes to numpy mat-vec.
     else:
         raise AssertionError
 

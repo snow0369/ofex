@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Union, Tuple
 
 import numpy as np
@@ -43,27 +44,22 @@ def _fermion_to_pauli(ref_state_1: State,
     return op_pauli, ref1_sim, ref2_sim
 
 
-def qksd_extended_swap_test(ref_state_1: State,  # Qubit state
-                            ref_state_2: State,  # Qubit state
-                            operator: Union[QubitOperator, FermionFragment],
-                            verbose=False,
-                            eig_degen_tol=1e-8,
-                            **kwargs) -> Tuple[JointProbDist, JointProbDist]:
+def prepare_qksd_est(ref_state_1: State,
+                     ref_state_2: State,
+                     operator: Union[QubitOperator, FermionOperator],
+                     **kwargs):
     ref_state_1, ref_state_2 = to_dense(ref_state_1), to_dense(ref_state_2)
-    real_prob_dict, imag_prob_dict = dict(), dict()
-
     if not np.isclose(state_dot(ref_state_1, ref_state_1), 1.0):
         raise ValueError("Ref1 is not normalized.")
     if not np.isclose(state_dot(ref_state_2, ref_state_2), 1.0):
         raise ValueError("Ref2 is not normalized.")
-    num_qubits = get_num_qubits(ref_state_1)
-    if num_qubits != get_num_qubits(ref_state_2):
+    n_qubits = get_num_qubits(ref_state_1)
+    if n_qubits != get_num_qubits(ref_state_2):
         raise ValueError("Not matching number of qubits.")
 
-    # 1. Prepare diagonalized operators and reference states in the diagonalizing basis.
     if isinstance(operator, QubitOperator):  # Pauli simulation
         # Find clifford
-        op_mat, op_coeff, cl_hist = diagonalizing_clifford(operator, num_qubits)
+        op_mat, op_coeff, cl_hist = diagonalizing_clifford(operator, n_qubits)
         op_pauli = tableau_to_pauli(op_mat, None, op_coeff)
         op_pauli = QubitOperator.accumulate(op_pauli)
         # Clifford Simulation of ref vectors
@@ -82,20 +78,41 @@ def qksd_extended_swap_test(ref_state_1: State,  # Qubit state
     assert np.isclose(op_pauli.constant, 0.0)
 
     op_pauli = clean_imaginary(op_pauli)
-    op_pauli = get_linear_qubit_operator_diagonal(op_pauli, n_qubits=num_qubits)
+    op_pauli = get_linear_qubit_operator_diagonal(op_pauli, n_qubits=n_qubits)
     assert np.allclose(op_pauli.imag, 0.0)
     op_pauli = op_pauli.real
+    return ref1_sim, ref2_sim, op_pauli
+
+
+def qksd_extended_swap_test(ref_state_1: State,  # Qubit state
+                            ref_state_2: State,  # Qubit state
+                            operator: Union[QubitOperator, FermionFragment, np.ndarray],
+                            imaginary: bool = False,
+                            verbose=False,
+                            eig_degen_tol=1e-8,
+                            prepared=False,
+                            **kwargs) -> Tuple[JointProbDist, JointProbDist]:
+    real_prob_dict, imag_prob_dict = dict(), dict()
+
+    # 1. Prepare diagonalized operators and reference states in the diagonalizing basis.
+    if prepared:
+        ref1_sim, ref2_sim, op_pauli = deepcopy(ref_state_1), deepcopy(ref_state_2), deepcopy(operator)
+    else:
+        ref1_sim, ref2_sim, op_pauli = prepare_qksd_est(ref_state_1, ref_state_2, operator, **kwargs)
 
     # 2. Probabilities of ancilla qubit
     ov = state_dot(ref_state_1, ref_state_2)
+
     p_ancilla_x_0, p_ancilla_y_0 = 0.5 * (1 + ov.real), 0.5 * (1 + ov.imag)
     p_ancilla_x_1, p_ancilla_y_1 = 1 - p_ancilla_x_0, 1 - p_ancilla_y_0
 
     # 3. Collapsed state after measuring ancilla
-    state_x_0, state_x_1 = ref2_sim + ref1_sim, ref2_sim + ref1_sim * (-1)
-    state_y_0, state_y_1 = ref2_sim + ref1_sim * 1j, ref2_sim + ref1_sim * (-1j)
+    state_x_0 = ref2_sim + ref1_sim
+    state_x_1 = ref2_sim + ref1_sim * (-1)
+    state_y_0 = ref2_sim + ref1_sim * 1j
+    state_y_1 = ref2_sim + ref1_sim * (-1j)
     for st in [state_x_0, state_x_1, state_y_0, state_y_1]:
-        if not np.isclose(norm(st), 1.0):
+        if not np.isclose(norm(st), 0.0):
             normalize(st, inplace=True)
 
     # 4. Probability distribution for the system qubits with computational basis
@@ -103,8 +120,11 @@ def qksd_extended_swap_test(ref_state_1: State,  # Qubit state
     p_system_x_1 = abs(state_x_1) ** 2
     p_system_y_0 = abs(state_y_0) ** 2
     p_system_y_1 = abs(state_y_1) ** 2
-    assert np.allclose(np.sum([p_system_x_0, p_system_x_1, p_system_y_0, p_system_y_1],
-                              axis=1), 1.0)
+
+    for p_ancilla, p_system in zip([p_ancilla_x_0, p_ancilla_x_1, p_ancilla_y_0, p_ancilla_y_1],
+                                   [p_system_x_0, p_system_x_1, p_system_y_0, p_system_y_1]):
+        if not np.isclose(p_ancilla, 0.0):
+            assert np.isclose(sum(p_system), 1.0)
 
     # 5. Compute the probability distributions
     if verbose:  # Compute for each Pauli's.

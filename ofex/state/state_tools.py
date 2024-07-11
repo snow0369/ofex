@@ -131,14 +131,14 @@ def state_type_transform(state: State, target_type: str) -> State:
         raise ValueError(f"unknown type {target_type}")
 
 
-def compress_sparse(state: Union[SparseStateDict, ScipySparse], atol=EQ_TOLERANCE) \
+def compress_sparse(state: Union[SparseStateDict, ScipySparse], atol=EQ_TOLERANCE,
+                    out_normalize=False) \
         -> Union[SparseStateDict, ScipySparse]:
     if is_sparse_state(state):
         new_state = dict()
         for fock, value in state.items():
             if abs(value) > atol:
                 new_state[fock] = value
-        return normalize(new_state)
     elif is_scipy_sparse_state(state):
         state_dim = get_state_dim(state)
         new_state = ScipySparse(np.zeros(state_dim), shape=(1, state_dim))
@@ -146,9 +146,14 @@ def compress_sparse(state: Union[SparseStateDict, ScipySparse], atol=EQ_TOLERANC
             idx = idx[0]
             if abs(state[idx]) > atol:
                 new_state[idx] = state[idx]
-        return normalize(new_state)
     else:
         raise OfexTypeError(state)
+
+    if out_normalize:
+        return normalize(new_state)
+    else:
+        return new_state
+
 
 
 def allclose(state_1: State,

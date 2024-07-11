@@ -11,8 +11,9 @@ from ofex.state.types import State
 
 
 def hadamard_test_general(overlap: complex,
-                          coeff: Number = 1.0) \
-        -> Tuple[ProbDist, ProbDist]:
+                          imaginary: bool,
+                          coeff: Number = 1.0,) \
+        -> ProbDist:
     """
     Generate probability distributions for a Hadamard Test whose expectation value is c * <φ1|φ2>.
 
@@ -24,11 +25,12 @@ def hadamard_test_general(overlap: complex,
     ab_overlap = abs(overlap)
     if not (np.isclose(ab_overlap, 1.0, atol=EQ_TOLERANCE) or ab_overlap < 1.0):
         raise ValueError(f"Operator seems non-unitary (abs(overlap)={ab_overlap} exceeds 1.0).")
-    p0_real = 0.5 * (overlap.real + 1)
-    p0_imag = 0.5 * (overlap.imag + 1)
-    probdist_real = ProbDist({coeff: p0_real, -coeff: 1 - p0_real})
-    probdist_imag = ProbDist({coeff: p0_imag, -coeff: 1 - p0_imag})
-    return probdist_real, probdist_imag
+    if not imaginary:
+        p0 = 0.5 * (overlap.real + 1)
+    else:
+        p0 = 0.5 * (overlap.imag + 1)
+    probdist = ProbDist({coeff: p0, -coeff: 1 - p0})
+    return probdist
 
 
 def hadamard_test_qubit_operator(ref_state_1: State,
@@ -56,7 +58,9 @@ def hadamard_test_qubit_operator(ref_state_1: State,
         overlap = transition_amplitude(unitary, ref_state_1, ref_state_2, sparse_1, sparse_2)
     else:
         overlap = state_dot(ref_state_1, ref_state_2)
-    return hadamard_test_general(overlap, coeff)
+    prob_re = hadamard_test_general(overlap, False, coeff)
+    prob_im = hadamard_test_general(overlap, True, coeff)
+    return prob_re, prob_im
 
 
 def hadamard_test_fermion_operator(ref_state_1: State,

@@ -138,6 +138,6 @@ def state_dot(state_1: State, state_2: State) -> complex:
         return state_1.conj().dot(state_2.T)[0, 0]
     elif dense_1 and (not dense_2):
         state_2 = to_scipy_sparse(state_2)
-        return state_2.conj().dot(state_1.T)[0, 0].conjugate()
+        return state_2.conj().dot(state_1.T)[0].conjugate()
     else:
         return np.dot(state_1.conj(), state_2)

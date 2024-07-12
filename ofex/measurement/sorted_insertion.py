@@ -88,8 +88,9 @@ def optimal_sorted_insertion(op: QubitOperator,
         if abs(c) > 1e-5:
             raise Warning('Constant term is ignored in sorted insertion.')
 
+    from ofex.measurement.iterative_coefficient_splitting.ics_prepare import init_split
     ham_frags, (pauli_list, grp_pauli_list, pauli_grp_list), c_vec = (
-        init_ics(op, anticommute, method=init_method))
+        init_split(op, anticommute, method=init_method))
 
     if debug:
         for idx_grp, p_list in enumerate(grp_pauli_list):

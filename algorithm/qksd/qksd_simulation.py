@@ -94,7 +94,7 @@ def sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
     if ham_frag.ndim == 1:
         pham = QubitOperator.accumulate(ham_frag)
     elif ham_frag.ndim in [2, 3]:
-        first_idx = (0 for _ in range(ham_frag.ndim - 1))
+        first_idx = tuple(0 for _ in range(ham_frag.ndim - 1))
         pham = QubitOperator.accumulate(ham_frag[first_idx])
     else:
         raise ValueError
@@ -131,14 +131,20 @@ def sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
             else:
                 raise AssertionError
             for j, ov in enumerate(ov_list):
-                prob_real_h = hadamard_test_general(ov, imaginary=False, coeff=float(norm_re_1d[j]))
-                prob_imag_h = hadamard_test_general(ov, imaginary=True,  coeff=float(norm_im_1d[j]))
-                h_arr[i] += prob_real_h.empirical_average(int(shot_list[H][i][j][REAL]))
-                h_arr[i] += prob_imag_h.empirical_average(int(shot_list[H][i][j][IMAG])) * 1j
+                shot_j_re, shot_j_im = int(shot_list[H][i][j][REAL]), int(shot_list[H][i][j][IMAG])
+                if shot_j_re > 0:
+                    prob_real_h = hadamard_test_general(ov, imaginary=False, coeff=float(norm_re_1d[j]))
+                    h_arr[i] += prob_real_h.empirical_average(shot_j_re)
+                if shot_j_im > 0:
+                    prob_imag_h = hadamard_test_general(ov, imaginary=True, coeff=float(norm_im_1d[j]))
+                    h_arr[i] += prob_imag_h.empirical_average(shot_j_im) * 1j
 
             prob_real_s, prob_imag_s = hadamard_test_qubit_operator(ref, ksd_state, sparse_1=True)
-            s_arr[i] += prob_real_s.empirical_average(int(shot_list[S][i][REAL]))
-            s_arr[i] += prob_imag_s.empirical_average(int(shot_list[S][i][IMAG])) * 1j
+            shot_s_re, shot_s_im = int(shot_list[S][i][REAL]), int(shot_list[S][i][IMAG])
+            if shot_s_re > 0:
+                s_arr[i] += prob_real_s.empirical_average(shot_s_re)
+            if shot_s_im > 0:
+                s_arr[i] += prob_imag_s.empirical_average(shot_s_im) * 1j
 
             if i != n_krylov - 1:
                 ksd_state = apply_operator(prop, ksd_state)
@@ -159,17 +165,17 @@ def sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
                         idx_h = (i, j)
                     else:
                         idx_h = (i, part, j)
-                    state1, h_frag = ref1_prepared[idx_h], ham_frag[idx_h]
-                    prob_dist = qksd_extended_swap_test(state1, ksd_state, h_frag, imaginary=(part == IMAG),
-                                                        prepared_op=True,
-                                                        prepared_state=(True, False))
+
                     shot_j = int(shot_list[i][j][part])
-                    samp = prob_dist.empirical_average(shot_j)
-
-                    h_arr[i] += samp["H"] if part == REAL else (1j * samp["H"])
-
-                    inc_s = samp["S"] * shot_j / shots_now
-                    s_arr[i] += inc_s if part == REAL else (1j * inc_s)
+                    if shot_j > 0:
+                        state1, h_frag = ref1_prepared[idx_h], ham_frag[idx_h]
+                        prob_dist = qksd_extended_swap_test(state1, ksd_state, h_frag, imaginary=(part == IMAG),
+                                                            prepared_op=True,
+                                                            prepared_state=(True, False))
+                        samp = prob_dist.empirical_average(shot_j)
+                        h_arr[i] += samp["H"] if part == REAL else (1j * samp["H"])
+                        inc_s = samp["S"] * shot_j / shots_now
+                        s_arr[i] += inc_s if part == REAL else (1j * inc_s)
 
             if i != n_krylov - 1:
                 ksd_state = apply_operator(prop, ksd_state)
@@ -213,7 +219,7 @@ def sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
     if ham_frag.ndim == 1:
         pham = QubitOperator.accumulate(ham_frag)
     elif ham_frag.ndim in [2, 3]:
-        first_idx = (0 for _ in range(ham_frag.ndim - 1))
+        first_idx = tuple(0 for _ in range(ham_frag.ndim - 1))
         pham = QubitOperator.accumulate(ham_frag[first_idx])
     else:
         raise ValueError
@@ -244,30 +250,37 @@ def sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
 
                 basis2 = basis[i2]
                 if ham_frag.ndim == 1:
-                    ov_list = np.array([state_dot(ref_evol, basis2) for ref_evol in ref_evol_list])
+                    ov_list = np.array([state_dot(ref_evol, basis2) for ref_evol in ref_evol_list], dtype=np.complex128)
                     norm_re, norm_im = norm_list, norm_list
                 elif ham_frag.ndim == 2:
-                    ov_list = np.array([transition_amplitude(h, basis1, basis2) for h in ham_frag[i2 - i1]])
+                    ov_list = np.array([transition_amplitude(h, basis1, basis2) for h in ham_frag[i2 - i1]], dtype=np.complex128)
                     norm_re, norm_im = norm_list[i2 - i1], norm_list[i2 - i1]
                 elif ham_frag.ndim == 3:
-                    ov_list = np.array([transition_amplitude(h, basis1, basis2).real for h in ham_frag[i2 - i1][REAL]])
+                    ov_list = np.array([transition_amplitude(h, basis1, basis2).real for h in ham_frag[i2 - i1][REAL]],
+                                       dtype=np.complex128)
                     if i1 != i2:
                         ov_list +=\
-                            np.array([transition_amplitude(h, basis1, basis2).imag for h in ham_frag[i2 - i1][IMAG]]) * 1j
+                            np.array([transition_amplitude(h, basis1, basis2).imag for h in ham_frag[i2 - i1][IMAG]],
+                                     dtype=np.complex128) * 1j
                     norm_re, norm_im = norm_list[i2 - i1][REAL], norm_list[i2 - i1][IMAG]
                 else:
                     raise AssertionError
                 for j, ov in enumerate(ov_list):
-                    prob_real_h = hadamard_test_general(ov, imaginary=False, coeff=float(norm_re[j]))
-                    h_mat[i1, i2] += prob_real_h.empirical_average(int(shot_list[H][i1, i2][j][REAL]))
-                    if i1 != i2:
+                    shot_h_re, shot_h_im = int(shot_list[H][i1, i2][j][REAL]), int(shot_list[H][i1, i2][j][IMAG])
+                    if shot_h_re > 0:
+                        prob_real_h = hadamard_test_general(ov, imaginary=False, coeff=float(norm_re[j]))
+                        h_mat[i1, i2] += prob_real_h.empirical_average(shot_h_re)
+                    if i1 != i2 and shot_h_im > 0:
                         prob_imag_h = hadamard_test_general(ov, imaginary=True, coeff=float(norm_im[j]))
                         h_mat[i1, i2] += prob_imag_h.empirical_average(int(shot_list[H][i1, i2][j][IMAG])) * 1j
 
                 if i1 != i2:
+                    shot_s_re, shot_s_im = int(shot_list[S][i1, i2][REAL]), int(shot_list[S][i1, i2][IMAG])
                     prob_real_s, prob_imag_s = hadamard_test_qubit_operator(basis1, basis2)
-                    s_mat[i1, i2] += prob_real_s.empirical_average(int(shot_list[S][i1, i2][REAL]))
-                    s_mat[i1, i2] += prob_imag_s.empirical_average(int(shot_list[S][i1, i2][IMAG])) * 1j
+                    if shot_s_re > 0:
+                        s_mat[i1, i2] += prob_real_s.empirical_average(shot_s_re)
+                    if shot_s_im > 0:
+                        s_mat[i1, i2] += prob_imag_s.empirical_average(shot_s_im) * 1j
 
     elif meas_type == "FH":
         prepared_state1 = False
@@ -298,7 +311,7 @@ def sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                     prepared_state1 = True
 
                 for part in [REAL, IMAG]:
-                    shots = sum([int(shot_list[i1, i2][j][part]) for j in range(len(ham_frag))])
+                    shots = sum([int(shot_list[i1, i2][j][part]) for j in range(len(shot_list[i1, i2]))])
                     for j in range(n_frag):
                         if ham_frag.ndim == 1:
                             idx_h = j
@@ -306,18 +319,19 @@ def sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                             idx_h = (i2-i1, j)
                         else:
                             idx_h = (i2-i1, part, j)
-                        state1 = ref1_prepared[j] if prepared_state1 else basis1
-                        prop_dist = qksd_extended_swap_test(state1, basis2, ham_frag[idx_h],
-                                                            imaginary=bool(part),
-                                                            prepared_op=True,
-                                                            prepared_state=(prepared_state1, False))
                         shot_j = int(shot_list[i1, i2][j][part])
-                        samp = prop_dist.empirical_average(shot_j)
+                        if shot_j > 0:
+                            state1 = ref1_prepared[j] if prepared_state1 else basis1
+                            prop_dist = qksd_extended_swap_test(state1, basis2, ham_frag[idx_h],
+                                                                imaginary=bool(part),
+                                                                prepared_op=True,
+                                                                prepared_state=(prepared_state1, False))
+                            samp = prop_dist.empirical_average(shot_j)
 
-                        h_mat[i1, i2] += samp["H"] if part == REAL else samp["H"] * 1j
-                        if i1 != i2:
-                            inc = samp["S"] * shot_j / shots
-                            s_mat[i1, i2] += inc if part == REAL else inc * 1j
+                            h_mat[i1, i2] += samp["H"] if part == REAL else samp["H"] * 1j
+                            if i1 != i2:
+                                inc = samp["S"] * shot_j / shots
+                                s_mat[i1, i2] += inc if part == REAL else inc * 1j
 
     else:
         raise AssertionError
@@ -420,180 +434,3 @@ def qksd_shot_allocation(tot_shots: Union[int, float],
         return shot_h * tot_shots
     else:
         raise AssertionError
-
-
-def _example_prepare():
-    import inspect
-
-    from ofex.utils.chem import molecule_example, run_driver
-    from openfermion import get_fermion_operator
-    from ofex.transforms.fermion_qubit import fermion_to_qubit_operator
-    from ofex.state.chem_ref_state import hf_ground
-    from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
-    from ofex.propagator.exact import exact_rte
-    from ofex.propagator.trotter import trotter_rte_by_si_lcu
-    from ofex.measurement.sorted_insertion import sorted_insertion
-
-    def retrieve_name(var):
-        callers_local_vars = inspect.currentframe().f_back.f_back.f_locals.items()
-        return [var_name for var_name, var_val in callers_local_vars if var_val is var][0]
-
-    mol_name = "H4"
-    transform = "bravyi_kitaev"
-    n_krylov = 10
-    time_step = 3 * np.pi / n_krylov
-    n_trotter = 2
-
-    mol = molecule_example(mol_name)
-    mol = run_driver(mol, run_fci=True, driver="PSI4")
-    fham = mol.get_molecular_hamiltonian()
-    fham = get_fermion_operator(fham)
-
-    # keyword arguments required in ofex.transforms.fermion_to_qubit_operator
-    f2q_kwargs = {"n_qubits": mol.n_qubits}
-
-    pham = fermion_to_qubit_operator(fham, transform, **f2q_kwargs)
-    p_const = pham.constant
-    pham = pham - p_const
-    assert np.isclose(p_const.imag, 0.0)
-    p_const = p_const.real
-    pham_prop, norm = normalize_by_lcu_norm(pham, level=1)
-    # pham_prop = pham
-
-    ref = hf_ground(mol, fermion_to_qubit_map=transform, **f2q_kwargs)
-
-    prop_rte = exact_rte(pham_prop, time_step)
-    prop_trot = trotter_rte_by_si_lcu(pham_prop, time_step, mol.n_qubits,
-                                      n_trotter=n_trotter)
-
-    ham_frag = sorted_insertion(pham, anticommute=False)
-    lcu_frag = sorted_insertion(pham, anticommute=True)
-
-    return {retrieve_name(v): v for v in [pham, prop_rte, prop_trot, ref, n_krylov,
-                                          ham_frag, lcu_frag,
-                                          mol, p_const]}
-
-
-def _example_script_trotter(pham, prop_rte, prop_trot, ref, n_krylov, mol, p_const, **_):
-    from qksd_utils import trunc_eigh
-
-    ideal_h, ideal_s = ideal_qksd_toeplitz(pham, prop_rte, ref, n_krylov)
-    toep_h, toep_s = ideal_qksd_toeplitz(pham, prop_trot, ref, n_krylov)
-    nontoep_h, nontoep_s = ideal_qksd_nontoeplitz(pham, prop_trot, ref, n_krylov)
-
-    val, vec = trunc_eigh(ideal_h, ideal_s, epsilon=1e-14)
-    ideal_gnd = np.min(val)
-    print("=== Trotter Perturbation Analysis ===")
-    print("")
-    print(f"\tIdealQKSD - FCI = {ideal_gnd + p_const - mol.fci_energy}")
-
-    toep_h_pert = np.linalg.norm(ideal_h - toep_h, ord=2)
-    toep_s_pert = np.linalg.norm(ideal_s - toep_s, ord=2)
-    val, vec = trunc_eigh(toep_h, toep_s, epsilon=toep_s_pert)
-    print("")
-    print(f"\tTrotter Toeplitz ‖ΔH‖ = {toep_h_pert}")
-    print(f"\tTrotter Toeplitz ‖ΔS‖ = {toep_s_pert}")
-    print(f"\tEigenvalue Perturbation = {np.min(val) - ideal_gnd}")
-
-    ntoep_h_pert = np.linalg.norm(ideal_h - nontoep_h, ord=2)
-    ntoep_s_pert = np.linalg.norm(ideal_s - nontoep_s, ord=2)
-    val, vec = trunc_eigh(nontoep_h, nontoep_s, epsilon=ntoep_s_pert)
-    print("")
-    print(f"\tTrotter NonToeplitz ‖ΔH‖ = {ntoep_h_pert}")
-    print(f"\tTrotter NonToeplitz ‖ΔS‖ = {ntoep_s_pert}")
-    print(f"\tEigenvalue Perturbation = {np.min(val) - ideal_gnd}")
-
-    print("")
-
-
-def _example_script_sample(pham, prop_rte, ref, n_krylov, ham_frag, lcu_frag, **_):
-    from qksd_utils import trunc_eigh
-    from time import time
-
-    tot_shots = 1e8
-
-    ideal_h, ideal_s = ideal_qksd_toeplitz(pham, prop_rte, ref, n_krylov)
-    val, vec = trunc_eigh(ideal_h, ideal_s, epsilon=1e-14)
-    ideal_gnd = np.min(val)
-
-    print("=== Sampling Perturbation Analysis ===")
-    print("")
-
-    for is_toeplitz, meas_type in product([True, False], ["FH", "LCU"]):
-        if not (meas_type == "LCU"):
-            continue
-
-        frag = ham_frag if meas_type == "FH" else lcu_frag
-
-        t = time()
-        shot_alloc = qksd_shot_allocation(tot_shots, frag, n_krylov, meas_type, is_toeplitz)
-        checksum_shot = np.sum(shot_alloc) if isinstance(shot_alloc, np.ndarray) \
-            else (np.sum(shot_alloc[0]) + np.sum(shot_alloc[1]))
-        assert np.isclose(checksum_shot, tot_shots)
-        samp_h, samp_s = sample_qksd(frag, prop_rte, ref, n_krylov, is_toeplitz, meas_type, shot_alloc)
-        t = time() - t
-
-        pert_h = np.linalg.norm(samp_h - ideal_h, ord=2)
-        pert_s = np.linalg.norm(samp_s - ideal_s, ord=2)
-        val, vec = trunc_eigh(samp_h, samp_s, epsilon=pert_s)
-
-        print(f"\t{meas_type}, Toeplitz = {is_toeplitz} ({t} sec)")
-        print(f"\t\t‖ΔH‖ = {pert_h}")
-        print(f"\t\t‖ΔS‖ = {pert_s}")
-        print(f"\t\t ΔE  = {np.min(val) - ideal_gnd}")
-        print("")
-
-
-def _profile_script_sample(prop_rte, ref, n_krylov, ham_frag, lcu_frag, **_):
-    from cProfile import Profile
-    from pstats import Stats
-
-    meas_type = "FH"
-    is_toeplitz = False
-    tot_shots = 1e8
-
-    frag = ham_frag if meas_type == "FH" else lcu_frag
-    shot_alloc = qksd_shot_allocation(tot_shots, frag, n_krylov, meas_type, is_toeplitz)
-
-    def _test():
-        return sample_qksd(frag, prop_rte, ref, n_krylov, is_toeplitz, meas_type, shot_alloc)
-
-    profiler = Profile()
-    profiler.runcall(_test)
-
-    stats = Stats(profiler)
-    stats.strip_dirs()
-    stats.sort_stats('cumulative')
-    stats.print_stats()
-
-
-if __name__ == '__main__':
-    _kwargs = _example_prepare()
-    # _example_script_trotter(**_kwargs)
-    _example_script_sample(**_kwargs)
-    # _profile_script_sample(**_kwargs)
-
-
-""" Before opt
-=== Sampling Perturbation Analysis ===
-
-FH, Toeplitz = True (10.277536392211914 sec)
-    ‖ΔH‖ = 0.00886276558785948
-    ‖ΔS‖ = 0.0018364324854852354
-     ΔE  = 0.0015409997423421196
-
-LCU, Toeplitz = True (0.9645671844482422 sec)
-    ‖ΔH‖ = 0.01931204774044579
-    ‖ΔS‖ = 0.0024032952228101537
-     ΔE  = 0.0018312137734883827
-
-FH, Toeplitz = False (61.58808445930481 sec)
-    ‖ΔH‖ = 0.020933689485522638
-    ‖ΔS‖ = 0.004987929042981472
-     ΔE  = 0.00620039400308281
-
-LCU, Toeplitz = False (21.749511003494263 sec)
-    ‖ΔH‖ = 0.0427862458778354
-    ‖ΔS‖ = 0.005697910065644717
-     ΔE  = 0.001869023436507522
-"""

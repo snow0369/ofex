@@ -2,20 +2,23 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from openfermion import QubitOperator
+from openfermion.config import EQ_TOLERANCE
 from scipy.linalg import eigh
 
 from ofex.measurement.iterative_coefficient_splitting.ics_utils import _synthesize_group, \
     _calculate_groupwise_std, _generate_cov_list, _add_epsilon_shot
 from ofex.measurement.pauli_variance import pauli_variance, pauli_covariance
 from ofex.measurement.types import PauliCovDict, TransitionPauliCovDict
-from ofex.operators.symbolic_operator_tools import coeff
+from ofex.operators.symbolic_operator_tools import coeff, compare_operators
 
 
 def run_ics(ham: QubitOperator,
             initial_grp: Tuple[List[QubitOperator], List[List[int]], List[List[int]]],
             cov_dict: Union[PauliCovDict, TransitionPauliCovDict],
             transition: bool = False,
-            conv_th: float = 1e-6,
+            sep_reim: bool = False,
+            conv_atol: float = 1e-6,
+            conv_rtol: Optional[float] = 1e-4,
             max_iter=10000,
             lstsq_rcond=1e-6,
             initial_c: Optional[np.ndarray] = None,
@@ -28,7 +31,7 @@ def run_ics(ham: QubitOperator,
         initial_grp:
         cov_dict: Covariances, (key : tuple of pauli string, value : real (and imaginary for transition = True))
         transition: Calculation for transition amplitude (ref1 and ref2 are different)
-        conv_th: Threshold for the optimization convergence.
+        conv_atol: Threshold for the optimization convergence.
         max_iter: Maximum number of iteration in ics optimization
         lstsq_rcond:
         initial_c:
@@ -39,6 +42,8 @@ def run_ics(ham: QubitOperator,
 
     """
     if ham.constant != 0.0:
+        raise ValueError
+    if sep_reim and not transition:
         raise ValueError
 
     # 1. Partitioning into compatible groups
@@ -62,6 +67,16 @@ def run_ics(ham: QubitOperator,
     if not np.allclose(b_vec.imag, 0.0):
         raise ValueError
     b_vec = b_vec.real
+
+    if sep_reim:
+        new_amat = np.zeros((num_pauli * 2, num_split_pauli * 2), dtype=float)
+        new_amat[:a_mat.shape[0], :a_mat.shape[1]] = a_mat
+        new_amat[a_mat.shape[0]:, a_mat.shape[1]:] = a_mat
+        new_bvec = np.zeros(b_vec.shape[0] * 2, dtype=float)
+        new_bvec[:b_vec.shape[0]] = b_vec
+        new_bvec[b_vec.shape[0]:] = b_vec
+        a_mat = new_amat
+        b_vec = new_bvec
 
     # 3. Generate variance
     # List of covariance matrix for each groups
@@ -87,7 +102,7 @@ def run_ics(ham: QubitOperator,
     # 4-0. Initial m allocation
     if initial_c is not None:
         init_std_real_list, init_std_imag_list = _calculate_groupwise_std(
-            transition, num_grp, size_grp, initial_c, cov_list_real, cov_list_imag
+            transition, False, num_grp, size_grp, initial_c, cov_list_real, cov_list_imag
         )
         if transition:
             init_sum_std = sum(init_std_real_list) + sum(init_std_imag_list)
@@ -117,7 +132,10 @@ def run_ics(ham: QubitOperator,
     # To satisfy the constraint : c_opt = phi_s + projector @ phi
     a_pinv = a_mat.T @ np.linalg.inv(a_mat @ a_mat.T)  # pseudo inverse of A
     phi_s = a_pinv @ b_vec
-    projector = np.eye(num_split_pauli) - a_pinv @ a_mat
+    if sep_reim:
+        projector = np.eye(num_split_pauli * 2) - a_pinv @ a_mat
+    else:
+        projector = np.eye(num_split_pauli) - a_pinv @ a_mat
 
     # Perform iterative optimization
     sum_std = None
@@ -134,21 +152,32 @@ def run_ics(ham: QubitOperator,
         m_tot = sum(m_opt_real) + sum(m_opt_imag) if transition else sum(m_opt_real)
         assert np.isclose(m_tot, 1.0), m_tot
         try:
-            c_opt = initial_c
+            if sep_reim and initial_c is not None:
+                c_opt = np.zeros(initial_c.shape[0] * 2, dtype=float)
+                c_opt[:initial_c.shape[0]] = initial_c
+                c_opt[initial_c.shape[0]:] = initial_c
+            else:
+                c_opt = initial_c
             for it in range(max_iter):
                 # 4-1. construct total covariance matrix
-                tot_vmat = np.zeros((num_split_pauli, num_split_pauli))
+                if sep_reim:
+                    tot_vmat = np.zeros((2 * num_split_pauli, 2 * num_split_pauli))
+                else:
+                    tot_vmat = np.zeros((num_split_pauli, num_split_pauli))
                 count_pauli = 0
                 for idx_grp in range(num_grp):
-                    if np.isclose(m_opt_real[idx_grp], 0):
-                        block = np.zeros(cov_list_real[idx_grp].shape)
-                    else:
-                        block = cov_list_real[idx_grp] / m_opt_real[idx_grp]
-                    if transition:
-                        if not np.isclose(m_opt_imag[idx_grp], 0):
-                            block += cov_list_imag[idx_grp] / m_opt_imag[idx_grp]
                     end_idx = count_pauli + size_grp[idx_grp]
-                    tot_vmat[count_pauli: end_idx, count_pauli: end_idx] = block
+                    if not np.isclose(m_opt_real[idx_grp], 0):
+                        tot_vmat[count_pauli: end_idx, count_pauli: end_idx] \
+                            = cov_list_real[idx_grp] / m_opt_real[idx_grp]
+                    if transition and (not sep_reim) and (not np.isclose(m_opt_imag[idx_grp], 0)):
+                        tot_vmat[count_pauli: end_idx, count_pauli: end_idx] \
+                            += cov_list_imag[idx_grp] / m_opt_imag[idx_grp]
+                    elif sep_reim and not np.isclose(m_opt_imag[idx_grp], 0):
+                        tot_vmat[count_pauli + num_split_pauli: end_idx + num_split_pauli,
+                                 count_pauli + num_split_pauli: end_idx + num_split_pauli] \
+                            = cov_list_imag[idx_grp] / m_opt_imag[idx_grp]
+
                     count_pauli += size_grp[idx_grp]
                 if converge:
                     break
@@ -172,8 +201,8 @@ def run_ics(ham: QubitOperator,
 
                 # 4-3. Solve measurement allocation
                 # 4-3-1. Calculate group-wise standard deviations
-                std_real_list, std_imag_list = _calculate_groupwise_std(transition, num_grp, size_grp, new_c_opt,
-                                                                        cov_list_real, cov_list_imag)
+                std_real_list, std_imag_list = _calculate_groupwise_std(transition, sep_reim, num_grp, size_grp,
+                                                                        new_c_opt, cov_list_real, cov_list_imag)
 
                 # 4-3-2. Check Convergence
                 new_sum_std = sum(std_real_list)
@@ -181,12 +210,19 @@ def run_ics(ham: QubitOperator,
                     new_sum_std += sum(std_imag_list)
                 if sum_std is not None and new_sum_std > sum_std:
                     break
-                converge = abs(
-                    new_sum_std - sum_std) < conv_th if sum_std is not None else False
+
+                converge = False
+                if sum_std is not None:
+                    if conv_rtol is not None and abs(sum_std) > EQ_TOLERANCE:
+                        rtol_check = abs(new_sum_std - sum_std) / sum_std < conv_rtol
+                    else:
+                        rtol_check = False
+                    converge = (abs(new_sum_std - sum_std) < conv_atol) or rtol_check
+
                 sum_std = new_sum_std
                 c_opt = new_c_opt
 
-                # 4-3-3. Allocate measurement
+                # 4-3-3. Allocate shots
                 m_opt_real = np.array([s / sum_std for s in std_real_list])
                 if transition:
                     m_opt_imag = np.array([s / sum_std for s in std_imag_list])
@@ -200,11 +236,13 @@ def run_ics(ham: QubitOperator,
 
                 if debug:
                     print(f"it {it} : {sum_std ** 2}")
-                    grp_ham = _synthesize_group(c_opt, pauli_list, grp_pauli_list, size_grp, ham, debug,
-                                                correct_sum=False)
-                    checksum = sum(grp_ham[1:], grp_ham[0])
-                    if not checksum == ham:
-                        print(f"mismatch during optimization : {(checksum - ham).two_norm}")
+                    grp_ham_list = _synthesize_group(sep_reim, c_opt, pauli_list, grp_pauli_list, size_grp, ham, debug,
+                                                     correct_sum=False)
+                    for grp_ham in grp_ham_list:
+                        checksum = QubitOperator.accumulate(grp_ham)
+                        if not checksum.isclose(ham):
+                            print(f"mismatch during optimization : {(checksum - ham).induced_norm(order=2)}")
+                            print(compare_operators(checksum, ham, str_len=300))
             else:
                 raise Warning("Reached Max Iteration")
             break
@@ -218,11 +256,11 @@ def run_ics(ham: QubitOperator,
                 raise e
 
     # 5. Synthesize group
-    grp_ham = _synthesize_group(c_opt, pauli_list, grp_pauli_list, size_grp, ham,
-                                debug)  # , leftover, anticommute, debug)
+    grp_ham_list = _synthesize_group(sep_reim, c_opt, pauli_list, grp_pauli_list, size_grp, ham,
+                                     debug)  # , leftover, anticommute, debug)
     final_variance = 0.5 * c_opt.T @ tot_vmat @ c_opt
 
-    n_frag = len(grp_ham)
+    n_frag = len(grp_ham_list[0])
     if transition:
         shots = np.zeros((n_frag, 2), dtype=float)
         shots[:, 0] = m_opt_real
@@ -230,7 +268,10 @@ def run_ics(ham: QubitOperator,
     else:
         shots = m_opt_real
 
-    return grp_ham, shots, final_variance, c_opt
+    if not sep_reim:
+        return grp_ham_list[0], shots, final_variance, c_opt
+    else:
+        return grp_ham_list, shots, final_variance, c_opt
 
 
 if __name__ == "__main__":
@@ -279,14 +320,15 @@ if __name__ == "__main__":
         print(pretty_print_state(ref1))
         ref2 = apply_operator(prop, ref1)
 
-        _, initial_grp, _ = init_ics(pham, anticommute=anticommute, debug=debug)
-        cov_dict = pauli_covariance(initial_grp, ref1, ref2, anticommute=anticommute, num_workers=15, debug=debug)
+        initial_grp, cov_dict = init_ics(pham, ref1, ref2,
+                                         num_workers=15,
+                                         anticommute=anticommute, debug=debug)
 
         grp_ham, shots, final_var, c_opt = run_ics(pham,
                                                    initial_grp,
                                                    cov_dict,
                                                    transition=True,
-                                                   conv_th=1e-6,
+                                                   conv_atol=1e-6,
                                                    debug=debug)
         print(final_var)
         print("== ICS VAR ==")

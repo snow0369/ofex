@@ -2,12 +2,16 @@ from itertools import product, combinations
 from typing import List, Tuple, Optional
 
 import numpy as np
-from openfermion import MolecularData
+from openfermion import MolecularData, FermionOperator, jordan_wigner
+from openfermion.config import EQ_TOLERANCE
 
+from ofex.linalg.sparse_tools import sparse_apply_operator
+from ofex.operators.fermion_operator_tools import one_body_excitation
 from ofex.state.binary_fock import BinaryFockVector
-from ofex.state.state_tools import pretty_print_state
+from ofex.state.state_tools import pretty_print_state, norm
 from ofex.state.types import SparseStateDict
 from ofex.transforms.fermion_qubit import fermion_to_qubit_state
+from ofex.utils.chem import run_driver
 
 
 def hf_ground(mol: MolecularData,
@@ -22,6 +26,34 @@ def hf_ground(mol: MolecularData,
     if fermion_to_qubit_map is not None:
         state = fermion_to_qubit_state(state, fermion_to_qubit_map, **kwargs)
     return state
+
+
+def cisd_ground(mol: MolecularData, ):
+    mol.load()
+    mol = run_driver(mol, run_cisd=True, driver='pyscf')
+    cisd_data = mol._pyscf_data['cisd']
+    c0, c1, c2 = cisd_data.cisdvec_to_amplitudes(cisd_data.ci)
+    nocc, nvirt = c1.shape
+    occ, virt = list(range(nocc)), list(range(nocc, nocc + nvirt))
+
+    fermion_ex = FermionOperator.identity() * c0
+    for (ai, a), (ri, r) in product(enumerate(occ), enumerate(virt)):
+        if abs(c1[ai, ri]) > EQ_TOLERANCE:
+            fermion_ex += one_body_excitation(r, a, spin_idx=False, hermitian=False) * c1[ai, ri]
+    for (ai, a), (bi, b), (ri, r), (si, s) in product(enumerate(occ), enumerate(occ),
+                                                      enumerate(virt), enumerate(virt)):
+        if abs(c2[ai, bi, ri, si]) > EQ_TOLERANCE:
+            two_ex = one_body_excitation(r, a, spin_idx=False, hermitian=False) * \
+                     one_body_excitation(s, b, spin_idx=False, hermitian=False)
+            if b == r:
+                two_ex -= one_body_excitation(s, a, spin_idx=False, hermitian=False)
+            fermion_ex += two_ex * 0.5 * c2[ai, bi, ri, si]
+
+    pauli_ex = jordan_wigner(fermion_ex)
+    cisd_state = sparse_apply_operator(pauli_ex, hf_ground(mol))
+
+    assert np.isclose(norm(cisd_state), 1.0)
+    return cisd_state
 
 
 def generate_csf(n_orbital: int,

@@ -3,8 +3,8 @@ from typing import List
 
 from openfermion import get_fermion_operator, normal_ordered, QubitOperator
 
-from ofex.measurement.iterative_coefficient_splitting import init_ics
 from ofex.measurement.iterative_coefficient_splitting.efficient_ics import efficient_ics
+from ofex.measurement.iterative_coefficient_splitting.ics_prepare import init_split
 from ofex.measurement.sorted_insertion import sorted_insertion
 from ofex.transforms.fermion_qubit import fermion_to_qubit_operator
 from ofex.utils.chem import molecule_example
@@ -30,7 +30,7 @@ def compare_si_eics_test():
         pham.compress()
 
         si = sorted_insertion(pham, anticommute=anticommute)
-        _, initial_grp, _ = init_ics(pham, anticommute, debug=False)
+        _, initial_grp, _ = init_split(pham, anticommute, debug=False)
         eics, _ = efficient_ics(pham, initial_grp)
         print(f"\tQW  = {pham.induced_norm(order=1)}")
         print(f"\tSI  = {_grp_norm(si)}")

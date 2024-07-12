@@ -143,6 +143,7 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
         raise ValueError
 
     pham = fermion_to_qubit_operator(fham, transform, **f2q_kwargs)
+    const -= pham.constant
     hf_qubit_state = fermion_to_qubit_state({hf_vector: 1.0}, transform, **f2q_kwargs)
     hf_qubit_fock = list(hf_qubit_state.keys())[0]
 

@@ -1,21 +1,29 @@
-from typing import Tuple, List
+import os
+import pickle
+from typing import List, Optional
 
 import numpy as np
 from openfermion import QubitOperator
 from openfermion.config import EQ_TOLERANCE
 
 from ofex.measurement.iterative_coefficient_splitting.ics_utils import _synthesize_group
+from ofex.measurement.pauli_variance import pauli_covariance
 from ofex.measurement.sorted_insertion import sorted_insertion
 from ofex.operators.ordering import order_abs_coeff
 from ofex.operators.qubit_operator_tools import single_pauli_commute_chk
-from ofex.operators.symbolic_operator_tools import coeff, operator
+from ofex.operators.symbolic_operator_tools import coeff, operator, compare_operators
+from ofex.state.types import State
 
 
 def init_ics(ham: QubitOperator,
+             ref1: State,
+             ref2: Optional[State] = None,
+             num_workers: int = 1,
              anticommute: bool = False,
              method="even",
-             debug=False) \
-        -> Tuple[List[QubitOperator], Tuple[List[QubitOperator], List[List[int]], List[List[int]]], np.ndarray]:
+             cov_buf_dir: Optional[str] = None,
+             phase_list: Optional[List[float]] = None,
+             debug: bool = False):
     """
     Produce initial coefficient splitting.
 
@@ -33,6 +41,39 @@ def init_ics(ham: QubitOperator,
     if ham.constant != 0.0:
         raise ValueError("Hamiltonian should have zero trace.")
 
+    if cov_buf_dir is None or not os.path.exists(cov_buf_dir):
+        _, initial_grp = init_split(ham, anticommute, method, debug)
+        pauli_list, grp_pauli_list, pauli_grp_list = initial_grp
+
+        if cov_buf_dir is not None:
+            if not os.path.isdir(cov_buf_dir):
+                os.mkdir(cov_buf_dir)
+            save_pauli_list = [p.terms for p in pauli_list]
+            with open(os.path.join(cov_buf_dir, "init_frag.pkl"), "wb") as f:
+                pickle.dump((save_pauli_list, grp_pauli_list, pauli_grp_list), f)
+
+    elif os.path.isdir(cov_buf_dir):
+        with open(os.path.join(cov_buf_dir, "init_frag.pkl"), "rb") as f:
+            load_pauli_list, grp_pauli_list, pauli_grp_list = pickle.load(f)
+        pauli_list = list()
+        for p in load_pauli_list:
+            tmp_pauli = QubitOperator()
+            tmp_pauli.terms = p
+            pauli_list.append(tmp_pauli)
+        checksum = QubitOperator.accumulate(pauli_list)
+        if not ham.isclose(checksum, tol=EQ_TOLERANCE):
+            raise ValueError(compare_operators(ham, checksum))
+
+    else:
+        raise AssertionError
+
+    initial_grp = pauli_list, grp_pauli_list, pauli_grp_list
+
+    cov_dict = pauli_covariance(initial_grp, ref1, ref2, num_workers, anticommute, cov_buf_dir, phase_list, debug)
+    return initial_grp, cov_dict
+
+
+def init_split(ham, anticommute: bool = False, method: str = "even", debug: bool = False):
     pauli_list = order_abs_coeff(ham, reverse=True)
     for i, p in enumerate(pauli_list):
         assert np.isclose(coeff(p).imag, 0.0)
@@ -91,7 +132,6 @@ def init_ics(ham: QubitOperator,
             c_vec[addr_p] = coeff(pauli_list[p_idx]).real
     else:
         raise ValueError(f"Unknown method {method}")
-    ham_frags = _synthesize_group(c_vec, pauli_list, grp_pauli_list, size_grp, ham, debug)
+    ham_frags = _synthesize_group(False, c_vec, pauli_list, grp_pauli_list, size_grp, ham, debug)[0]
     initial_grp = pauli_list, grp_pauli_list, pauli_grp_list
-
-    return ham_frags, initial_grp, c_vec
+    return ham_frags, initial_grp

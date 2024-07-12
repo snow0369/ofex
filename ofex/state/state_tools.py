@@ -155,7 +155,6 @@ def compress_sparse(state: Union[SparseStateDict, ScipySparse], atol=EQ_TOLERANC
         return new_state
 
 
-
 def allclose(state_1: State,
              state_2: State,
              atol=EQ_TOLERANCE) -> bool:

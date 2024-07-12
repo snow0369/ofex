@@ -126,7 +126,7 @@ def pauli_covariance(initial_grp: Tuple[List[QubitOperator], List[List[int]], Li
     cov_dict_list = {p: mngr.dict() for p in phase_list}
     fname_list = None
     if cov_buf_dir is not None:
-        fname_list = {p: os.path.join(cov_buf_dir, "phase={:.2f}.pkl".format(p)) for p in phase_list}
+        fname_list = {p: os.path.join(cov_buf_dir, "phase={:.6f}.pkl".format(p)) for p in phase_list}
         if not os.path.isdir(cov_buf_dir):
             os.mkdir(cov_buf_dir)
         for p, fname in fname_list.items():

@@ -1,26 +1,25 @@
 import inspect
 import os
-from itertools import product
-from time import time
 from cProfile import Profile
+from itertools import product
 from pstats import Stats
+from time import time
 
 import numpy as np
+from openfermion import get_fermion_operator
 
+from algorithms.qksd.qksd_simulation import ideal_qksd_toeplitz, ideal_qksd_nontoeplitz, qksd_shot_allocation, \
+    sample_qksd
+from algorithms.qksd.qksd_utils import trunc_eigh
 from ofex.measurement.iterative_coefficient_splitting import init_ics, run_ics
 from ofex.measurement.killer_shift import killer_shift_opt_fermion_hf
-from ofex.measurement.pauli_variance import pauli_covariance
-from ofex.utils.chem import molecule_example, run_driver
-from openfermion import get_fermion_operator
-from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
-from ofex.state.chem_ref_state import hf_ground, cisd_ground
+from ofex.measurement.sorted_insertion import sorted_insertion
 from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
 from ofex.propagator.exact import exact_rte
 from ofex.propagator.trotter import trotter_rte_by_si_lcu
-from ofex.measurement.sorted_insertion import sorted_insertion
-from qksd_script.qksd_simulation import ideal_qksd_toeplitz, ideal_qksd_nontoeplitz, qksd_shot_allocation, \
-    sample_qksd
-from qksd_script.qksd_utils import trunc_eigh
+from ofex.state.chem_ref_state import hf_ground, cisd_ground
+from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
+from ofex.utils.chem import molecule_example, run_driver
 
 
 def _prepare():
@@ -151,7 +150,7 @@ def _profile_sample(prop_rte, ref, n_krylov, ham_frag, lcu_frag, **_):
     stats.print_stats()
 
 
-def _killer_shift(pham, fham, prop_rte, ref, f_ref, n_krylov, transform, f2q_kwargs, p_const, **_):
+def _killer_shift(pham, fham, prop_rte, ref, f_ref, n_krylov, transform, f2q_kwargs, **_):
     repeat_opt = 5  # only effective for opt_level=2
     tot_shots = 1e8
     is_toeplitz = True
@@ -193,7 +192,7 @@ def _killer_shift(pham, fham, prop_rte, ref, f_ref, n_krylov, transform, f2q_kwa
             print("")
 
 
-def _iterative_coefficient_split(mol, mol_name, fham, pham, f_ref, ref, transform, f2q_kwargs,
+def _iterative_coefficient_split(mol, fham, pham, f_ref, ref, transform, f2q_kwargs,
                                  n_krylov, prop_rte, time_step, norm, **_):
     tot_shots = 1e8
     num_workers = 8

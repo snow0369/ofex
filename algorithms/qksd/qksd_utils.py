@@ -3,17 +3,18 @@ from typing import Optional
 
 import numpy as np
 import scipy
+from openfermion.config import EQ_TOLERANCE
 from scipy.linalg import eigh
 
 
 def toeplitz_arr_to_mat(toeplitz_arr: np.ndarray) -> np.ndarray:
-    if not np.isclose(toeplitz_arr[0].imag, 0):
-        raise ValueError(toeplitz_arr[0])
-    n = toeplitz_arr.shape[0]
-    mat = np.zeros((n, n), dtype=toeplitz_arr.dtype)
+    if not np.allclose(toeplitz_arr[..., 0].imag, 0.0, atol=EQ_TOLERANCE):
+        raise ValueError(toeplitz_arr)
+    n = toeplitz_arr.shape[-1]
+    mat = np.zeros((*toeplitz_arr.shape[:-1], n, n), dtype=toeplitz_arr.dtype)
     for i, j in product(range(n), repeat=2):
-        val = toeplitz_arr[abs(i - j)]
-        mat[i, j] = val if i < j else val.conj()
+        val = toeplitz_arr[..., abs(i - j)]
+        mat[..., i, j] = val if i < j else val.conj()
     return mat
 
 

@@ -70,6 +70,14 @@ class ProbDist(dict):
             avg += ev * occ
         return avg / shots
 
+    def batched_empirical_average(self, shots: Union[int, float], n_batch: int, seed=None):
+        if seed is not None:
+            np.random.seed(seed)
+        output = list()
+        for i in range(n_batch):
+            output.append(self.empirical_average(shots, seed=None))
+        return output
+
     def empirical_variance(self, shots: int, seed=None):
         if math.isinf(shots):
             return self.true_variance

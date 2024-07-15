@@ -1,4 +1,6 @@
 import copy
+import os
+import pickle
 from itertools import product
 from typing import Union, Optional, Tuple
 
@@ -12,6 +14,7 @@ from ofex.linalg.sparse_tools import apply_operator, state_dot, expectation, spa
 from ofex.sampling_simulation.hadamard_test import hadamard_test_qubit_operator, hadamard_test_general
 from ofex.sampling_simulation.qksd_extended_swap_test import qksd_extended_swap_test, prepare_qksd_est_op, \
     prepare_qksd_est_state
+from ofex.sampling_simulation.sampling_base import ProbDist
 from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import State
 
@@ -72,6 +75,7 @@ def sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
                          n_krylov: int,
                          meas_type: str,
                          shot_list: Union[np.ndarray, Tuple[np.ndarray, np.ndarray]],
+                         sample_buf_dir: Optional[str] = None,
                          ) -> Tuple[np.ndarray, np.ndarray]:
     # For FH
     # shot_list[idx_n_krylov][idx_ham_frag][real=0, imag=1]
@@ -80,17 +84,23 @@ def sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
     # shot_list[h=0][idx_n_krylov][idx_unitary ][real=0, imag=1]
     # shot_list[s=1][idx_n_krylov][real=0, imag=1]
 
-    n_qubits = get_num_qubits(ref)
-
+    # Check input
     meas_type = meas_type.upper()
     if meas_type not in ["LCU", "FH"]:
         raise ValueError("meas_type must be 'LCU' or 'FH'.")
 
-    ksd_state = copy.deepcopy(ref)
-    s_arr, h_arr = np.zeros(n_krylov, dtype=complex), np.zeros(n_krylov, dtype=complex)
+    n_qubits = get_num_qubits(ref)
 
+    # ham_frag.ndim == 1 : The fragmentation is uniform across the krylov indices and real/imaginary part.
+    #                       ( ham_frag[idx_frag] )
+    # ham_frag.ndim == 2 : The fragmentation is differed by krylov indices.
+    #                       ( ham_frag[idx_krylov][idx_frag] )
+    # ham_frag.ndim == 3 : The fragmentation is differed by krylov indices and real/imaginary part.
+    #                       ( ham_frag[idx_krylov][REAL/IMAG][idx_frag] )
     ham_frag = np.array(ham_frag)
     n_frag = ham_frag.shape[-1]
+
+    # Find hamiltonian by accumulating the fragments.
     if ham_frag.ndim == 1:
         pham = QubitOperator.accumulate(ham_frag)
     elif ham_frag.ndim in [2, 3]:
@@ -99,52 +109,110 @@ def sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
     else:
         raise ValueError
 
+    # Initial preparation
+    ksd_state = copy.deepcopy(ref)
+    s_arr, h_arr = np.zeros(n_krylov, dtype=complex), np.zeros(n_krylov, dtype=complex)
+
+    # Assign the 0th elements without sampling.
     h_arr[0] = expectation(pham, ref, sparse=True)
     s_arr[0] = 1.0
     ksd_state = apply_operator(prop, ksd_state)
 
+    # Load prob. dist. for the simulation from the previously generated files.
+    loaded_prob_dist = dict()
+    use_prob_buffer = sample_buf_dir is not None
+    if sample_buf_dir is not None:
+        if os.path.exists(sample_buf_dir):
+            f_list = os.listdir(sample_buf_dir)
+            for fname in f_list:
+                idx_krylov = int(fname.split('.')[0])
+                assert idx_krylov not in loaded_prob_dist
+                with open(os.path.join(sample_buf_dir, fname), 'rb') as f:
+                    loaded_prob_dist[idx_krylov] = pickle.load(f)
+        else:
+            os.mkdir(sample_buf_dir)
+
+    # Run the sampling
     if meas_type == "LCU":
-        # Normalize
+        # Normalize to make it unitary
         norm_list = np.zeros(ham_frag.shape, dtype=float)
         for idx in product(*[range(s) for s in ham_frag.shape]):
             norm_list[idx] = ham_frag[idx].induced_norm(order=2)
             ham_frag[idx] = ham_frag[idx] / norm_list[idx]
 
+        # Prepare objects for the Hadamard Test simulation.
         ref_evol_1d, norm_re_1d, norm_im_1d = None, None, None
         if ham_frag.ndim == 1:
             ref_evol_1d = [sparse_apply_operator(h, ref) for h in ham_frag]
             norm_re_1d, norm_im_1d = norm_list, norm_list
 
+        # Sampling simulation
         for i in range(1, n_krylov):
-            if ham_frag.ndim == 1:
-                ov_list = [state_dot(ref_evol, ksd_state) for ref_evol in ref_evol_1d]
-            elif ham_frag.ndim == 2:
-                ref_evol_1d = [sparse_apply_operator(h, ref) for h in ham_frag[i]]
-                ov_list = [state_dot(ref_evol, ksd_state) for ref_evol in ref_evol_1d]
-                norm_re_1d, norm_im_1d = norm_list[i], norm_list[i]
-            elif ham_frag.ndim == 3:
-                ref_evol_re_1d = [sparse_apply_operator(h, ref) for h in ham_frag[i][REAL]]
-                ref_evol_im_1d = [sparse_apply_operator(h, ref) for h in ham_frag[i][IMAG]]
-                ov_list = [state_dot(ref_evol_re, ksd_state).real + state_dot(ref_evol_im, ksd_state).imag * 1j
-                           for ref_evol_re, ref_evol_im in zip(ref_evol_re_1d, ref_evol_im_1d)]
-                norm_re_1d, norm_im_1d = norm_list[i][REAL], norm_list[i][IMAG]
+            # Evaluate the sampling if not loaded from the buffer.
+            if i not in loaded_prob_dist:
+                # Prepare overlaps
+                # Note that the probability distribution of Hadamard test outcomes are determined
+                # by the overlap values.
+                if ham_frag.ndim == 1:
+                    ov_list = [state_dot(ref_evol, ksd_state) for ref_evol in ref_evol_1d]
+                elif ham_frag.ndim == 2:
+                    ref_evol_1d = [sparse_apply_operator(h, ref) for h in ham_frag[i]]
+                    ov_list = [state_dot(ref_evol, ksd_state) for ref_evol in ref_evol_1d]
+                    norm_re_1d, norm_im_1d = norm_list[i], norm_list[i]
+                elif ham_frag.ndim == 3:
+                    ref_evol_re_1d = [sparse_apply_operator(h, ref) for h in ham_frag[i][REAL]]
+                    ref_evol_im_1d = [sparse_apply_operator(h, ref) for h in ham_frag[i][IMAG]]
+                    ov_list = [state_dot(ref_evol_re, ksd_state).real + state_dot(ref_evol_im, ksd_state).imag * 1j
+                               for ref_evol_re, ref_evol_im in zip(ref_evol_re_1d, ref_evol_im_1d)]
+                    norm_re_1d, norm_im_1d = norm_list[i][REAL], norm_list[i][IMAG]
+                else:
+                    raise AssertionError
+                prob_dist_now = list()
+                for j, ov in enumerate(ov_list):
+                    shot_j_re, shot_j_im = int(shot_list[H][i][j][REAL]), int(shot_list[H][i][j][IMAG])
+                    prob_real_h = hadamard_test_general(ov, imaginary=False, coeff=float(norm_re_1d[j]))
+                    prob_imag_h = hadamard_test_general(ov, imaginary=True, coeff=float(norm_im_1d[j]))
+                    if shot_j_re > 0:
+                        h_arr[i] += prob_real_h.empirical_average(shot_j_re)
+                    if shot_j_im > 0:
+                        h_arr[i] += prob_imag_h.empirical_average(shot_j_im) * 1j
+
+                    prob_dist_now.append((prob_real_h.pickle(), prob_imag_h.pickle()))
+
+                prob_real_s, prob_imag_s = hadamard_test_qubit_operator(ref, ksd_state, sparse_1=True)
+                shot_s_re, shot_s_im = int(shot_list[S][i][REAL]), int(shot_list[S][i][IMAG])
+                if shot_s_re > 0:
+                    s_arr[i] += prob_real_s.empirical_average(shot_s_re)
+                if shot_s_im > 0:
+                    s_arr[i] += prob_imag_s.empirical_average(shot_s_im) * 1j
+
+                loaded_prob_dist[i] = {"H": prob_dist_now, "S": (prob_real_s.pickle(), prob_imag_s.pickle())}
+
+                if use_prob_buffer:
+                    fname = f'{i}.pkl'
+                    with open(os.path.join(sample_buf_dir, fname), 'wb') as f:
+                        pickle.dump(prob_dist_now, f)
+
+            elif i in loaded_prob_dist:
+                prob_dist_now = loaded_prob_dist[i]["H"]
+                for j, (prob_real_h, prob_imag_h) in enumerate(prob_dist_now):
+                    prob_real_h, prob_imag_h = ProbDist.unpickle(prob_real_h), ProbDist.unpickle(prob_imag_h)
+                    shot_j_re, shot_j_im = int(shot_list[H][i][j][REAL]), int(shot_list[H][i][j][IMAG])
+                    if shot_j_re > 0:
+                        h_arr[i] += prob_real_h.empirical_average(shot_j_re)
+                    if shot_j_im > 0:
+                        h_arr[i] += prob_imag_h.empirical_average(shot_j_im) * 1j
+
+                shot_s_re, shot_s_im = int(shot_list[S][i][REAL]), int(shot_list[S][i][IMAG])
+                prob_real_s, prob_imag_s = loaded_prob_dist[i]["S"]
+                prob_real_s, prob_imag_s = ProbDist.unpickle(prob_real_s), ProbDist.unpickle(prob_imag_s)
+                if shot_s_re > 0:
+                    s_arr[i] += prob_real_s.empirical_average(shot_s_re)
+                if shot_s_im > 0:
+                    s_arr[i] += prob_imag_s.empirical_average(shot_s_im) * 1j
+
             else:
                 raise AssertionError
-            for j, ov in enumerate(ov_list):
-                shot_j_re, shot_j_im = int(shot_list[H][i][j][REAL]), int(shot_list[H][i][j][IMAG])
-                if shot_j_re > 0:
-                    prob_real_h = hadamard_test_general(ov, imaginary=False, coeff=float(norm_re_1d[j]))
-                    h_arr[i] += prob_real_h.empirical_average(shot_j_re)
-                if shot_j_im > 0:
-                    prob_imag_h = hadamard_test_general(ov, imaginary=True, coeff=float(norm_im_1d[j]))
-                    h_arr[i] += prob_imag_h.empirical_average(shot_j_im) * 1j
-
-            prob_real_s, prob_imag_s = hadamard_test_qubit_operator(ref, ksd_state, sparse_1=True)
-            shot_s_re, shot_s_im = int(shot_list[S][i][REAL]), int(shot_list[S][i][IMAG])
-            if shot_s_re > 0:
-                s_arr[i] += prob_real_s.empirical_average(shot_s_re)
-            if shot_s_im > 0:
-                s_arr[i] += prob_imag_s.empirical_average(shot_s_im) * 1j
 
             if i != n_krylov - 1:
                 ksd_state = apply_operator(prop, ksd_state)
@@ -169,10 +237,10 @@ def sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
                     shot_j = int(shot_list[i][j][part])
                     if shot_j > 0:
                         state1, h_frag = ref1_prepared[idx_h], ham_frag[idx_h]
-                        prob_dist = qksd_extended_swap_test(state1, ksd_state, h_frag, imaginary=(part == IMAG),
-                                                            prepared_op=True,
-                                                            prepared_state=(True, False))
-                        samp = prob_dist.empirical_average(shot_j)
+                        loaded_prob_dist = qksd_extended_swap_test(state1, ksd_state, h_frag, imaginary=(part == IMAG),
+                                                                   prepared_op=True,
+                                                                   prepared_state=(True, False))
+                        samp = loaded_prob_dist.empirical_average(shot_j)
                         h_arr[i] += samp["H"] if part == REAL else (1j * samp["H"])
                         inc_s = samp["S"] * shot_j / shots_now
                         s_arr[i] += inc_s if part == REAL else (1j * inc_s)
@@ -253,13 +321,14 @@ def sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                     ov_list = np.array([state_dot(ref_evol, basis2) for ref_evol in ref_evol_list], dtype=np.complex128)
                     norm_re, norm_im = norm_list, norm_list
                 elif ham_frag.ndim == 2:
-                    ov_list = np.array([transition_amplitude(h, basis1, basis2) for h in ham_frag[i2 - i1]], dtype=np.complex128)
+                    ov_list = np.array([transition_amplitude(h, basis1, basis2) for h in ham_frag[i2 - i1]],
+                                       dtype=np.complex128)
                     norm_re, norm_im = norm_list[i2 - i1], norm_list[i2 - i1]
                 elif ham_frag.ndim == 3:
                     ov_list = np.array([transition_amplitude(h, basis1, basis2).real for h in ham_frag[i2 - i1][REAL]],
                                        dtype=np.complex128)
                     if i1 != i2:
-                        ov_list +=\
+                        ov_list += \
                             np.array([transition_amplitude(h, basis1, basis2).imag for h in ham_frag[i2 - i1][IMAG]],
                                      dtype=np.complex128) * 1j
                     norm_re, norm_im = norm_list[i2 - i1][REAL], norm_list[i2 - i1][IMAG]
@@ -316,9 +385,9 @@ def sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                         if ham_frag.ndim == 1:
                             idx_h = j
                         elif ham_frag.ndim == 2:
-                            idx_h = (i2-i1, j)
+                            idx_h = (i2 - i1, j)
                         else:
-                            idx_h = (i2-i1, part, j)
+                            idx_h = (i2 - i1, part, j)
                         shot_j = int(shot_list[i1, i2][j][part])
                         if shot_j > 0:
                             state1 = ref1_prepared[j] if prepared_state1 else basis1

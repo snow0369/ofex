@@ -91,14 +91,11 @@ class ProbDist(dict):
         return np.sqrt(self.empirical_variance(shots, seed))
 
     @classmethod
-    def load(cls, path):
-        with open(path, 'rb') as f:
-            obj = pickle.load(f)
-        return cls(obj)
+    def unpickle(cls, pickled_obj):
+        return cls(pickled_obj)
 
-    def save(self, path):
-        with open(path, 'wb') as f:
-            pickle.dump(dict(self), f)
+    def pickle(self):
+        return dict(self)
 
 
 class JointProbDist(ProbDist):
@@ -115,9 +112,8 @@ class JointProbDist(ProbDist):
         self.dtype = dtype
 
     @classmethod
-    def load(cls, path):
-        with open(path, 'rb') as f:
-            keywords, distr, dtype = pickle.load(f)
+    def unpickle(cls, pickled_obj):
+        keywords, distr, dtype = pickled_obj
         if 'float' in dtype:
             dtype = float
         elif 'complex' in dtype:
@@ -128,9 +124,8 @@ class JointProbDist(ProbDist):
             raise ValueError(f"Invalid dtype {dtype}")
         return cls(keywords, distr, dtype)
 
-    def save(self, path):
-        with open(path, 'wb') as f:
-            pickle.dump((self.keywords, dict(self), str(self.dtype)), f)
+    def pickle(self):
+        return self.keywords, dict(self), str(self.dtype)
 
     @property
     def true_average(self):

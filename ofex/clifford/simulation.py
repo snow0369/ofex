@@ -2,7 +2,8 @@ from typing import Optional, List
 
 import numpy as np
 from galois import FieldArray
-from qiskit import QuantumCircuit, transpile, Aer
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import Aer
 
 from ofex.clifford.clifford_tools import gf
 from ofex.clifford.standard_operators import hadamard, s_gate, cx, cz
@@ -71,7 +72,6 @@ def clifford_qiskit(num_qubits: int, clifford_hist: List[str], init_state: Optio
 
 
 def clifford_simulation(init_state: np.ndarray, clifford_history: List[str], inv=False) -> np.ndarray:
-    from qiskit.providers.aer import Aer
     ckt = clifford_qiskit(get_num_qubits(init_state), clifford_history, init_state, inv)
     ckt.save_statevector()
     sv_sim = Aer.get_backend("aer_simulator_statevector")

@@ -135,19 +135,23 @@ def _sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
     # Find basis which is not involved in the loaded prob. dist.
     if use_prob_buffer:
         if meas_type == "LCU":
-            is_all_loaded_h = np.array([all([(H, i, part, j) in loaded_prob_dist
-                                             for part, j in product([REAL, IMAG], range(n_frag))])
-                                        for i in range(1, n_krylov)], dtype=bool)
-            is_all_loaded_s = np.array([all([(S, i, part) in loaded_prob_dist
-                                             for part in [REAL, IMAG]])
-                                        for i in range(1, n_krylov)], dtype=bool)
+            is_all_loaded_h = np.array([True] + [all([(H, i, part, j) in loaded_prob_dist
+                                                      for part, j in product([REAL, IMAG], range(n_frag))])
+                                                 for i in range(1, n_krylov)], dtype=bool)
+            is_all_loaded_s = np.array([True] + [all([(S, i, part) in loaded_prob_dist
+                                                      for part in [REAL, IMAG]])
+                                                 for i in range(1, n_krylov)], dtype=bool)
             is_all_loaded = np.logical_and(is_all_loaded_h, is_all_loaded_s)
         else:
-            is_all_loaded = np.array([all([(i, part, j) in loaded_prob_dist
-                                           for part, j in product([REAL, IMAG], range(n_frag))])
-                                      for i in range(1, n_krylov)], dtype=bool)
-        basis_required = not is_all_loaded
-        max_basis_required = max([idx[0] for idx in np.argwhere(basis_required)])
+            is_all_loaded = np.array([True] + [all([(i, part, j) in loaded_prob_dist
+                                                    for part, j in product([REAL, IMAG], range(n_frag))])
+                                               for i in range(1, n_krylov)], dtype=bool)
+        basis_required = np.logical_not(is_all_loaded)
+        idxs_basis_req = [idx[0] for idx in np.argwhere(basis_required)]
+        if len(idxs_basis_req) > 0:
+            max_basis_required = max(idxs_basis_req)
+        else:
+            max_basis_required = 0
     else:
         max_basis_required = n_krylov - 1
     # Run sampling
@@ -162,7 +166,7 @@ def _sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
                 j = idx[0]
                 for i, part in product(range(n_krylov), [REAL, IMAG]):
                     idx_h_list.append((i, part, j))
-            elif ham_frag.ndim == 1:
+            elif ham_frag.ndim == 2:
                 i, j = idx[0], idx[1]
                 idx_h_list = [(i, REAL, j), (i, IMAG, j)]
             elif ham_frag.ndim == 3:
@@ -392,7 +396,7 @@ def _sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
         for i1, i2 in product(range(n_krylov), range(n_krylov)):
             if i1 == i2 == 0 or i1 > i2:
                 continue
-            if basis_required[i2 - i1]:
+            if basis_required[i1] and basis_required[i2]:
                 continue
 
             if i1 != i2:
@@ -411,12 +415,17 @@ def _sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                 else:  # FH
                     is_loaded = all([(i1, i2, part, j) in loaded_prob_dist
                                      for part, j in product([REAL], range(n_frag))])
-            basis_required[i2 - i1] = basis_required[i2 - i1] or not is_loaded
+            basis_required[i1] = basis_required[i1] or not is_loaded
+            basis_required[i2] = basis_required[i2] or not is_loaded
 
     else:  # All the basis are required.
         basis_required = np.ones(n_krylov, dtype=bool)
 
-    max_basis_required = max([idx[0] for idx in np.argwhere(basis_required)])
+    idxs_basis_req = [idx[0] for idx in np.argwhere(basis_required)]
+    if len(idxs_basis_req) > 0:
+        max_basis_required = max(idxs_basis_req)
+    else:
+        max_basis_required = 0
 
     # Basis Preparation
     basis: Dict[int, Optional[State]] = {i: None for i in range(n_krylov)}
@@ -443,7 +452,7 @@ def _sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                 j = idx[0]
                 for i, part in product(range(n_krylov), [REAL, IMAG]):
                     idx_h_list.append((i, part, j))
-            elif ham_frag.ndim == 1:
+            elif ham_frag.ndim == 2:
                 i, j = idx[0], idx[1]
                 idx_h_list = [(i, REAL, j), (i, IMAG, j)]
             elif ham_frag.ndim == 3:
@@ -588,7 +597,7 @@ def _sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                     h_mat[:, i1, i2] = expectation(pham, ref, sparse=True)
                     continue
                 elif i1 > i2:
-                    h_mat[:, i1, i2] = h_mat[i2, i1].conjugate()
+                    h_mat[:, i1, i2] = h_mat[:, i2, i1].conjugate()
                     continue
 
                 basis2 = basis[i2]
@@ -648,12 +657,73 @@ def sample_qksd(ham_frag: npt.NDArray[QubitOperator],
                 n_krylov: int,
                 is_toeplitz: bool,
                 meas_type: str,
-                shot_list: Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]
+                shot_list: Union[np.ndarray, Tuple[np.ndarray, np.ndarray]],
+                n_batch: Optional[int] = None,
+                sample_buf_dir: Optional[str] = None
                 ) -> Tuple[np.ndarray, np.ndarray]:
-    if is_toeplitz:
-        return _sample_qksd_toeplitz(ham_frag, prop, ref, n_krylov, meas_type, shot_list)
+    """
+    Performs circuit simulation to generate QKSD matrices.
+
+    Args:
+        ham_frag: Array of Hamiltonian fragmentation (meas_type == "FH") or LCU (meas_type == "LCU")
+                  The dimension of the array should be one of the follows:
+                    1D - ham_frag[idx_frag]
+                    2D - ham_frag[idx_krylov][idx_frag]
+                    3D - ham_frag[idx_krylov][REAL/IMAG][idx_frag]
+
+                  idx_frag: Index of FH or LCU (j: H=ΣH_j or H=Σj β_jU_j)
+                  idx_krylov: Index of Krylov basis. (k: <φ|H e^{-iH k Δt}|φ>)
+                  REAL/IMAG: Whether to measure Re[<φ|H e^{-iH k Δt}|φ>] or Im[<φ|H e^{-iH k Δt}|φ>].
+
+                  Note: The fragmentation may differ by krylov index / Re/Im measurements.
+        prop: Propagator (e^{-iH k Δt}) or its Trotterized operator
+        ref: Reference State, such as Hartree Fock ground state.
+        n_krylov: Krylov order, i.e. size of Krylov matrices.
+        is_toeplitz: Whether to perform Toeplitz measurement for H matrix.
+
+                     Toeplitz: H_{k,l} = <φ|H e^{-iH (l-k) Δt}|φ>  -> O(n_krylov) elements
+                     NonToeplitz: H_{k,l} = <φ|e^{iH k Δt} H e^{-iH l Δt}|φ>  -> O(n_krylov^2) elements
+
+                     Note : If the exact propagator is assigned in prop, the expectation of H_{k,l} are identical,
+                            while the variance is larger in Non-Toeplitz case because the shots are distributed to more
+                            elements. However, the expectations are different when the Trotterized operator is asigned
+                            to prop because prop no longer commutes with H.
+        meas_type: "FH" or "LCU", depending on the type of ham_frag.
+        shot_list: Shot allocation.
+                   For FH, S and H matrices are measured simultaneously. Shots are not distinguished by two matrices.
+                        shot_list[idx_krylov][real=0, imag=1][idx_ham_frag]
+
+                   For LCU, S and H are measured individually.
+                        shot_list[H=0][idx_krylov][REAL/IMAG][idx_unitary]
+                        shot_list[S=1][idx_krylov][REAL/IMAG]
+        n_batch: Number of batch.
+                 The function will generate n_batch pairs of (H, S) matrices, which are sampled independently.
+                 If None, only single matrix pair is generated.
+        sample_buf_dir: Directory to the buffer for sampling distribution.
+                        If specified, the probability distributions of the circuit simulation are saved as files.
+                        If those files already exist, sampling can be done quickly by loading the results which are
+                        previously calculated.
+                        If None, such operation doesn't occur.
+
+    Returns:
+        (List of) H and S matrices.
+    """
+    if n_batch is None:
+        was_n_batch_none = True
+        n_batch = 1
     else:
-        return _sample_qksd_nontoeplitz(ham_frag, prop, ref, n_krylov, meas_type, shot_list)
+        was_n_batch_none = False
+
+    if is_toeplitz:
+        hmat, smat = _sample_qksd_toeplitz(ham_frag, prop, ref, n_krylov, meas_type, shot_list, n_batch, sample_buf_dir)
+    else:
+        hmat, smat = _sample_qksd_nontoeplitz(ham_frag, prop, ref, n_krylov, meas_type, shot_list, n_batch,
+                                              sample_buf_dir)
+
+    if was_n_batch_none:
+        return hmat[0], smat[0]
+    else:
+        return hmat, smat
 
 
 def qksd_shot_allocation(tot_shots: Union[int, float],
@@ -663,6 +733,24 @@ def qksd_shot_allocation(tot_shots: Union[int, float],
                          is_toeplitz: bool,
                          frag_shot_alloc: Optional[np.ndarray] = None) \
         -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    """
+    Allocates the shots to each element and hamiltonian fragment.
+
+    Args:
+        tot_shots: Number of total shots. Those will be allocated to each element.
+        ham_frag: Hamiltonian fragments (Refer to the input in sample_qksd).
+        n_krylov: Krylov order, i.e. size of Krylov matrices.
+        meas_type: "FH" or "LCU", depending on the type of ham_frag.
+        is_toeplitz: Whether to perform Toeplitz measurement for H matrix. (Refer to the input in sample_qksd).
+        frag_shot_alloc: Base shot allocation to each element.
+                        1D - frag_shot_alloc[idx_frag]
+                        2D - frag_shot_alloc[REAL/IMAG][idx_frag]
+                        3D - frag_shot_alloc[idx_krylov][REAL/IMAG][idx_frag]
+                        If None, 1D array is assigned based on the fragment norm.
+    Returns:
+        shot_allocation: Refer to the input in sample_qksd.
+
+    """
     # frag_shot_alloc : [n_frag] or [2][n_frag] or [n_krylov][2][n_frag]
     meas_type = meas_type.upper()
     if meas_type not in ["LCU", "FH"]:

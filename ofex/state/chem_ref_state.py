@@ -28,9 +28,10 @@ def hf_ground(mol: MolecularData,
     return state
 
 
-def cisd_ground(mol: MolecularData, ):
+def cisd_ground(mol: MolecularData, debug=False):
     mol.load()
-    mol = run_driver(mol, run_cisd=True, driver='pyscf')
+    if 'cisd' not in mol._pyscf_data or mol._pyscf_data['cisd'] is None:
+        mol = run_driver(mol, run_cisd=True, driver='pyscf')
     cisd_data = mol._pyscf_data['cisd']
     c0, c1, c2 = cisd_data.cisdvec_to_amplitudes(cisd_data.ci)
     nocc, nvirt = c1.shape

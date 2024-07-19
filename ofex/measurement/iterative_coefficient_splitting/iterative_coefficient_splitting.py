@@ -262,9 +262,9 @@ def run_ics(ham: QubitOperator,
 
     n_frag = len(grp_ham_list[0])
     if transition:
-        shots = np.zeros((n_frag, 2), dtype=float)
-        shots[:, 0] = m_opt_real
-        shots[:, 1] = m_opt_imag
+        shots = np.zeros((2, n_frag), dtype=float)
+        shots[0, :] = m_opt_real
+        shots[1, :] = m_opt_imag
     else:
         shots = m_opt_real
 

@@ -1,20 +1,23 @@
+import os
+import pickle
 from itertools import product
 
 import numpy as np
 from numpy.random import rand
-from openfermion import FermionOperator, get_fermion_operator, normal_ordered, get_sparse_operator
+from openfermion import FermionOperator, get_fermion_operator, normal_ordered
 
 from ofex.linalg.sparse_tools import expectation
 from ofex.operators.symbolic_operator_tools import compare_operators
-from ofex.state.chem_ref_state import hf_ground
-from ofex.state.state_tools import compare_states, pretty_print_state, to_dense
+from ofex.state.binary_fock import BinaryFockVector
+from ofex.state.chem_ref_state import hf_ground, cisd_ground
+from ofex.state.state_tools import compare_states, pretty_print_state
 from ofex.test_scripts.random_object import random_state_spdict
-from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
 from ofex.transforms.bravyi_kitaev_deprecated import bravyi_kitaev as bravyi_kitaev_original, \
     inv_bravyi_kitaev_state
 from ofex.transforms.bravyi_kitaev_deprecated import bravyi_kitaev_state
 from ofex.transforms.bravyi_kitaev_tree_state import bravyi_kitaev_tree_state, \
     inv_bravyi_kitaev_tree_state
+from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
 from ofex.utils.chem import molecule_example
 from ofex.utils.dict_utils import dict_allclose
 
@@ -51,23 +54,64 @@ def state_transform_test(num_qubits, transform, **kwargs):
     assert dict_allclose(fermion_state, fermion_state_2), '\n' + compare_states(fermion_state, fermion_state_2)
 
 
-def hf_test(mol_name, transform, **kwargs):
-    mol = molecule_example(mol_name)
-    num_qubits = mol.n_qubits
-    fham = get_fermion_operator(mol.get_molecular_hamiltonian())
-    fham = normal_ordered(fham)
-    qham = fermion_to_qubit_operator(fham, transform, n_qubits=num_qubits, **kwargs)
-    hf_fermion = hf_ground(mol)
-    hf_state = hf_ground(mol, fermion_to_qubit_map=transform, n_qubits=num_qubits, **kwargs)
-    est_hf_energy_direct = expectation(qham, hf_state)
-    est_hf_energy_sparse = expectation(get_sparse_operator(qham, n_qubits=num_qubits), hf_state)
-    assert np.isclose(est_hf_energy_direct, est_hf_energy_sparse), (est_hf_energy_direct, est_hf_energy_sparse)
-    assert np.isclose(est_hf_energy_direct.imag, 0.0)
-    est_hf_energy_direct = est_hf_energy_direct.real
-    assert np.isclose(est_hf_energy_direct, mol.hf_energy), '\n'.join([pretty_print_state(hf_fermion),
-                                                                pretty_print_state(hf_state),
-                                                                str(to_dense(hf_fermion)),
-                                                                f"{est_hf_energy_direct - mol.hf_energy:.4f}"])
+def energy_test(mol, transform, cisd_state):
+    if transform in ["bravyi_kitaev", "bravyi_kitaev_tree"]:
+        f2q_kwargs = {"n_qubits": mol.n_qubits}
+    elif transform == "symmetry_conserving_bravyi_kitaev":
+        f2q_kwargs = {"active_fermions": mol.n_electrons,
+                      "active_orbitals": mol.n_qubits}
+    elif transform == "jordan_wigner":
+        f2q_kwargs = dict()
+    else:
+        raise NotImplementedError
+
+    mol_dir = "./tmp_mol_data/"
+    if not os.path.isdir(mol_dir):
+        os.mkdir(mol_dir)
+    fname = os.path.join(mol_dir, f"{mn}.pkl")
+
+    if not os.path.isfile(fname):
+        fham = get_fermion_operator(mol.get_molecular_hamiltonian())
+        fham = normal_ordered(fham)
+        pkl_fham = fham.terms
+        pkl_cisd = {tuple(f):v for f, v in cisd_state.items()}
+        with open(fname, 'wb') as f:
+            pickle.dump((pkl_fham, pkl_cisd), f)
+    else:
+        with open(fname, 'rb') as f:
+            pkl_fham, pkl_cisd = pickle.load(f)
+        fham = FermionOperator()
+        fham.terms = pkl_fham
+        cisd_state = {BinaryFockVector(f): v for f, v in pkl_cisd.items()}
+
+    qham = fermion_to_qubit_operator(fham, transform, **f2q_kwargs)
+    f_hf_state = hf_ground(mol)
+    hf_state = fermion_to_qubit_state(f_hf_state, transform, **f2q_kwargs)
+    print("HF=")
+    print(pretty_print_state(hf_state))
+    est_hf_energy = expectation(qham, hf_state)
+    assert np.isclose(est_hf_energy.imag, 0.0)
+    est_hf_energy = est_hf_energy.real
+    assert np.isclose(est_hf_energy, mol.hf_energy, atol=1e-7), '\n'.join(
+        [f"{est_hf_energy:.4f} {mol.hf_energy:.4f}", pretty_print_state(hf_state)])
+
+    cisd_state_qubit = fermion_to_qubit_state(cisd_state, transform, **f2q_kwargs)
+
+    if len(cisd_state) < 20:
+        print("CISDFERMION=")
+        print(pretty_print_state(cisd_state))
+        print("CISDQUBIT=")
+        print(pretty_print_state(cisd_state_qubit))
+    else:
+        f_hf_vector = list(f_hf_state.keys())[0]
+        hf_vector = list(hf_state.keys())[0]
+        print(f"CISDFERMION[HF]= {cisd_state[f_hf_vector]}")
+        print(f"CISDQUBIT[HF]  = {cisd_state_qubit[hf_vector]}")
+
+    est_cisd_energy = expectation(qham, cisd_state_qubit)
+    assert np.isclose(est_cisd_energy.imag, 0.0)
+    est_cisd_energy = est_cisd_energy.real
+    assert np.isclose(est_cisd_energy, mol.cisd_energy, atol=1e-7), (est_cisd_energy, mol.cisd_energy, mol.hf_energy)
 
 
 if __name__ == "__main__":
@@ -79,7 +123,13 @@ if __name__ == "__main__":
         state_transform_test(n_qubits, 'jordan_wigner', n_qubits=n_qubits)
         print('Passed')
 
-    for mn, tr in product(["H2", "H4"], ['jordan_wigner', 'bravyi_kitaev', 'bravyi_kitaev_tree']):
+    tr_list = ['jordan_wigner', 'bravyi_kitaev', 'bravyi_kitaev_tree', 'symmetry_conserving_bravyi_kitaev']
+    mol_name_list = ["H2", "H4", "LiH", "BeH2", "H2O"]
+
+    mol_list = {mn: molecule_example(mn) for mn in mol_name_list}
+    cisd_state_list = {mn: cisd_ground(mol_list[mn]) for mn in mol_name_list}
+
+    for mn, tr in product(mol_name_list, tr_list):
         print(f"\nHF energy test : {mn} | {tr}")
-        hf_test(mn, tr)
+        energy_test(mol_list[mn], tr, cisd_state_list[mn])
         print("Passed")

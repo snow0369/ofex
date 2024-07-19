@@ -1,3 +1,4 @@
+from itertools import product
 from typing import Union, Dict, Sequence
 
 import numpy as np
@@ -7,7 +8,8 @@ from openfermion.config import EQ_TOLERANCE
 
 from ofex.linalg.sparse_tools import sparse_apply_operator
 from ofex.state.binary_fock import BinaryFockVector
-from ofex.state.state_tools import to_sparse_dict, to_dense, compress_sparse, get_num_qubits, state_type_transform
+from ofex.state.state_tools import to_sparse_dict, to_dense, compress_sparse, get_num_qubits, state_type_transform, \
+    pretty_print_state
 from ofex.state.types import DenseState, SparseStateDict, State, type_state
 from ofex.transforms.bravyi_kitaev_state import bravyi_kitaev_state, inv_bravyi_kitaev_state
 from ofex.transforms.bravyi_kitaev_tree_state import bravyi_kitaev_tree_state, inv_bravyi_kitaev_tree_state
@@ -62,8 +64,22 @@ def fermion_to_qubit_state(fermion_state: State,
     elif transform == "bravyi_kitaev_tree":
         qubit_state = bravyi_kitaev_tree_state(fermion_state)
     elif transform == "symmetry_conserving_bravyi_kitaev":
+        #n_orbitals = get_num_qubits(fermion_state)
+        #parity_set = [node.index for node in fenwick_tree.get_parity_set(index)]
+        #ancestors = [node.index for node in fenwick_tree.get_update_set(index)]
+        #ancestor_children = [node.index for node in fenwick_tree.get_remainder_set(index)]
+
         active_orbitals = kwargs.get("active_orbitals", get_num_qubits(fermion_state))
-        fermion_state_reorder = reorder_state(fermion_state, up_then_down)
+        fermion_state_reorder = reorder_state(fermion_state, up_then_down, phase=True)
+
+        # fenwick_tree = FenwickTree(active_orbitals)
+        # qubit_excitation = QubitOperator()
+        # for fock, coeff in fermion_state_reorder.items():
+        #     f_term = [(i, 1) for i, f in enumerate(fock) if f][::-1]
+        #     qubit_excitation += _transform_operator_term(f_term, coeff, fenwick_tree)
+        # qubit_zero = {BinaryFockVector([0 for _ in range(active_orbitals)]): 1.0}
+        # qubit_state = sparse_apply_operator(qubit_excitation, qubit_zero)
+
         qubit_state = bravyi_kitaev_tree_state(fermion_state_reorder)
         qubit_state = remove_indices_state(qubit_state, (active_orbitals // 2 - 1, active_orbitals - 1))
     else:
@@ -77,6 +93,10 @@ def fermion_to_qubit_state_general(state: SparseStateDict,
                                    **kwargs) -> SparseStateDict:
     # Inefficient
     new_state = dict()
+
+    if transform == "symmetry_conserving_bravyi_kitaev":
+        raise NotImplementedError
+
     for fock, coeff in state.items():
         cre_op = FermionOperator(tuple([(idx, 1) for idx, f in enumerate(fock) if f]))
         pauli_cre_op = fermion_to_qubit_operator(cre_op, transform, **kwargs)
@@ -134,15 +154,31 @@ def qubit_to_fermion_state(qubit_state: State,
         return fermion_state
 
 
-def reorder_state(state: SparseStateDict, order_function, reverse=False) -> SparseStateDict:
+def reorder_state(state: SparseStateDict, order_function, reverse=False, phase=False)\
+        -> SparseStateDict:
     num_modes = get_num_qubits(state)
-    mode_map = {mode_idx: order_function(mode_idx, num_modes) for mode_idx in range(num_modes)}
+    inv_mode_map = {mode_idx: order_function(mode_idx, num_modes) for mode_idx in range(num_modes)}
+    mode_map = {val: key for key, val in inv_mode_map.items()}
     if reverse:
-        mode_map = {val: key for key, val in mode_map.items()}
+        inv_mode_map, mode_map = mode_map, inv_mode_map
 
     new_state = dict()
     for fock, coeff in state.items():
-        new_fock = BinaryFockVector([mode_map[f] for f in fock])
+        if phase:
+            pairs = [(i, inv_mode_map[i]) for i, f in enumerate(fock) if f]
+            n_cross_hf = int((len(pairs) - 2) * len(pairs) // 8)
+            count_cross = 0
+            for (idx_p1, p1), (idx_p2, p2) in product(enumerate(pairs), enumerate(pairs)):
+                if idx_p1 <= idx_p2:
+                    continue
+                i1, j1 = p1
+                i2, j2 = p2
+                assert i1 != i2
+                assert j1 != j2
+                count_cross += int((i1 < i2) != (j1 < j2))
+            if (count_cross % 2) != (n_cross_hf % 2):
+                coeff = -coeff
+        new_fock = BinaryFockVector([fock[mode_map[i]] for i in range(num_modes)])
         new_state[new_fock] = coeff
     return new_state
 
@@ -162,7 +198,7 @@ def remove_indices_state(state: SparseStateDict, indices: Sequence[int],
             if check_f is None:
                 check_f = check_f_now
             elif check_f != check_f_now:
-                raise ValueError("Symmetry is not conserved.")
+                raise ValueError(f"Symmetry is not conserved. {new_fock} {check_f} \n{pretty_print_state(new_state)}")
         assert new_fock not in new_state
         new_state[new_fock] = coeff
     return new_state

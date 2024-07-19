@@ -29,8 +29,8 @@ def _prepare():
         callers_local_vars = inspect.currentframe().f_back.f_back.f_locals.items()
         return [var_name for var_name, var_val in callers_local_vars if var_val is var][0]
 
-    mol_name = "H4"
-    transform = "bravyi_kitaev"  # "symmetry_conserving_bravyi_kitaev"
+    mol_name = "H2O"
+    transform = "symmetry_conserving_bravyi_kitaev"
     n_krylov = 10
     time_step = 3 * np.pi / n_krylov
     n_trotter = 2
@@ -102,8 +102,7 @@ def _prepare():
 
     n_qubits = get_num_qubits(ref)
     prop_rte = exact_rte(pham_prop, time_step)
-    prop_trot = trotter_rte_by_si_lcu(pham_prop, time_step, n_qubits,
-                                      n_trotter=n_trotter)
+    prop_trot = None  # trotter_rte_by_si_lcu(pham_prop, time_step, n_qubits, n_trotter=n_trotter)
 
     ham_frag = sorted_insertion(pham, anticommute=False)
     lcu_frag = sorted_insertion(pham, anticommute=True)
@@ -309,7 +308,7 @@ def _iterative_coefficient_split(mol, mol_name, pham, ref, n_krylov, prop_rte, t
             curr_ideal_h = sh_ideal_h if is_shifted else ideal_h
             curr_shift_const = shift_const if is_shifted else 0.0
             anticommute = meas_type == "LCU"
-            cov_buf_dir = f"./tmp_cov_{meas_type}_sh={is_shifted}_icslv={ics_level}/"
+            cov_buf_dir = f"./tmp_cov_{mol_name}_{meas_type}_sh={is_shifted}_icslv={ics_level}/"
 
             print(f"\tshift={is_shifted}, ics_level={ics_level} ({idx_ex})")
             idx_ex += 1
@@ -387,10 +386,104 @@ def _iterative_coefficient_split(mol, mol_name, pham, ref, n_krylov, prop_rte, t
                 os.remove(cov_buf_dir)
 
 
+def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylov, norm, time_step, cisd_state, **_):
+    tot_shots = 1e8
+    num_workers = 8
+
+    n_batch = 100
+    save_buffer = True
+    load_buffer = True
+
+    meas_type = "FH"
+
+    prob_buf_dir = f'./tmp_prob_buf_{mol_name}_{transform}/'
+    if not os.path.isdir(prob_buf_dir):
+        os.mkdir(prob_buf_dir)
+
+    result_dir = f"./tmp_{mol_name}_{transform}_result_matrices/"
+    if not os.path.isdir(result_dir):
+        os.mkdir(result_dir)
+
+    _, shift_pham, shift_const = shift_op[2]
+
+    ideal_h, ideal_s = ideal_qksd_toeplitz(pham, prop_rte, ref, n_krylov)
+    val, vec = trunc_eigh(ideal_h, ideal_s, epsilon=1e-14)
+    ideal_gnd = np.min(val)
+
+    sh_ideal_h, _ = ideal_qksd_toeplitz(shift_pham, prop_rte, ref, n_krylov)
+
+    cisd_energy = mol.cisd_energy
+    cisd_phase = np.array([time_step * cisd_energy * k / norm for k in range(n_krylov)])
+
+    print(f"=== Experiment {mol_name}, {transform} ===")
+
+    for is_shifted, perform_ics in product([True, False], [True, False]):
+        print(f"is_shifte={is_shifted}, perform_ics={perform_ics}")
+        curr_pham = shift_pham if is_shifted else pham
+        curr_ideal_h = sh_ideal_h if is_shifted else ideal_h
+        curr_shift_const = shift_const if is_shifted else 0.0
+        anticommute = meas_type == "LCU"
+        cov_buf_dir = f"./tmp_icscov_{mol_name}_{meas_type}_sh={is_shifted}/"
+        buf_dir = os.path.join(prob_buf_dir, f"./ks_{is_shifted}_ics_{perform_ics}_{meas_type}/")
+        if not save_buffer:
+            buf_dir = None
+        elif not load_buffer and os.path.isdir(buf_dir):
+            os.remove(buf_dir)
+        if perform_ics:
+            if cov_buf_dir is not None and os.path.exists(cov_buf_dir):
+                print("\t\tCov buf exists.")
+
+            t = time()
+            initial_grp, cov_dict = init_ics(curr_pham, ref, cisd_state, num_workers, anticommute,
+                                             cov_buf_dir=cov_buf_dir,
+                                             phase_list=cisd_phase)
+            t = time() - t
+            print(f"\t\tCov Pauli Took {t}")
+            grp_ham_list, frag_shots_list = list(), list()
+            t = time()
+            for j, ph in enumerate(cisd_phase):
+                grp_ham, frag_shots, final_var, c_opt = run_ics(curr_pham, initial_grp, cov_dict[ph],
+                                                                sep_reim=True,
+                                                                transition=True, conv_atol=1e-5, conv_rtol=1e-4,
+                                                                debug=False)
+                grp_ham_list.append(grp_ham)
+                frag_shots_list.append(frag_shots)
+            t = time() - t
+            print(f"\t\tICS took {t}")
+
+            grp_ham = np.array(grp_ham_list)
+            frag_shots = np.array(frag_shots_list)
+        else:
+            grp_ham = sorted_insertion(curr_pham, anticommute)
+            frag_shots = None
+
+        shot_alloc = qksd_shot_allocation(tot_shots, grp_ham, n_krylov, meas_type,
+                                          is_toeplitz=True,
+                                          frag_shot_alloc=frag_shots)
+        samp_h, samp_s = sample_qksd(grp_ham, prop_rte, ref, n_krylov, is_toeplitz=True,
+                                     meas_type=meas_type, shot_list=shot_alloc, n_batch=n_batch, sample_buf_dir=buf_dir)
+        pert_h = np.linalg.norm(samp_h - curr_ideal_h, ord=2, axis=(1, 2))
+        pert_s = np.linalg.norm(samp_s - ideal_s, ord=2, axis=(1, 2))
+        eigvals = np.zeros(n_batch, dtype=float)
+        for i in range(n_batch):
+            val, vec = trunc_eigh(samp_h[i, :, :], samp_s[i, :, :], epsilon=pert_s[i])
+            eigvals[i] = np.min(val) + curr_shift_const
+
+        print(f"\t\t‖ΔH‖ AVG = {np.mean(pert_h)} | STD = {np.std(pert_h)}")
+        print(f"\t\t‖ΔS‖ AVG = {np.mean(pert_s)} | STD = {np.std(pert_s)}")
+        print(f"\t\t ΔE  AVG = {np.mean(eigvals - ideal_gnd)} | STD = {np.std(eigvals - ideal_gnd)}")
+        print("")
+        with open(os.path.join(result_dir, f"shift={is_shifted}_ics={perform_ics}.pkl"), 'wb') as f:
+            samp_h_list = samp_h.tolist()
+            samp_s_list = samp_s.tolist()
+            pickle.dump((samp_h_list, samp_s_list), f)
+
+
 if __name__ == '__main__':
     _kwargs = _prepare()
     # _trotter_perturbation(**_kwargs)
     # _sample_perturbation(**_kwargs)
     # _profile_script_sample(**_kwargs)
-    _killer_shift(**_kwargs)
+    # _killer_shift(**_kwargs)
     # _iterative_coefficient_split(**_kwargs)
+    _experiment(**_kwargs)

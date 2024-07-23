@@ -10,3 +10,4 @@ qiskit~=1.1.1
 filelock~=3.13.1
 matplotlib~=3.8.2
 qiskit-aer~=0.14.2
+sympy~=1.13.0

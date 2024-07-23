@@ -90,6 +90,7 @@ class FunctionBasis(object):
         for n_it in range(max_iter):
             mu_tilde = mu_tilde_0 - diff0 * reg_coeff
             c_abs = np.linalg.solve(s_tilde, mu_tilde)
+            assert np.allclose(c_abs / np.abs(c_abs), 1.0)
             c = c_abs * c0_phase
 
             dot = np.dot(c.conj(), mu)

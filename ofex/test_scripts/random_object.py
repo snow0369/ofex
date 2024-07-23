@@ -44,14 +44,14 @@ def random_state_all(n_qubits, density=None, seed=None) -> Tuple[SparseStateDict
     return state_dict, to_dense(state_dict), to_scipy_sparse(state_dict)
 
 
-def random_qubit_operator(n_qubits, weight, seed=None, hermitian=True):
+def random_qubit_operator(n_qubits, num_terms, seed=None, hermitian=True):
     if seed is not None:
         np.random.seed(seed)
-    weight = min(4 ** n_qubits, weight)
-    idx_list = np.random.choice(4 ** n_qubits, size=weight, replace=False)
+    num_terms = min(4 ** n_qubits, num_terms)
+    idx_list = np.random.choice(4 ** n_qubits, size=num_terms, replace=False)
     pauli_tableau = np.array([list(int_to_binary(idx, 2 * n_qubits, lsb_first=True)) for idx in idx_list], dtype=int).T
-    coeff = np.random.rand(weight) * 2 - 1
+    coeff = np.random.rand(num_terms) * 2 - 1
     if not hermitian:
-        coeff += (np.random.rand(weight) * 2 - 1) * 1j
+        coeff += (np.random.rand(num_terms) * 2 - 1) * 1j
     qubit_operators = tableau_to_pauli(pauli_tableau, coeff=coeff)
     return QubitOperator.accumulate(qubit_operators)

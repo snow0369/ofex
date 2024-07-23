@@ -53,7 +53,7 @@ def single_prop_test():
     t = 1.0
     beta = 1.0
     for _ in tqdm(range(trial)):
-        op = random_qubit_operator(n_qubits, weight=1, hermitian=True)
+        op = random_qubit_operator(n_qubits, num_terms=1, hermitian=True)
         mat = get_sparse_operator(op, n_qubits=n_qubits).toarray()
         d, u = np.linalg.eigh(mat)
         assert np.allclose(mat, u @ np.diag(d) @ u.T.conj())

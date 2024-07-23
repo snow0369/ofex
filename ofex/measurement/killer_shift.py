@@ -1,3 +1,4 @@
+from copy import deepcopy
 from itertools import product
 from typing import Tuple, Any, Dict, Optional
 
@@ -6,9 +7,12 @@ import scipy.optimize
 from openfermion import FermionOperator, QubitOperator, normal_ordered, get_fermion_operator
 
 from ofex.linalg.sparse_tools import sparse_apply_operator
+from ofex.measurement.sorted_insertion import sorted_insertion
 from ofex.operators.fermion_operator_tools import cre_ann, normal_ordered_single, one_body_excitation
 from ofex.operators.qubit_operator_tools import dict_to_operator
 from ofex.state.binary_fock import BinaryFockVector
+from ofex.state.state_tools import compress_sparse
+from ofex.transforms.fermion_factorization import ham_to_ei_spin
 from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
 from ofex.operators import symbolic_operator_tools
 
@@ -29,6 +33,15 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
     fham = normal_ordered(fham)
     n_spinorb = len(hf_vector)
 
+    occ = [i for i, f in enumerate(hf_vector) if f]
+
+    pham = fermion_to_qubit_operator(fham, transform, **f2q_kwargs)
+    const -= pham.constant
+    hf_qubit_state = fermion_to_qubit_state({hf_vector: 1.0}, transform, **f2q_kwargs)
+    hf_qubit_fock = list(hf_qubit_state.keys())[0]
+    assert np.isclose(hf_qubit_state[hf_qubit_fock], 1.0)
+    assert len(hf_qubit_state) == 1
+
     # Find Z-Only
     """    shift_0 = PauliSum()
     for op in pham.terms():
@@ -39,98 +52,74 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
         cre, ann = cre_ann(f_term)
         if sorted(cre) == sorted(ann):  # Number operator
             shift += f_term
+
+    # Objects for opt_level=2
+    # Number operator(p) * one-body operator(r,s)
+    g_prs = np.zeros((n_spinorb, n_spinorb, n_spinorb), dtype=float)
+    # Targets to be optimized :: operators corresponds to the occupied orbitals (n_p = 1)
+    dof = list()  # degree of freedom to be optimized (p, r, s)
+    dof_idx = dict()  # idx of (p, r, s) in the dof list.
+    shift_op = list()  # Shift operators of corresponding dof.
+
     if optimization_level == 0:  # one-body number operator only
         pass
-    elif optimization_level == 1:
+    elif optimization_level in [1, 2]:
+        shifted_fham = fham - shift
+        oei, tei, c = ham_to_ei_spin(shifted_fham, n_spinorb)
+        tei_diag_1 = np.zeros(tei.shape[:3], dtype=complex)
+        tei_diag_2 = np.zeros(tei.shape[:3], dtype=complex)
+        for p in range(tei.shape[0]):
+            tei_diag_1[p] = tei[p, p, :, :]
+            tei_diag_2[p] = tei[:, :, p, p]
+        assert np.allclose(tei_diag_1, tei_diag_2)
+        assert np.isclose(c, 0.0)
         for p in range(n_spinorb):
+            if p in occ:
+                n_op = FermionOperator(((p, 1), (p, 0)), 1.0) - FermionOperator.identity()
+            else:
+                n_op = FermionOperator(((p, 1), (p, 0)), 1.0)
+
             for r, s in product(range(n_spinorb), repeat=2):
                 if p == r or p == s:  # a^2
                     continue
                 if r <= s:  # Lower triangular part
                     continue
                 # op1 + op2 = n_p (a†_r a_s + c.c), normal ordered
-                op1 = normal_ordered_single(cre=[p, r], ann=[p, s])
-                op2 = normal_ordered_single(cre=[p, s], ann=[p, r])
-                if op1 in fham.terms:
-                    assert op2 in fham.terms, (op1, op2, fham.terms[op1])
-                    assert np.isclose(fham.terms[op1], fham.terms[op2])
-                    coeff = fham.terms[op1]
-                    tmp_shift = dict_to_operator({op1: coeff, op2: coeff}, base=FermionOperator)
-                    shift = shift + tmp_shift
-    elif optimization_level == 2:  # Include number * excitation
-        # Recover one-body tensor
-        h_rs = np.zeros((n_spinorb, n_spinorb), dtype=float)
-        for r, s in product(range(n_spinorb), repeat=2):
-            if r <= s:
-                continue
-            one_op0 = ((r, 1), (s, 0))
-            one_op1 = ((s, 1), (r, 0))
-            if one_op0 in fham.terms:
-                h_rs[r, s] = fham.terms[one_op0]
-                assert np.isclose(h_rs[r, s], fham.terms[one_op1])
 
-        # Number operator(p) * one-body operator(r,s)
-        g_prs = np.zeros((n_spinorb, n_spinorb, n_spinorb), dtype=float)
-        # Targets to be optimized :: operators corresponds to the occupied orbitals (n_p = 1)
-        dof = list()  # degree of freedom to be optimized (p, r, s)
-        dof_idx = dict()  # idx of (p, r, s) in the dof list.
-        occ_set = set()  # Set of occupied orbitals
-        shift_op = list()  # Shift operators of corresponding dof.
+                if not np.isclose(tei_diag_1[p, r, s], 0.0):
+                    assert np.isclose(tei_diag_1[p, r, s], tei_diag_1[p, s, r])
+                    ex_op = FermionOperator(((r, 1), (s, 0)), 1.0) + FermionOperator(((s, 1), (r, 0)), 1.0)
+                    tmp_shift = n_op * ex_op
+                    tmp_shift += ex_op * n_op
+                    no_tmp_shift = normal_ordered(tmp_shift)
+                    if optimization_level == 1 or p not in occ:
+                        c = tei_diag_1[p, r, s]
+                        shift = shift + no_tmp_shift * (c/2)
+                        continue
 
-        for p in range(n_spinorb):
-            for r, s in product(range(n_spinorb), repeat=2):
-                if p == r or p == s:  # a^2
-                    continue
-                if r <= s:  # Lower triangular part
-                    continue
-                # op1 + op2 = n_p (a†_r a_s + c.c), normal ordered
-                op1 = normal_ordered_single(cre=[p, r], ann=[p, s])
-                op2 = normal_ordered_single(cre=[p, s], ann=[p, r])
-                if op1 in fham.terms:
-                    assert op2 in fham.terms, (op1, op2, fham.terms[op1])
-                    assert np.isclose(fham.terms[op1], fham.terms[op2])
-                    coeff = fham.terms[op1]
-                    if hf_vector[p]:  # n_p = 1
-                        occ_set.add(p)
-                        g_prs[p, r, s] = coeff
-                        dof_idx[(p, r, s)] = len(dof)
-                        dof.append((p, r, s))
-                        ph = symbolic_operator_tools.coeff(FermionOperator(((r, 1), (s, 0))) * FermionOperator(((p, 1), (p, 0))))
-                        shift_op.append(dict_to_operator({op1: 1.0, op2: 1.0}, FermionOperator)
-                                        - one_body_excitation(r, s) * ph)
-                        """
-                        coeff = 0.5 * (coeff + one_coeff)
-                        tmp_shift = FermionSum({op1: coeff, op2: coeff})
-                        ph = (FermionOperator(((q,), (r,))) * FermionOperator(((p,), (p,)))).coeff
-                        tmp_shift = tmp_shift + (one_body_excitation(q,r)* -coeff * ph)
-                        """
-                    else:
-                        tmp_shift = dict_to_operator({op1: coeff, op2: coeff}, base=FermionOperator)
-                        shift = shift + tmp_shift
+                    # optimization_level == 2 and p in occ:
+                    g_prs[p, r, s] = c/2
+                    dof_idx[(p, r, s)] = len(dof)
+                    dof.append((p, r, s))
+                    shift_op.append(no_tmp_shift)
 
+    if optimization_level == 2:
         # Optimization
         x_initial = np.zeros(len(dof), dtype=float)
         for r, s in product(range(n_spinorb), repeat=2):
             if r <= s:
                 continue
-            for p in list(occ_set):
+            for p in occ:
                 if (p, r, s) in dof_idx:
-                    x_initial[dof_idx[(p, r, s)]] = - h_rs[r, s] / len(occ_set)
+                    x_initial[dof_idx[(p, r, s)]] = g_prs[p, r, s]
 
         def cost(_x):
-            _c = 0.0
-            for _r, _s in product(range(n_spinorb), repeat=2):
-                if _r <= _s:
-                    continue
-                # One-body cost
-                _c += abs(h_rs[_r, _s] + sum([_x[dof_idx[(_p, _r, _s)]] for _p in list(occ_set)
-                                              if (_p, _r, _s) in dof_idx]))
-
-                # Two-body cost
-                for _p in list(occ_set):
-                    if (_p, _r, _s) in dof_idx:
-                        _c += abs(g_prs[(_p, _r, _s)] - _x[dof_idx[(_p, _r, _s)]])
-            return _c
+            _shift = FermionOperator()
+            _shift.terms = deepcopy(shift.terms)
+            for _coeff, _op in zip(_x, shift_op):
+                _shift += _op * _coeff
+            _shift_pauli = fermion_to_qubit_operator(_shift, transform, **f2q_kwargs)
+            return sum([_h.induced_norm(order=2) for _h in sorted_insertion(pham - _shift_pauli)])
 
         res_list = list()
         for _ in range(repeat_opt):
@@ -139,23 +128,18 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
         res = sorted(res_list, key=lambda opt_res: opt_res.fun)[0]
         for x, op in zip(res.x, shift_op):
             shift += op * x
-    else:
-        raise ValueError
-
-    pham = fermion_to_qubit_operator(fham, transform, **f2q_kwargs)
-    const -= pham.constant
-    hf_qubit_state = fermion_to_qubit_state({hf_vector: 1.0}, transform, **f2q_kwargs)
-    hf_qubit_fock = list(hf_qubit_state.keys())[0]
 
     shift_pauli = fermion_to_qubit_operator(shift, transform, **f2q_kwargs)
 
     tilde_qubit_state = sparse_apply_operator(shift_pauli, hf_qubit_state)
+    tilde_qubit_state = compress_sparse(tilde_qubit_state, atol=1e-7)
+    assert len(tilde_qubit_state) == 1  # If bug here, fix atol in compress_sparse().
     tilde_fock = list(tilde_qubit_state.keys())[0]
+    assert hf_qubit_fock == tilde_fock, (hf_qubit_fock, tilde_fock)
 
-    if tilde_fock is not None:
-        assert hf_qubit_fock == tilde_fock, (hf_qubit_fock, tilde_fock)
-        eig = list(tilde_qubit_state.values())[0]
-        const += eig
+    eig = list(tilde_qubit_state.values())[0]
+    const += eig
+
     assert np.isclose(const.imag, 0.0)
     const = const.real
 
@@ -165,7 +149,6 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
 if __name__ == "__main__":
     from ofex.utils.chem import molecule_example
     from ofex.state.chem_ref_state import hf_ground
-    from ofex.measurement.sorted_insertion import sorted_insertion
 
 
     def betas(pham: QubitOperator):

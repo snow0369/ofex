@@ -84,13 +84,14 @@ def _prepare():
         pham = pham - p_const
 
         shift_op = dict()
-        repeat_opt = 10
+        repeat_opt = 1
         hf_vector = list(f_ref.keys())[0]
         for optimization_level in [0, 1, 2]:
             shift_fham, shift_pham, shift_const = killer_shift_opt_fermion_hf(fham, hf_vector, transform,
                                                                               optimization_level,
                                                                               repeat_opt,
                                                                               f2q_kwargs)
+            print(f"opt_level={optimization_level} | {shift_pham.induced_norm(order=2)}")
             shift_op[optimization_level] = (shift_fham, shift_pham, shift_const)
 
         shift_op_pikl = {oplvl: (fh.terms, ph.terms, c) for oplvl, (fh, ph, c) in shift_op.items()}
@@ -101,11 +102,23 @@ def _prepare():
     # pham_prop = pham
 
     n_qubits = get_num_qubits(ref)
-    prop_rte = exact_rte(pham_prop, time_step)
-    prop_trot = None  # trotter_rte_by_si_lcu(pham_prop, time_step, n_qubits, n_trotter=n_trotter)
+    rte_fname = f"tmp_{mol_name}_{transform}_rte.npy"
+    if os.path.isfile(rte_fname):
+        prop_rte = np.load(rte_fname)
+    else:
+        prop_rte = exact_rte(pham_prop, time_step)
+        np.save(rte_fname, prop_rte.toarray())
+    trot_fname = f"tmp_{mol_name}_{transform}_trot_{n_trotter}.npy"
+    if os.path.isfile(trot_fname):
+        prop_trot = np.load(trot_fname)
+    else:
+        prop_trot = trotter_rte_by_si_lcu(pham_prop, time_step, n_qubits, n_trotter=n_trotter)
+        np.save(trot_fname, prop_trot.toarray())
 
     ham_frag = sorted_insertion(pham, anticommute=False)
     lcu_frag = sorted_insertion(pham, anticommute=True)
+
+    print("=== Preparation Done ===")
 
     return {retrieve_name(v): v for v in [fham, pham, f_const, p_const,
                                           prop_rte, prop_trot,
@@ -113,7 +126,32 @@ def _prepare():
                                           n_krylov, time_step, norm,
                                           ham_frag, lcu_frag,
                                           shift_op,
-                                          mol, mol_name, transform, f2q_kwargs,]}
+                                          mol, mol_name, transform, f2q_kwargs, ]}
+
+
+def _ideal_matrix(pham, shift_op, prop_rte, ref, n_krylov, mol_name, transform, **_):
+    ideal_matrices = dict()
+
+    ideal_h, ideal_s = ideal_qksd_toeplitz(pham, prop_rte, ref, n_krylov)
+    val, _ = trunc_eigh(ideal_h, ideal_s, epsilon=1e-12)
+    ideal_gnd = np.min(val)
+
+    ideal_matrices["non-shifted"] = (ideal_h.tolist(), ideal_s.tolist())
+
+    for opt_level in [0, 1, 2]:
+        _, shift_pham, shift_const = shift_op[opt_level]
+        ideal_sh_h, ideal_sh_s = ideal_qksd_toeplitz(shift_pham, prop_rte, ref, n_krylov)
+
+        val, _ = trunc_eigh(ideal_sh_h, ideal_sh_s, epsilon=1e-12)
+        shift_gnd = np.min(val) + shift_const
+
+        assert np.allclose(ideal_s, ideal_sh_s)
+        assert np.isclose(ideal_gnd, shift_gnd)
+
+        ideal_matrices[f"shifted_{opt_level}"] = (ideal_sh_h.tolist(), ideal_sh_s.tolist(), shift_const)
+
+    with open(f"./tmp_{mol_name}_{transform}_idealmat.pkl", "wb") as f:
+        pickle.dump(ideal_matrices, f)
 
 
 def _trotter_perturbation(pham, prop_rte, prop_trot, ref, n_krylov, mol, p_const, f_const, **_):
@@ -313,7 +351,8 @@ def _iterative_coefficient_split(mol, mol_name, pham, ref, n_krylov, prop_rte, t
             print(f"\tshift={is_shifted}, ics_level={ics_level} ({idx_ex})")
             idx_ex += 1
 
-            buf_dir = os.path.join(prob_buf_dir, f"./ks_{is_shifted}_ics{ics_level}_toeplitz_{is_toeplitz}_{meas_type}/")
+            buf_dir = os.path.join(prob_buf_dir,
+                                   f"./ks_{is_shifted}_ics{ics_level}_toeplitz_{is_toeplitz}_{meas_type}/")
             if not save_buffer:
                 buf_dir = None
             elif not load_buffer and os.path.isdir(buf_dir):
@@ -390,7 +429,7 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
     tot_shots = 1e8
     num_workers = 8
 
-    n_batch = 100
+    n_batch = 1000
     save_buffer = True
     load_buffer = True
 
@@ -481,6 +520,7 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
 
 if __name__ == '__main__':
     _kwargs = _prepare()
+    # _ideal_matrix(**_kwargs)
     # _trotter_perturbation(**_kwargs)
     # _sample_perturbation(**_kwargs)
     # _profile_script_sample(**_kwargs)

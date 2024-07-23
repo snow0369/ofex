@@ -4,7 +4,7 @@ import numpy as np
 from openfermion import QubitOperator, count_qubits, get_sparse_operator
 from scipy.sparse import spmatrix, identity
 
-from ofex.operators.symbolic_operator_tools import coeff, is_constant
+from ofex.operators.symbolic_operator_tools import is_constant
 
 
 def single_pauli_expm(pauli: QubitOperator,

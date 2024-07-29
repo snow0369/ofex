@@ -1,5 +1,4 @@
-import math
-from typing import Any, List, Tuple, Dict, Optional, Union
+from typing import List, Tuple, Dict, Union
 
 import numpy as np
 from openfermion import FermionOperator

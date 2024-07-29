@@ -32,7 +32,7 @@ def _prepare():
     mol_name = "H2O"
     transform = "symmetry_conserving_bravyi_kitaev"
     n_krylov = 10
-    time_step = 3 * np.pi / n_krylov
+    time_step = 8.5625 * np.pi / n_krylov
     n_trotter = 2
 
     mol = molecule_example(mol_name)
@@ -306,7 +306,7 @@ def _killer_shift(pham, fham, prop_rte, ref, mol_name, n_krylov, shift_op, trans
 
 
 def _iterative_coefficient_split(mol, mol_name, pham, ref, n_krylov, prop_rte, time_step, norm, cisd_state, shift_op,
-                                 transform, **_):
+                                 transform, p_const, f_const, **_):
     tot_shots = 1e8
     num_workers = 8
     remove_buf = False
@@ -328,7 +328,7 @@ def _iterative_coefficient_split(mol, mol_name, pham, ref, n_krylov, prop_rte, t
 
     sh_ideal_h, _ = ideal_qksd_toeplitz(shift_pham, prop_rte, ref, n_krylov)
 
-    cisd_energy = mol.cisd_energy
+    cisd_energy = mol.cisd_energy - p_const - f_const
     cisd_phase = np.array([time_step * cisd_energy * k / norm for k in range(n_krylov)])
 
     print("=== ICS Sampling Perturbation Analysis ===")
@@ -425,7 +425,8 @@ def _iterative_coefficient_split(mol, mol_name, pham, ref, n_krylov, prop_rte, t
                 os.remove(cov_buf_dir)
 
 
-def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylov, norm, time_step, cisd_state, **_):
+def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylov, norm, time_step, cisd_state,
+                p_const, f_const, **_):
     tot_shots = 1e8
     num_workers = 8
 
@@ -451,7 +452,7 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
 
     sh_ideal_h, _ = ideal_qksd_toeplitz(shift_pham, prop_rte, ref, n_krylov)
 
-    cisd_energy = mol.cisd_energy
+    cisd_energy = mol.cisd_energy - p_const - f_const
     cisd_phase = np.array([time_step * cisd_energy * k / norm for k in range(n_krylov)])
 
     print(f"=== Experiment {mol_name}, {transform} ===")
@@ -518,6 +519,100 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
             pickle.dump((samp_h_list, samp_s_list), f)
 
 
+def _sweep_time_step(mol, mol_name, transform, shift_op, pham, ref, n_krylov, norm, cisd_state, p_const, f_const, **_):
+    def is_power_of_2(n):
+        return n > 0 and (n & (n - 1)) == 0
+
+    def bin_arrange(start, stop, num):
+        if not is_power_of_2(num - 1):
+            raise ValueError("num must be power of 2 + 1")
+        n = int(np.log2(num - 1))
+        rearr = [num - 1, 0, (num - 1) // 2]
+        for d in range(n - 1, 0, -1):
+            d = 2 ** d
+            rearr += list(range(d // 2, num - 1, d))[::-1]
+
+        vals = np.linspace(start, stop, num)
+        return vals[rearr]
+
+    print("=== Time step sweep ===")
+    pham_prop = pham / norm
+
+    tot_shots = 1e8
+    n_batch = 1000
+    num_workers = 8
+    meas_type = "FH"
+
+    true_gnd = mol.fci_energy - p_const - f_const
+
+    anticommute = meas_type == "LCU"
+
+    _, shift_pham, shift_const = shift_op[2]
+
+    result = dict()
+
+    for delta_t in bin_arrange(1.0, 13.0, 33):
+        time_step = delta_t * np.pi / n_krylov
+        print(f"delta_t = {delta_t}")
+        prop_rte = exact_rte(pham_prop, time_step)
+
+        ideal_h, ideal_s = ideal_qksd_toeplitz(pham, prop_rte, ref, n_krylov)
+        val, vec = trunc_eigh(ideal_h, ideal_s, epsilon=1e-14)
+        ideal_gnd = np.min(val)
+
+        sh_ideal_h, _ = ideal_qksd_toeplitz(shift_pham, prop_rte, ref, n_krylov)
+        val, vec = trunc_eigh(sh_ideal_h, ideal_s, epsilon=1e-14)
+        ideal_sh_gnd = np.min(val) + shift_const
+
+        print(f"\t\t ΔE(ideal) = {ideal_gnd - true_gnd}")
+        print(f"\t\t ΔE(shift) = {ideal_sh_gnd - ideal_gnd}")
+
+        cisd_energy = mol.cisd_energy - p_const - f_const
+        cisd_phase = np.array([time_step * cisd_energy * k / norm for k in range(n_krylov)])
+
+        t = time()
+        initial_grp, cov_dict = init_ics(shift_pham, ref, cisd_state, num_workers, anticommute,
+                                         phase_list=cisd_phase)
+        t = time() - t
+        print(f"\t\tCov Pauli Took {t}")
+
+        grp_ham_list, frag_shots_list = list(), list()
+        t = time()
+        for j, ph in enumerate(cisd_phase):
+            grp_ham, frag_shots, final_var, c_opt = run_ics(shift_pham, initial_grp, cov_dict[ph],
+                                                            sep_reim=True,
+                                                            transition=True, conv_atol=1e-5, conv_rtol=1e-4,
+                                                            debug=False)
+            grp_ham_list.append(grp_ham)
+            frag_shots_list.append(frag_shots)
+        t = time() - t
+        print(f"\t\tICS took {t}")
+
+        grp_ham = np.array(grp_ham_list)
+        frag_shots = np.array(frag_shots_list)
+
+        shot_alloc = qksd_shot_allocation(tot_shots, grp_ham, n_krylov, meas_type,
+                                          is_toeplitz=True,
+                                          frag_shot_alloc=frag_shots)
+        samp_h, samp_s = sample_qksd(grp_ham, prop_rte, ref, n_krylov, is_toeplitz=True,
+                                     meas_type=meas_type, shot_list=shot_alloc, n_batch=n_batch)
+        pert_h = np.linalg.norm(samp_h - sh_ideal_h, ord=2, axis=(1, 2))
+        pert_s = np.linalg.norm(samp_s - ideal_s, ord=2, axis=(1, 2))
+        eigvals = np.zeros(n_batch, dtype=float)
+        for i in range(n_batch):
+            val, vec = trunc_eigh(samp_h[i, :, :], samp_s[i, :, :], epsilon=pert_s[i])
+            eigvals[i] = np.min(val) + shift_const
+
+        print(f"\t\t‖ΔH‖ AVG = {np.mean(pert_h)} | STD = {np.std(pert_h)}")
+        print(f"\t\t‖ΔS‖ AVG = {np.mean(pert_s)} | STD = {np.std(pert_s)}")
+        print(f"\t\t ΔE  AVG = {np.mean(eigvals - true_gnd)} | STD = {np.std(eigvals - true_gnd)}")
+        print("")
+
+        result[delta_t] = (np.mean(eigvals - true_gnd), np.std(eigvals - true_gnd))
+        with open(f"tmp_timesweep_{mol_name}_{transform}.pkl", 'wb') as f:
+            pickle.dump(result, f)
+
+
 if __name__ == '__main__':
     _kwargs = _prepare()
     # _ideal_matrix(**_kwargs)
@@ -527,3 +622,4 @@ if __name__ == '__main__':
     # _killer_shift(**_kwargs)
     # _iterative_coefficient_split(**_kwargs)
     _experiment(**_kwargs)
+    # _sweep_time_step(**_kwargs)

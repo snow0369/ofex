@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Tuple, Optional
 
 import numpy as np
-from openfermion import QubitOperator, LinearQubitOperator
+import scipy
+from openfermion import QubitOperator, LinearQubitOperator, get_sparse_operator
 from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator
 
@@ -73,6 +74,20 @@ def apply_operator(operator: Union[QubitOperator, spmatrix, LinearOperator],
         raise AssertionError
 
 
+def diagonalization(operator,
+                    n_qubits: int,
+                    sparse_eig: bool,
+                    n_eigen: Optional[int] = None,
+                    **kwargs) -> Union[Tuple[np.ndarray, np.ndarray], np.ndarray]:
+    operator = get_sparse_operator(operator, n_qubits=n_qubits)
+    if sparse_eig:
+        which = kwargs.pop('which', "SA")
+        return scipy.sparse.linalg.eigsh(operator, k=n_eigen, which=which, **kwargs)
+    else:
+        operator = operator.todense()
+        return scipy.linalg.eigh(operator, **kwargs)
+
+
 def sparse_apply_operator(operator: QubitOperator,
                           state: State) -> State:
     input_type = type_state(state)
@@ -135,7 +150,7 @@ def state_dot(state_1: State, state_2: State) -> complex:
         return state_1.conj().dot(state_2.T)[0, 0]
     elif (not dense_1) and dense_2:
         state_1 = to_scipy_sparse(state_1)
-        return state_1.conj().dot(state_2.T)[0, 0]
+        return state_1.conj().dot(state_2.T)[0]
     elif dense_1 and (not dense_2):
         state_2 = to_scipy_sparse(state_2)
         return state_2.conj().dot(state_1.T)[0].conjugate()

@@ -9,7 +9,7 @@ import numpy.typing as npt
 from openfermion import QubitOperator
 from scipy.sparse import spmatrix
 
-from algorithms.qksd.qksd_utils import toeplitz_arr_to_mat
+from ofex_algorithms.qksd.qksd_utils import toeplitz_arr_to_mat
 from ofex.linalg.sparse_tools import apply_operator, state_dot, expectation, sparse_apply_operator
 from ofex.sampling_simulation.hadamard_test import hadamard_test_general
 from ofex.sampling_simulation.qksd_extended_swap_test import qksd_extended_swap_test, prepare_qksd_est_op, \

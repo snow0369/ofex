@@ -9,9 +9,9 @@ from time import time
 import numpy as np
 from openfermion import get_fermion_operator, FermionOperator, QubitOperator
 
-from algorithms.qksd.qksd_simulation import ideal_qksd_toeplitz, ideal_qksd_nontoeplitz, qksd_shot_allocation, \
+from ofex_algorithms.qksd.qksd_simulation import ideal_qksd_toeplitz, ideal_qksd_nontoeplitz, qksd_shot_allocation, \
     sample_qksd
-from algorithms.qksd.qksd_utils import trunc_eigh
+from ofex_algorithms.qksd.qksd_utils import trunc_eigh
 from ofex.measurement.iterative_coefficient_splitting import init_ics, run_ics
 from ofex.measurement.killer_shift import killer_shift_opt_fermion_hf
 from ofex.measurement.sorted_insertion import sorted_insertion
@@ -32,7 +32,7 @@ def _prepare():
     mol_name = "H2O"
     transform = "symmetry_conserving_bravyi_kitaev"
     n_krylov = 10
-    time_step = 8.5625 * np.pi / n_krylov
+    time_step = 9.25 * np.pi / n_krylov
     n_trotter = 2
 
     mol = molecule_example(mol_name)
@@ -102,13 +102,13 @@ def _prepare():
     # pham_prop = pham
 
     n_qubits = get_num_qubits(ref)
-    rte_fname = f"tmp_{mol_name}_{transform}_rte.npy"
+    rte_fname = f"tmp_{mol_name}_{transform}_{time_step}_rte.npy"
     if os.path.isfile(rte_fname):
         prop_rte = np.load(rte_fname)
     else:
         prop_rte = exact_rte(pham_prop, time_step)
         np.save(rte_fname, prop_rte.toarray())
-    trot_fname = f"tmp_{mol_name}_{transform}_trot_{n_trotter}.npy"
+    trot_fname = f"tmp_{mol_name}_{transform}_{time_step}_trot_{n_trotter}.npy"
     if os.path.isfile(trot_fname):
         prop_trot = np.load(trot_fname)
     else:
@@ -129,7 +129,7 @@ def _prepare():
                                           mol, mol_name, transform, f2q_kwargs, ]}
 
 
-def _ideal_matrix(pham, shift_op, prop_rte, ref, n_krylov, mol_name, transform, **_):
+def _ideal_matrix(pham, shift_op, prop_rte, ref, n_krylov, mol_name, transform, mol, **_):
     ideal_matrices = dict()
 
     ideal_h, ideal_s = ideal_qksd_toeplitz(pham, prop_rte, ref, n_krylov)
@@ -137,6 +137,7 @@ def _ideal_matrix(pham, shift_op, prop_rte, ref, n_krylov, mol_name, transform, 
     ideal_gnd = np.min(val)
 
     ideal_matrices["non-shifted"] = (ideal_h.tolist(), ideal_s.tolist())
+    print(f"no shift : ‖H‖β={sum([h.induced_norm(order=2) for h in sorted_insertion(pham)])}")
 
     for opt_level in [0, 1, 2]:
         _, shift_pham, shift_const = shift_op[opt_level]
@@ -147,7 +148,7 @@ def _ideal_matrix(pham, shift_op, prop_rte, ref, n_krylov, mol_name, transform, 
 
         assert np.allclose(ideal_s, ideal_sh_s)
         assert np.isclose(ideal_gnd, shift_gnd)
-
+        print(f"opt_level = {opt_level}  ‖H‖β={sum([h.induced_norm(order=2) for h in sorted_insertion(shift_pham)])}")
         ideal_matrices[f"shifted_{opt_level}"] = (ideal_sh_h.tolist(), ideal_sh_s.tolist(), shift_const)
 
     with open(f"./tmp_{mol_name}_{transform}_idealmat.pkl", "wb") as f:
@@ -427,12 +428,12 @@ def _iterative_coefficient_split(mol, mol_name, pham, ref, n_krylov, prop_rte, t
 
 def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylov, norm, time_step, cisd_state,
                 p_const, f_const, **_):
-    tot_shots = 1e8
+    tot_shots = 1e9
     num_workers = 8
 
-    n_batch = 1000
-    save_buffer = True
-    load_buffer = True
+    n_batch = 10000
+    save_buffer = False
+    load_buffer = False
 
     meas_type = "FH"
 
@@ -440,7 +441,7 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
     if not os.path.isdir(prob_buf_dir):
         os.mkdir(prob_buf_dir)
 
-    result_dir = f"./tmp_{mol_name}_{transform}_result_matrices/"
+    result_dir = f"./tmp_{mol_name}_{transform}_{meas_type}_{int(np.log10(tot_shots))}_result_matrices/"
     if not os.path.isdir(result_dir):
         os.mkdir(result_dir)
 
@@ -449,6 +450,7 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
     ideal_h, ideal_s = ideal_qksd_toeplitz(pham, prop_rte, ref, n_krylov)
     val, vec = trunc_eigh(ideal_h, ideal_s, epsilon=1e-14)
     ideal_gnd = np.min(val)
+    true_gnd = mol.fci_energy - p_const - f_const
 
     sh_ideal_h, _ = ideal_qksd_toeplitz(shift_pham, prop_rte, ref, n_krylov)
 
@@ -475,7 +477,6 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
 
             t = time()
             initial_grp, cov_dict = init_ics(curr_pham, ref, cisd_state, num_workers, anticommute,
-                                             cov_buf_dir=cov_buf_dir,
                                              phase_list=cisd_phase)
             t = time() - t
             print(f"\t\tCov Pauli Took {t}")
@@ -500,8 +501,11 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
         shot_alloc = qksd_shot_allocation(tot_shots, grp_ham, n_krylov, meas_type,
                                           is_toeplitz=True,
                                           frag_shot_alloc=frag_shots)
+        t = time()
         samp_h, samp_s = sample_qksd(grp_ham, prop_rte, ref, n_krylov, is_toeplitz=True,
-                                     meas_type=meas_type, shot_list=shot_alloc, n_batch=n_batch, sample_buf_dir=buf_dir)
+                                     meas_type=meas_type, shot_list=shot_alloc, n_batch=n_batch)
+        t = time() - t
+        print(f"\t\tSampling took {t}")
         pert_h = np.linalg.norm(samp_h - curr_ideal_h, ord=2, axis=(1, 2))
         pert_s = np.linalg.norm(samp_s - ideal_s, ord=2, axis=(1, 2))
         eigvals = np.zeros(n_batch, dtype=float)
@@ -511,7 +515,7 @@ def _experiment(mol, mol_name, transform, shift_op, pham, prop_rte, ref, n_krylo
 
         print(f"\t\t‖ΔH‖ AVG = {np.mean(pert_h)} | STD = {np.std(pert_h)}")
         print(f"\t\t‖ΔS‖ AVG = {np.mean(pert_s)} | STD = {np.std(pert_s)}")
-        print(f"\t\t ΔE  AVG = {np.mean(eigvals - ideal_gnd)} | STD = {np.std(eigvals - ideal_gnd)}")
+        print(f"\t\t ΔE  AVG = {np.mean(eigvals - true_gnd)} | STD = {np.std(eigvals - true_gnd)}")
         print("")
         with open(os.path.join(result_dir, f"shift={is_shifted}_ics={perform_ics}.pkl"), 'wb') as f:
             samp_h_list = samp_h.tolist()
@@ -615,7 +619,7 @@ def _sweep_time_step(mol, mol_name, transform, shift_op, pham, ref, n_krylov, no
 
 if __name__ == '__main__':
     _kwargs = _prepare()
-    # _ideal_matrix(**_kwargs)
+    _ideal_matrix(**_kwargs)
     # _trotter_perturbation(**_kwargs)
     # _sample_perturbation(**_kwargs)
     # _profile_script_sample(**_kwargs)

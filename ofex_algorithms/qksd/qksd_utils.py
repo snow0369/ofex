@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 import scipy
 from openfermion.config import EQ_TOLERANCE
-from scipy.linalg import eigh
+from scipy.linalg import eigh, fractional_matrix_power
 
 
 def toeplitz_arr_to_mat(toeplitz_arr: np.ndarray) -> np.ndarray:
@@ -27,32 +27,58 @@ def diag_s(smat: np.ndarray):
     v_mat = v_mat[:, sort_idx]
     # assert np.allclose(v_mat.T.conj() @ v_mat, np.eye(v_mat.shape[0]), atol=1e-3), (v_mat, v_mat.T.conj() @ v_mat,
     # s_diag)
-    assert np.allclose(smat, v_mat @ np.diag(s_diag) @ v_mat.T.conj())
+    check = v_mat @ np.diag(s_diag) @ v_mat.T.conj()
+    assert np.allclose(smat, check)
     return s_diag, v_mat
 
 
-def condition_number(a: np.ndarray, b: np.ndarray, atol=None, verbose=False):
-    if atol is None:
-        eigval, eigvec = eigh(a, b)
+def condition_number(a: np.ndarray, b: np.ndarray, epsilon=None, n_lambda=None):
+    _, d, _ = gevp_pert_analysis(a, b, epsilon, n_lambda)
+    return d ** -1
+
+
+def gevp_pert_analysis(a: np.ndarray, b: np.ndarray, epsilon=None, n_lambda=None,
+                       check_lowest_eig_only=False):
+    if epsilon is not None or n_lambda is not None:
+        _, _, _, _, a, b = trunc_eigh_verbose(a, b, epsilon, n_lambda)
+
+    # Check Proposition 2.4 in Mathias and Li
+    n = a.shape[0]
+    b_inv = np.linalg.inv(b)
+    b_inv_half = fractional_matrix_power(b_inv, 0.5)
+    _, u = eigh(b_inv_half @ a @ b_inv_half)
+    check_u_unitary = u.T.conj() @ u
+    assert np.allclose(check_u_unitary, np.eye(n))
+    s = np.diag(np.sqrt(np.diagonal(u.T.conj() @ b_inv @ u)) ** -1)
+    x = b_inv_half @ u @ s
+
+    # Check unit-column of x:
+    cond_b = np.linalg.cond(b)
+    for j in range(n):
+        norm = np.linalg.norm(x[:, j])
+        assert np.isclose(norm, 1.0, atol=1e-12 * cond_b)
+
+    # Obtain z_i = α_i + i β_i
+    z = x.T.conj() @ (a + 1j * b) @ x
+    check_z_diagonal = np.diag(np.diagonal(z))
+    assert np.allclose(z, check_z_diagonal)
+    z = np.diag(z)
+    eigval = z.real / z.imag
+    eig_order = np.argsort(eigval)
+    eigval = eigval[eig_order]
+    z = z[eig_order]
+    theta = np.angle(z)
+
+    # distance
+    d = np.abs(z)
+
+    # Check eigvals
+    check_eigvals, _ = eigh(a, b)
+    if check_lowest_eig_only:
+        assert np.isclose(eigval[0], check_eigvals[0], atol=1e-12 / np.min(d))
     else:
-        eigval, eigvec, _, _, a, b = trunc_eigh_verbose(a, b, atol)
-    assert a.shape == b.shape
-    d = a.shape[0]
-    c = a + 1.0j * b
-    for j in range(d):
-        norm = np.sqrt(np.vdot(eigvec[:, j], eigvec[:, j]))
-        eigvec[:, j] /= norm
-    conj_c = eigvec.T.conj() @ c @ eigvec
-    assert np.allclose(np.diag(np.diag(conj_c)), conj_c)
-    conj_c = np.diag(conj_c)
-    eigval_conj = conj_c.real / conj_c.imag
-    idx_sort = np.argsort(eigval_conj)
-    # assert np.allclose(eigval, eigval_conj, atol=1e-4), np.linalg.norm(eigval-eigval_conj)
-    cond = np.abs(conj_c)[idx_sort]
-    if verbose:
-        return eigval, cond ** -1
-    else:
-        return cond ** -1
+        assert np.allclose(eigval, check_eigvals, atol=1e-12 / np.min(d))
+    return z, d, theta
 
 
 def trunc_s(hmat, smat, epsilon: Optional[float] = None, n_lambda: Optional[int] = None):
@@ -93,6 +119,7 @@ def trunc_eigh_verbose(hmat: np.ndarray,
         eigen_values, eigen_vectors = eigh(amat, bmat, eigvals_only=False)
     else:
         eigen_values, eigen_vectors = scipy.linalg.eig(amat, bmat)
+    eigen_vectors = v_mat @ eigen_vectors @ v_mat.T.conj()
     return eigen_values, eigen_vectors, s_diag, v_mat, amat, bmat
 
 
@@ -106,3 +133,37 @@ def trunc_eigh(hmat: np.ndarray,
     else:
         val, vec = eigh(hmat, smat, eigvals_only=False)
     return val, vec
+
+
+def tikhonov_eigh(hmat: np.ndarray,
+                  smat: np.ndarray,
+                  epsilon: float = 0.0,
+                  n_lambda: Optional[int] = None,
+                  hermitian=True):
+    n = smat.shape[0]
+    hmat_new = (smat.T.conj()) @ hmat
+    smat_new = smat.T.conj() @ smat + np.eye(n) * (epsilon ** 2)
+    if n_lambda is not None:
+        return trunc_eigh(hmat_new, smat_new, n_lambda=n_lambda, hermitian=hermitian)
+    elif hermitian:
+        return eigh(hmat_new, smat_new, eigvals_only=False)
+    else:
+        return scipy.linalg.eig(hmat_new, smat_new)
+
+
+if __name__ == "__main__":
+    def random_hermitian(n, positive):
+        h = np.random.normal(size=(n, n)) + 1j * np.random.normal(size=(n, n))
+        h = h + h.conj().T
+        if positive:
+            h = h @ h
+            for i in range(n):
+                h[i, i] = h[i, i].real
+            return h
+        else:
+            return h
+
+
+    np.random.seed(10)
+    a, b = random_hermitian(10, False), random_hermitian(10, True)
+    gevp_pert_analysis(a, b)

@@ -142,7 +142,8 @@ def qubit_to_fermion_state(qubit_state: State,
         else:
             final_orb = 1
             middle_orb = 0
-        qubit_state = recover_indices_state(qubit_state, {active_orbitals / 2: middle_orb, active_orbitals: final_orb})
+        active_orbitals = int(active_orbitals)
+        qubit_state = recover_indices_state(qubit_state, {active_orbitals // 2: middle_orb, active_orbitals: final_orb})
         fermion_state = inv_bravyi_kitaev_tree_state(qubit_state)
         fermion_state = reorder_state(fermion_state, up_then_down, reverse=True)
     else:

@@ -151,6 +151,10 @@ def tikhonov_eigh(hmat: np.ndarray,
         return scipy.linalg.eig(hmat_new, smat_new)
 
 
+def norm_s(n, shots):
+    return 2 * n * np.sqrt(2 * np.log(2 * n) / shots)
+
+
 if __name__ == "__main__":
     def random_hermitian(n, positive):
         h = np.random.normal(size=(n, n)) + 1j * np.random.normal(size=(n, n))

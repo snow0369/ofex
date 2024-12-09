@@ -52,7 +52,7 @@ def transition_amplitude(operator: Union[QubitOperator, spmatrix, LinearOperator
 def expectation(operator: Union[QubitOperator, spmatrix, LinearOperator],
                 state: State,
                 sparse: bool = False) -> complex:
-    return transition_amplitude(operator, state, state, sparse)
+    return transition_amplitude(operator, state, state, sparse, sparse)
 
 
 def apply_operator(operator: Union[QubitOperator, spmatrix, LinearOperator],

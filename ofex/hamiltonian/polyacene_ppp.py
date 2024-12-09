@@ -34,6 +34,10 @@ class PolyacenePPP:
     def n_electrons(self) -> int:
         return self.num_spin_orbitals // 2
 
+    @property
+    def n_qubits(self) -> int:
+        return self.num_spin_orbitals
+
     def __init__(self, n_ring: int,
                  param_type: str = "standard",
                  t0: float = 2.4 * EV_TO_HARTREE,
@@ -125,17 +129,23 @@ class PolyacenePPP:
         return self.hopping_lower() + self.hopping_upper() + self.hopping_bridge() + self.ee_repulsion()
 
     def get_molecular_hamiltonian(self):
-        return self.fermion_hamiltonian(), self.num_spin_orbitals
+        return self.fermion_hamiltonian()
 
     def hf_state(self):
-        fock = [0 for _ in range(self.num_spin_orbitals)]
+        fock_odd = [0 for _ in range(self.num_spin_orbitals)]
+        fock_even = [0 for _ in range(self.num_spin_orbitals)]
         for an in self.atom_name:
             if an[0] == "L" and int(an[1:]) % 2 == 0 or \
                     an[0] == "U" and int(an[1:]) % 2 == 1:
-                fock[self.spin_idx(an, SPIN_DOWN)] = 1
-                fock[self.spin_idx(an, SPIN_UP)] = 1
-        assert sum(fock) == self.n_electrons
-        return {BinaryFockVector(fock): 1.0}
+                fock_even[self.spin_idx(an, SPIN_DOWN)] = 1
+                fock_even[self.spin_idx(an, SPIN_UP)] = 1
+            elif an[0] == "L" and int(an[1:]) % 2 == 1 or\
+                    an[0] == "U" and int(an[1:]) % 2 == 0:
+                fock_odd[self.spin_idx(an, SPIN_DOWN)] = 1
+                fock_odd[self.spin_idx(an, SPIN_UP)] = 1
+        assert sum(fock_even) == self.n_electrons
+        return {BinaryFockVector(fock_odd): 1/np.sqrt(2),
+                BinaryFockVector(fock_even): 1/np.sqrt(2)}
 
     # </editor-fold>
 
@@ -256,7 +266,7 @@ if __name__ == "__main__":
     from ofex.state.state_tools import pretty_print_state
 
 
-    def _test_coord(n=3):
+    def _test_coord(n):
         delta = (0.2, 0.2)
 
         polyacene = PolyacenePPP(n_ring=n)
@@ -271,7 +281,7 @@ if __name__ == "__main__":
         plt.show()
 
 
-    def _test_hamiltonian(n=3):
+    def _test_hamiltonian(n):
         polyacene = PolyacenePPP(n_ring=n)
         hc1 = polyacene.hopping_lower()
         print("hc1")
@@ -297,5 +307,5 @@ if __name__ == "__main__":
         print(f"HF state = {pretty_print_state(polyacene.hf_state())}")
 
 
-    _test_coord(n=2)
-    _test_hamiltonian(n=2)
+    _test_coord(n=1)
+    _test_hamiltonian(n=1)

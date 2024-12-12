@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from copy import copy
 from typing import Tuple
+
+__all__ = ["int_to_binary", "binary_to_int", "hamming_weight"]
 
 
 def int_to_binary(integer, length: int, lsb_first: bool) -> Tuple[int, ...]:
@@ -32,12 +33,12 @@ if __name__ == "__main__":
     import numpy as np
     from itertools import product
 
-    trial = 10_000
-    for idx_trial, lsb_first in product(range(trial), [True, False]):
+    TRIAL = 10_000
+    for idx_trial, _lsb_first in product(range(TRIAL), [True, False]):
         rand_int = np.random.randint(0, 1023)
         rand_length = np.min([int(np.log2(rand_int + 1)), np.random.randint(1, 11)])
-        b = int_to_binary(rand_int, rand_length, lsb_first)
+        b = int_to_binary(rand_int, rand_length, _lsb_first)
         if idx_trial == 10:
-            print(f"{'LSB first' if lsb_first else 'MSB first'}, {b}, {rand_int}, {bin(rand_int)}")
-        assert binary_to_int(b, lsb_first) == rand_int, f"{b} -> {binary_to_int(b, lsb_first)} != {rand_int}"
+            print(f"{'LSB first' if _lsb_first else 'MSB first'}, {b}, {rand_int}, {bin(rand_int)}")
+        assert binary_to_int(b, _lsb_first) == rand_int, f"{b} -> {binary_to_int(b, _lsb_first)} != {rand_int}"
         assert hamming_weight(rand_int) == sum(b)

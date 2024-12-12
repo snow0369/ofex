@@ -14,6 +14,11 @@ from ofex.operators.qubit_operator_tools import dict_to_operator
 from ofex.operators.types import SingleFermion
 from ofex.transforms.fermion_rotation import fermion_rotation_operator
 
+__all__ = ["ham_to_ei_spatial", "ei_to_ham_spatial", "ham_to_ei_spin", "ei_to_ham_spin",
+           "double_factorization", "number_factorization_to_reflection",
+           "double_factorization_to_hamiltonian",
+           "calculate_reflect_norm", "FermionFragment"]
+
 FermionFragment = Tuple[FermionOperator, np.ndarray]
 
 
@@ -602,7 +607,7 @@ def number_factorization_to_reflection(h_list: List[np.ndarray],
         const = np.sum(h0) / 2
     else:
         const = np.sum(h0)
-    for i, (h, u) in enumerate(zip(h_list[1:], u_list[1:])):
+    for h, u in zip(h_list[1:], u_list[1:]):
         # Transition of twobody to onebody
         for p, q in product(range(n_orb), repeat=2):
             for r, s in product(range(n_orb), repeat=2):

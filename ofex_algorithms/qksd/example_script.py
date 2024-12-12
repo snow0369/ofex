@@ -13,14 +13,13 @@ from ofex_algorithms.qksd.qksd_simulation import ideal_qksd_toeplitz, ideal_qksd
     sample_qksd
 from ofex_algorithms.qksd.qksd_utils import trunc_eigh
 from ofex.measurement.iterative_coefficient_splitting import init_ics, run_ics
-from ofex.measurement.killer_shift import killer_shift_opt_fermion_hf
+from ofex.measurement import killer_shift_opt_fermion_hf
 from ofex.measurement.sorted_insertion import sorted_insertion
 from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
-from ofex.propagator.exact import exact_rte
-from ofex.propagator.trotter import trotter_rte_by_si_lcu
+from ofex.propagator import exact_rte, trotter_rte_by_si_lcu
 from ofex.state.chem_ref_state import hf_ground, cisd_ground
 from ofex.state.state_tools import get_num_qubits
-from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
+from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
 from ofex.utils.chem import molecule_example, run_driver
 
 

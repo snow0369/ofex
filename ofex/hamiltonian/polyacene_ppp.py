@@ -5,7 +5,7 @@ from openfermion import FermionOperator
 
 from ofex.constant import EV_TO_HARTREE, DEG_TO_RADIAN
 from ofex.operators.fermion_operator_tools import one_body_excitation, one_body_number
-from ofex.state.binary_fock import BinaryFockVector
+from ofex.state import BinaryFockVector
 
 SPIN_DOWN, SPIN_UP = 0, 1
 

@@ -8,7 +8,6 @@ from openfermion.config import EQ_TOLERANCE
 
 from ofex.measurement.iterative_coefficient_splitting.ics_utils import _synthesize_group
 from ofex.measurement.pauli_variance import pauli_covariance
-from ofex.measurement.sorted_insertion import sorted_insertion
 from ofex.operators.ordering import order_abs_coeff
 from ofex.operators.qubit_operator_tools import single_pauli_commute_chk
 from ofex.operators.symbolic_operator_tools import coeff, operator, compare_operators
@@ -73,7 +72,13 @@ def init_ics(ham: QubitOperator,
     return initial_grp, cov_dict
 
 
+def init_efficient_ics(ham, anticommute: bool = False, method: str = "even", debug: bool = False):
+    return init_split(ham, anticommute, method, debug)[1]
+
+
 def init_split(ham, anticommute: bool = False, method: str = "even", debug: bool = False):
+    from ofex.measurement.sorted_insertion import sorted_insertion
+
     pauli_list = order_abs_coeff(ham, reverse=True)
     for i, p in enumerate(pauli_list):
         assert np.isclose(coeff(p).imag, 0.0)
@@ -109,7 +114,7 @@ def init_split(ham, anticommute: bool = False, method: str = "even", debug: bool
                 if anticommute == single_pauli_commute_chk(p, q):
                     break
             else:
-                grp_pauli_list[idx_grp].append(idx_p)
+                grp.append(idx_p)
                 pauli_grp_list[idx_p].append(idx_grp)
 
     size_grp = [len(x) for x in grp_pauli_list]
@@ -118,8 +123,8 @@ def init_split(ham, anticommute: bool = False, method: str = "even", debug: bool
     c_vec = np.zeros(num_split_pauli, dtype=float)
     if method == "even":
         c_idx = 0
-        for idx_grp in range(len(grp_pauli_list)):
-            for idx_p, p in enumerate(grp_pauli_list[idx_grp]):
+        for idx_grp, grp in enumerate(grp_pauli_list):
+            for idx_p, p in enumerate(grp):
                 n_included_grp = len(pauli_grp_list[p])
                 c_vec[c_idx + idx_p] = coeff(pauli_list[p]).real * (1 / n_included_grp)
             c_idx += size_grp[idx_grp]

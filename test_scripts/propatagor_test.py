@@ -3,8 +3,8 @@ from openfermion import get_sparse_operator
 from tqdm import tqdm
 
 from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
-from ofex.propagator.exact import exact_rte, exact_ite
-from ofex.test_scripts.random_object import random_qubit_operator
+from ofex.propagator import exact_rte, exact_ite
+from test_scripts.random_object import random_qubit_operator
 from ofex.utils.chem import molecule_example, run_driver
 from ofex.transforms.fermion_qubit import fermion_to_qubit_operator
 

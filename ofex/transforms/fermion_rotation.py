@@ -2,7 +2,7 @@ import numpy as np
 from openfermion import FermionOperator, normal_ordered
 
 from ofex.operators.fermion_operator_tools import cre_ann
-from ofex.state.binary_fock import BinaryFockVector
+from ofex.state import BinaryFockVector
 from ofex.state.state_tools import to_sparse_dict, get_num_qubits, state_type_transform
 from ofex.state.types import State, type_state
 from ofex.utils.dict_utils import add_values

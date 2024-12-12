@@ -6,6 +6,10 @@ from ofex.operators.qubit_operator_tools import dict_to_operator
 from ofex.operators.symbolic_operator_tools import operator
 from ofex.operators.types import SingleFermion
 
+__all__ = ["cre_ann", "is_number_only", "normal_ordered_single",
+           "one_body_number", "one_body_excitation", "one_body_reflection",
+           "two_body_reflection"]
+
 
 def cre_ann(fermion_op: Union[SingleFermion, FermionOperator]) -> Tuple[List[int], List[int]]:
     cre, ann = list(), list()
@@ -20,7 +24,7 @@ def cre_ann(fermion_op: Union[SingleFermion, FermionOperator]) -> Tuple[List[int
 
 
 def is_number_only(f: FermionOperator) -> bool:
-    for op, coeff in f.terms.dict():
+    for op in f.terms:
         cre, ann = cre_ann(op)
         if sorted(cre) != sorted(ann):
             return False

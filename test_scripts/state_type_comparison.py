@@ -10,8 +10,8 @@ from openfermion import get_sparse_operator, generate_linear_qubit_operator
 from openfermion.config import EQ_TOLERANCE
 
 from ofex.linalg.sparse_tools import apply_operator, sparse_apply_operator
-from ofex.state.state_tools import to_dense, pretty_print_state, allclose, compare_states
-from ofex.test_scripts.random_object import random_state_all, random_qubit_operator
+from ofex.state.state_tools import to_dense, allclose, compare_states
+from test_scripts.random_object import random_state_all, random_qubit_operator
 import warnings
 
 from ofex.utils.dict_utils import nested_dict_assign

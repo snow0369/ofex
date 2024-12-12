@@ -1,5 +1,4 @@
 import math
-import pickle
 from itertools import product
 from typing import List, Any, Optional, Union, Dict
 
@@ -7,6 +6,8 @@ import numpy as np
 from openfermion.config import EQ_TOLERANCE
 
 from ofex.exceptions import OfexTypeError
+
+__all__ = ["ProbDist", "JointProbDist"]
 
 
 class ProbDist(dict):
@@ -31,7 +32,7 @@ class ProbDist(dict):
         except ValueError as e:
             print(shots)
             raise e
-        return {k: n for k, n in zip(self.event, dist)}
+        return dict(zip(self.event, dist))
 
     @property
     def true_average(self):
@@ -74,7 +75,7 @@ class ProbDist(dict):
         if seed is not None:
             np.random.seed(seed)
         output = list()
-        for i in range(n_batch):
+        for _ in range(n_batch):
             output.append(self.empirical_average(shots, seed=None))
         return output
 
@@ -226,18 +227,9 @@ class JointProbDist(ProbDist):
         return {k: np.sqrt(v) for k, v in self.empirical_covariance(shots, seed).items()}
 
 
-def pkl_save_prob_lst(prob: List[ProbDist], filename: str):
-    with open(filename, "wb") as f:
-        pickle.dump(prob, f)
-
-
-def pkl_load_prob_lst(filename) -> List[ProbDist]:
-    with open(filename, "rb") as f:
-        dict_lst = pickle.load(f)
-    return [ProbDist(x) for x in dict_lst]
-
-
 if __name__ == "__main__":
+    import pickle
+
     def probdist_test():
         a = ProbDist({1: 0.1,
                       2: 0.2,
@@ -251,8 +243,12 @@ if __name__ == "__main__":
         print(f"avg : {a.true_average}")  # 3.0
         print(f"var : {a.true_variance}")  # 1.0
 
-        pkl_save_prob_lst([a], "./tmp.pkl")
-        a_l = pkl_load_prob_lst("./tmp.pkl")
+        with open("./tmp.pkl", "wb") as f:
+            # noinspection PyTypeChecker
+            pickle.dump(a.pickle(), f)
+
+        with open("./tmp.pkl", "rb") as f:
+            a_l = ProbDist.unpickle(pickle.load(f))
         print(len(a_l))
         a_l = a_l[0]
         print(a_l)

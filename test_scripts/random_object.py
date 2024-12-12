@@ -3,8 +3,8 @@ from typing import Tuple
 import numpy as np
 from openfermion import QubitOperator
 
-from ofex.clifford.clifford_tools import tableau_to_pauli
-from ofex.state.binary_fock import int_to_fock
+from ofex.clifford import tableau_to_pauli
+from ofex.state import int_to_fock
 from ofex.state.state_tools import to_dense, to_scipy_sparse
 from ofex.state.types import SparseStateDict, ScipySparse
 from ofex.utils.binary import int_to_binary

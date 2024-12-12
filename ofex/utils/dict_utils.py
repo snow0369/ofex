@@ -5,6 +5,9 @@ from typing import Optional, Any, Callable
 import numpy as np
 from openfermion.config import EQ_TOLERANCE
 
+__all__ = ["recursive_dict_update", "recursive_dict_keys", "recursive_dict_items",
+           "nested_dict_assign", "add_values", "sub_values", "dict_allclose", "compare_dict"]
+
 
 def recursive_dict_update(previous: dict, additional: dict) -> dict:
     previous = deepcopy(previous)
@@ -32,7 +35,7 @@ def nested_dict_assign(dictionary: dict, key_list: list, value: Any):
 
 
 def recursive_dict_keys(dictionary: dict, max_depth=None):
-    def _get_key(key, value):
+    def _get_key(key, _):
         return key
 
     yield from _recursive_dict_items(dictionary, (), max_depth, _get_key)

@@ -1,5 +1,5 @@
-from .iterative_coefficient_splitting import run_ics
-from .ics_prepare import init_ics
+from .ics import run_ics
+from .efficient_ics import efficient_ics
+from .ics_prepare import init_ics, init_efficient_ics
 
-__all__ = ["run_ics",
-           "init_ics"]
+__all__ = ["run_ics", "efficient_ics", "init_ics", "init_efficient_ics"]

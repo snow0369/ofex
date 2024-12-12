@@ -6,6 +6,10 @@ import scipy
 from openfermion.config import EQ_TOLERANCE
 from scipy.linalg import eigh, fractional_matrix_power
 
+__all__ = ["toeplitz_arr_to_mat", "condition_number", "gevp_pert_analysis",
+           "trunc_s", "trunc_eig", "trunc_eigh", "trunc_eigh_verbose",
+           "tikhonov_eigh", "norm_sample_err_smat"]
+
 
 def toeplitz_arr_to_mat(toeplitz_arr: np.ndarray) -> np.ndarray:
     if not np.allclose(toeplitz_arr[..., 0].imag, 0.0, atol=EQ_TOLERANCE):
@@ -151,7 +155,7 @@ def tikhonov_eigh(hmat: np.ndarray,
         return scipy.linalg.eig(hmat_new, smat_new)
 
 
-def norm_s(n, shots):
+def norm_sample_err_smat(n, shots):
     return 2 * n * np.sqrt(2 * np.log(2 * n) / shots)
 
 

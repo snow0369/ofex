@@ -7,6 +7,11 @@ from typing import List, Union, Tuple, Optional
 import numpy as np
 from openfermion import MolecularData
 
+__all__ = ["MoleculeGeometry", "diatomic_molecules", "triatomic_molecules", "default_param",
+           "linear_geometry", "bent_geometry", "molecule_example",
+           "run_driver"]
+
+
 MoleculeGeometry = List[Tuple[str, Tuple[float, float, float]]]
 
 diatomic_molecules = ["H2", "HeH+", "LiH", ]
@@ -152,7 +157,7 @@ def run_driver(molecule: MolecularData,
         except AttributeError as e:
             msg = f"\nConsider updating the class PyscfMolecularData with"\
                   f"https://github.com/snow0369/OpenFermion-PySCF/blob/master/openfermionpyscf/_pyscf_molecular_data.py."
-            raise AttributeError(str(e) + msg)
+            raise AttributeError(str(e) + msg) from e
     else:
         raise ValueError(f"Driver {driver} not supported")
 

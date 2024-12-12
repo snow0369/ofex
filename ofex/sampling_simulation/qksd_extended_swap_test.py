@@ -3,9 +3,7 @@ from typing import Union, Tuple
 import numpy as np
 from openfermion import QubitOperator, FermionOperator, get_linear_qubit_operator_diagonal
 
-from ofex.clifford.clifford_tools import tableau_to_pauli
-from ofex.clifford.pauli_diagonalization import diagonalizing_clifford
-from ofex.clifford.simulation import clifford_simulation
+from ofex.clifford import tableau_to_pauli, diagonalizing_clifford, clifford_simulation
 from ofex.exceptions import OfexTypeError
 from ofex.linalg.sparse_tools import state_dot
 from ofex.operators.fermion_operator_tools import is_number_only
@@ -15,8 +13,8 @@ from ofex.sampling_simulation.sampling_base import JointProbDist
 from ofex.state.state_tools import get_num_qubits, norm, normalize, to_dense
 from ofex.state.types import State
 from ofex.transforms.fermion_factorization import FermionFragment
-from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state, qubit_to_fermion_state
-from ofex.transforms.fermion_rotation import fermion_rotation_state
+from ofex.transforms import (fermion_to_qubit_operator, fermion_to_qubit_state, qubit_to_fermion_state,
+                             fermion_rotation_state)
 
 
 def _fermion_to_pauli(ref_state: State,

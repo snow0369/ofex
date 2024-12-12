@@ -8,13 +8,11 @@ from openfermion import FermionOperator, QubitOperator, normal_ordered, get_ferm
 
 from ofex.linalg.sparse_tools import sparse_apply_operator
 from ofex.measurement.sorted_insertion import sorted_insertion
-from ofex.operators.fermion_operator_tools import cre_ann, normal_ordered_single, one_body_excitation
-from ofex.operators.qubit_operator_tools import dict_to_operator
-from ofex.state.binary_fock import BinaryFockVector
+from ofex.operators.fermion_operator_tools import cre_ann
+from ofex.state import BinaryFockVector
 from ofex.state.state_tools import compress_sparse
 from ofex.transforms.fermion_factorization import ham_to_ei_spin
-from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
-from ofex.operators import symbolic_operator_tools
+from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
 
 
 def killer_shift_opt_fermion_hf(fham: FermionOperator,
@@ -43,10 +41,12 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
     assert len(hf_qubit_state) == 1
 
     # Find Z-Only
-    """    shift_0 = PauliSum()
+    """
+    shift_0 = PauliSum()
     for op in pham.terms():
         if op.is_z_only():
-            shift_0 = shift_0 + op"""
+            shift_0 = shift_0 + op
+    """
     shift = FermionOperator()
     for f_term in fham.get_operators():
         cre, ann = cre_ann(f_term)
@@ -65,7 +65,7 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
         pass
     elif optimization_level in [1, 2]:
         shifted_fham = fham - shift
-        oei, tei, c = ham_to_ei_spin(shifted_fham, n_spinorb)
+        _, tei, c = ham_to_ei_spin(shifted_fham, n_spinorb)
         tei_diag_1 = np.zeros(tei.shape[:3], dtype=complex)
         tei_diag_2 = np.zeros(tei.shape[:3], dtype=complex)
         for p in range(tei.shape[0]):
@@ -80,7 +80,7 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
                 n_op = FermionOperator(((p, 1), (p, 0)), 1.0)
 
             for r, s in product(range(n_spinorb), repeat=2):
-                if p == r or p == s:  # a^2
+                if p in {r, s}:  # a^2
                     continue
                 if r <= s:  # Lower triangular part
                     continue
@@ -94,11 +94,11 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
                     no_tmp_shift = normal_ordered(tmp_shift)
                     if optimization_level == 1 or p not in occ:
                         c = tei_diag_1[p, r, s]
-                        shift = shift + no_tmp_shift * (c/2)
+                        shift = shift + no_tmp_shift * (c / 2)
                         continue
 
                     # optimization_level == 2 and p in occ:
-                    g_prs[p, r, s] = c/2
+                    g_prs[p, r, s] = c / 2
                     dof_idx[(p, r, s)] = len(dof)
                     dof.append((p, r, s))
                     shift_op.append(no_tmp_shift)

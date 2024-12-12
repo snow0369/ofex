@@ -24,19 +24,19 @@ def ring_pauli(num_qubits: int, p_type: str) -> of.QubitOperator:
     return qubit_op
 
 
-def ZZ_1D(num_qubits: int) -> of.QubitOperator:
+def zz_1d(num_qubits: int) -> of.QubitOperator:
     qubit_op = chain_pauli(num_qubits, "Z")
     # return get_sparse_operator(qubit_op, num_qubits)
     return qubit_op
 
 
-def heisenberg_1D(num_qubits) -> of.QubitOperator:
+def heisenberg_1d(num_qubits) -> of.QubitOperator:
     qubit_op = chain_pauli(num_qubits, "X") + chain_pauli(num_qubits, "Y") + chain_pauli(num_qubits, "Z")
     # return get_sparse_operator(qubit_op, num_qubits)
     return qubit_op
 
 
-def heisenberg_1D_ring(num_qubits) -> of.QubitOperator:
+def heisenberg_1d_ring(num_qubits) -> of.QubitOperator:
     qubit_op = ring_pauli(num_qubits, "X") + ring_pauli(num_qubits, "Y") + ring_pauli(num_qubits, "Z")
     # return get_sparse_operator(qubit_op, num_qubits)
     return qubit_op

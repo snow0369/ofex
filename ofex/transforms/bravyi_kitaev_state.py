@@ -2,7 +2,6 @@ import numpy as np
 from galois import FieldArray
 
 from ofex.clifford.clifford_tools import gf
-from ofex.state.binary_fock import BinaryFockVector
 from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import SparseStateDict
 
@@ -16,6 +15,8 @@ def inv_bravyi_kitaev_state(fock_state: SparseStateDict) -> SparseStateDict:
 
 
 def _bravyi_kitaev_state(input_state: SparseStateDict, inv: bool) -> SparseStateDict:
+    from ofex.state import BinaryFockVector
+
     ret_dict = dict()
     num_qubits = get_num_qubits(input_state)
     beta_mat = beta_matrix(num_qubits)

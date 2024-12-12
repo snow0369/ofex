@@ -5,7 +5,7 @@ from openfermion import QubitOperator
 from scipy import sparse
 
 from ofex.exceptions import OfexTypeError
-from ofex.measurement.sorted_insertion import sorted_insertion
+from ofex.measurement import sorted_insertion
 from ofex.operators.ordering import order_abs_coeff
 from ofex.propagator.exact import exact_expop
 

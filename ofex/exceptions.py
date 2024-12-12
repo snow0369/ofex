@@ -1,5 +1,7 @@
 import inspect
 
+__all__ = ["OfexTypeError"]
+
 
 class OfexTypeError(TypeError):
     def __init__(self, *obj):
@@ -7,4 +9,3 @@ class OfexTypeError(TypeError):
         super(OfexTypeError, self).__init__(
             typs + f" is not a valid type."
         )
-

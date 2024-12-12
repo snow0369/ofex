@@ -5,8 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
-from ofex.propagator.exact import exact_rte, exact_ite
-from ofex.propagator.trotter import trotter_rte_by_si_lcu, trotter_ite_by_si_lcu, trotter_rte_by_single_pauli, \
+from ofex.propagator import exact_rte, exact_ite, trotter_rte_by_si_lcu, trotter_ite_by_si_lcu, trotter_rte_by_single_pauli, \
     trotter_rte_by_si_comm, trotter_ite_by_si_comm, trotter_ite_by_single_pauli
 from ofex.transforms.fermion_qubit import fermion_to_qubit_operator
 from ofex.utils.chem import molecule_example

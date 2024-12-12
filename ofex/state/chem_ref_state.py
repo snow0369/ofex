@@ -13,6 +13,8 @@ from ofex.state.types import SparseStateDict
 from ofex.transforms.fermion_qubit import fermion_to_qubit_state
 from ofex.utils.chem import run_driver
 
+__all__ = ["hf_ground", "cisd_ground", "csf_states"]
+
 
 def hf_ground(mol: MolecularData,
               active_idx: Optional[List[int]] = None,
@@ -28,7 +30,7 @@ def hf_ground(mol: MolecularData,
     return state
 
 
-def cisd_ground(mol: MolecularData, debug=False):
+def cisd_ground(mol: MolecularData):
     mol.load()
     if 'cisd' not in mol._pyscf_data or mol._pyscf_data['cisd'] is None:
         mol = run_driver(mol, run_cisd=True, driver='pyscf')
@@ -57,13 +59,13 @@ def cisd_ground(mol: MolecularData, debug=False):
     return cisd_state
 
 
-def generate_csf(n_orbital: int,
-                 n_electrons: int,
-                 multiplicity: int = 1,
-                 projected_spin: float = 0.0,
-                 n_open: Optional[int] = None,
-                 cs_excitation: int = 0,
-                 os_excitation: int = 0) -> List[SparseStateDict]:
+def csf_states(n_orbital: int,
+               n_electrons: int,
+               multiplicity: int = 1,
+               projected_spin: float = 0.0,
+               n_open: Optional[int] = None,
+               cs_excitation: int = 0,
+               os_excitation: int = 0) -> List[SparseStateDict]:
     """
     Generate configuration state functions.
 
@@ -91,12 +93,12 @@ def generate_csf(n_orbital: int,
         raise ValueError
     if n_open < os_excitation:
         raise ValueError
-    T_list, P_list, coeff = generate_coupling_coeff(total_spin=float(multiplicity - 1) / 2,
+    _, p_list, coeff = generate_coupling_coeff(total_spin=float(multiplicity - 1) / 2,
                                                     projected_spin=projected_spin,
                                                     n_open=n_open)
     # Convert P_list to fock vectors
-    inc_P_list = [[P_list[i][j] - P_list[i][j - 1] if j > 0 else P_list[i][j] for j in range(n_open)]
-                  for i in range(len(P_list))]
+    inc_p_list = [[p_list[i][j] - p_list[i][j - 1] if j > 0 else p_list[i][j] for j in range(n_open)]
+                  for i in range(len(p_list))]
 
     states = list()
     num_closed = (n_electrons - n_open) // 2
@@ -111,7 +113,7 @@ def generate_csf(n_orbital: int,
             not_os_indicies = not_cs_indices.difference(ose)
             op = set(sorted(list(not_os_indicies))[:n_open - os_excitation]).union(ose)  # indices of open shell
             f_vector_list = list()
-            for inc_P in inc_P_list:  # add dets in a csf
+            for inc_p in inc_p_list:  # add dets in a csf
                 f_vector = list()
                 j = 0
                 for i in range(n_orbital):
@@ -119,9 +121,9 @@ def generate_csf(n_orbital: int,
                         f_vector += [1, 1]
                         assert i not in op
                     elif i in op:
-                        if inc_P[j] == 1:
+                        if inc_p[j] == 1:
                             f_vector += [1, 0]
-                        elif inc_P[j] == -1:
+                        elif inc_p[j] == -1:
                             f_vector += [0, 1]
                         else:
                             raise ValueError
@@ -130,9 +132,9 @@ def generate_csf(n_orbital: int,
                         f_vector += [0, 0]
                 try:
                     assert sum(f_vector) == n_electrons
-                except AssertionError:
+                except AssertionError as exc:
                     print(cse, op, f_vector, sum(f_vector))
-                    raise AssertionError
+                    raise exc
                 f_vector_list.append(BinaryFockVector(f_vector))
             for coeff_set in coeff:
                 states.append({f: c for f, c in zip(f_vector_list, coeff_set)})
@@ -155,18 +157,18 @@ def generate_coupling_coeff(total_spin: float, projected_spin: float, n_open: in
 
     """
 
-    def _genealogical_coeff(S: int, M: int, tn: int, sigma: int):
-        S, M, tn, sigma = float(S) / 2, float(M) / 2, float(tn) / 2, float(sigma) / 2
-        if np.isclose(tn, 0.5):
-            return np.sqrt(0.5 + sigma * M / S)
-        elif np.isclose(tn, -0.5):
-            inner = 0.5 - sigma * M / (S + 1)
+    def _genealogical_coeff(_s: int, _m: int, _tn: int, _sigma: int):
+        _s, _m, _tn, _sigma = float(_s) / 2, float(_m) / 2, float(_tn) / 2, float(_sigma) / 2
+        if np.isclose(_tn, 0.5):
+            return np.sqrt(0.5 + _sigma * _m / _s)
+        elif np.isclose(_tn, -0.5):
+            inner = 0.5 - _sigma * _m / (_s + 1)
             if inner < 0.0:
                 return 0.0
             else:
-                return -2 * sigma * np.sqrt(inner)
+                return -2 * _sigma * np.sqrt(inner)
         else:
-            raise ValueError(tn)
+            raise ValueError(_tn)
 
     # All S and M values are integers doubled from the original values
     total_spin = int(2 * total_spin)
@@ -182,41 +184,41 @@ def generate_coupling_coeff(total_spin: float, projected_spin: float, n_open: in
     if n_open == 0:
         return [[]], [[]], np.ones((1, 1), dtype=float)
 
-    T_table = [{1: [[1, ]]}]  # [S(n) : [ T_vectors ] for n in n_open]
-    P_table = [{1: [[1, ]], -1: [[-1, ]]}]  # [M(n) : [ T_vectors ] for n in n_open]
+    t_table = [{1: [[1, ]]}]  # [S(n) : [ T_vectors ] for n in n_open]
+    p_table = [{1: [[1, ]], -1: [[-1, ]]}]  # [M(n) : [ T_vectors ] for n in n_open]
     for i in range(1, n_open):
-        new_Ts = dict()
-        for s, T_list in T_table[i - 1].items():
+        new_ts = dict()
+        for s, t_list in t_table[i - 1].items():
             if s - 1 >= 0:
-                if s - 1 not in new_Ts:
-                    new_Ts[s - 1] = list()
-                new_Ts[s - 1] += [T_vec + [s - 1] for T_vec in T_list]
-            if s + 1 not in new_Ts:
-                new_Ts[s + 1] = list()
-            new_Ts[s + 1] += [T_vec + [s + 1] for T_vec in T_list]
-        T_table.append(new_Ts)
+                if s - 1 not in new_ts:
+                    new_ts[s - 1] = list()
+                new_ts[s - 1] += [t_vec + [s - 1] for t_vec in t_list]
+            if s + 1 not in new_ts:
+                new_ts[s + 1] = list()
+            new_ts[s + 1] += [t_vec + [s + 1] for t_vec in t_list]
+        t_table.append(new_ts)
 
-        new_Ps = dict()
-        for m, P_list in P_table[i - 1].items():
-            if m - 1 not in new_Ps:
-                new_Ps[m - 1] = list()
-            new_Ps[m - 1] += [P_vec + [m - 1] for P_vec in P_list]
-            if m + 1 not in new_Ps:
-                new_Ps[m + 1] = list()
-            new_Ps[m + 1] += [P_vec + [m + 1] for P_vec in P_list]
-        P_table.append(new_Ps)
+        new_ps = dict()
+        for m, p_list in p_table[i - 1].items():
+            if m - 1 not in new_ps:
+                new_ps[m - 1] = list()
+            new_ps[m - 1] += [p_vec + [m - 1] for p_vec in p_list]
+            if m + 1 not in new_ps:
+                new_ps[m + 1] = list()
+            new_ps[m + 1] += [p_vec + [m + 1] for p_vec in p_list]
+        p_table.append(new_ps)
 
-    T_list = T_table[n_open - 1][total_spin]
-    P_list = P_table[n_open - 1][projected_spin]
-    coeff_mat = np.zeros((len(T_list), len(P_list)), dtype=float)
-    for i, j in product(range(len(T_list)), range(len(P_list))):
+    t_list = t_table[n_open - 1][total_spin]
+    p_list = p_table[n_open - 1][projected_spin]
+    coeff_mat = np.zeros((len(t_list), len(p_list)), dtype=float)
+    for i, j in product(range(len(t_list)), range(len(p_list))):
         d = 1.0
         for k in range(n_open):
-            d *= _genealogical_coeff(S=T_list[i][k], M=P_list[j][k],
-                                     tn=T_list[i][k] if k == 0 else (T_list[i][k] - T_list[i][k - 1]),
-                                     sigma=P_list[j][k] if k == 0 else (P_list[j][k] - P_list[j][k - 1]))
+            d *= _genealogical_coeff(_s=t_list[i][k], _m=p_list[j][k],
+                                     _tn=t_list[i][k] if k == 0 else (t_list[i][k] - t_list[i][k - 1]),
+                                     _sigma=p_list[j][k] if k == 0 else (p_list[j][k] - p_list[j][k - 1]))
         coeff_mat[i, j] = d
-    return T_list, P_list, coeff_mat
+    return t_list, p_list, coeff_mat
 
 
 if __name__ == "__main__":
@@ -237,11 +239,11 @@ if __name__ == "__main__":
         n_open = 2
         cs_excitation = 1
         os_excitation = 2
-        states = generate_csf(n_orbital=n_orbitals, n_electrons=n_electrons,
-                              multiplicity=multiplicity, projected_spin=projected_spin,
-                              n_open=n_open,
-                              cs_excitation=cs_excitation,
-                              os_excitation=os_excitation)
+        states = csf_states(n_orbital=n_orbitals, n_electrons=n_electrons,
+                            multiplicity=multiplicity, projected_spin=projected_spin,
+                            n_open=n_open,
+                            cs_excitation=cs_excitation,
+                            os_excitation=os_excitation)
         for s in states:
             print(pretty_print_state(s))
 

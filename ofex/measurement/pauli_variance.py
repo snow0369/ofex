@@ -43,7 +43,7 @@ def pauli_variance(true_ref1: Optional[State],
                 if cov_key not in true_cov_dict:
                     cov_key = (cov_key[1], cov_key[0])
                 if cov_key not in true_cov_dict:
-                    true_cov_dict[cov_key] = _calc_pauli_cov(p, q, true_ref1, true_ref2, anticommute)
+                    true_cov_dict[cov_key] = _calc_pauli_cov(p, q, true_ref1, true_ref2, ph=0, anticommute=anticommute)
                 coeff_p, coeff_q = coeff(p), coeff(q)
                 assert np.isclose(coeff_p.imag, 0.0)
                 assert np.isclose(coeff_q.imag, 0.0)
@@ -114,7 +114,7 @@ def pauli_covariance(initial_grp: Tuple[List[QubitOperator], List[List[int]], Li
     :return:
         covariance_dict: Dictionary of Pauli covariance (key=(P,Q), value=cov or (cov_R, cov_I)).
     """
-    pauli_list, grp_pauli_list, pauli_grp_list = initial_grp
+    pauli_list, grp_pauli_list, _ = initial_grp
 
     was_ph_none = False
     if phase_list is None:

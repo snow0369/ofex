@@ -2,7 +2,6 @@ import numpy as np
 from openfermion import FenwickTree
 
 from ofex.clifford.clifford_tools import gf
-from ofex.state.binary_fock import BinaryFockVector
 from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import SparseStateDict
 
@@ -11,9 +10,8 @@ def _depth_first_search(node_now, visited, func, args):
     for child_node in node_now.children:
         if child_node.index not in visited:
             _depth_first_search(child_node, visited, func, args)
-    else:
-        func(node_now, args)
-        visited.append(node_now)
+    func(node_now, args)
+    visited.append(node_now)
 
 
 def _update_descendent_mat(node, mat):
@@ -31,6 +29,8 @@ def _update_children_mat(node, mat):
 
 
 def _bk_tree_state_transform(state: SparseStateDict, func) -> SparseStateDict:
+    from ofex.state import BinaryFockVector
+
     num_qubits = get_num_qubits(state)
     fenwick_tree = FenwickTree(num_qubits)
     mat = gf(np.zeros((num_qubits, num_qubits), dtype=int))

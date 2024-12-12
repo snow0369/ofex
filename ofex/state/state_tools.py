@@ -13,6 +13,11 @@ from ofex.state.types import DenseState, SparseStateDict, is_dense_state, is_spa
     ScipySparse
 from ofex.utils.dict_utils import dict_allclose, compare_dict
 
+__all__ = ["get_num_qubits", "get_state_dim", "get_sparsity", "pretty_print_state", "compare_states",
+           "to_dense", "to_scipy_sparse", "to_sparse_dict", "state_type_transform",
+           "fock_vector_to_dense_state", "fock_vector_to_scipy_state",
+           "compress_sparse", "allclose", "norm", "normalize", "is_zero"]
+
 
 def get_num_qubits(state: State) -> int:
     if is_dense_state(state) or is_scipy_sparse_state(state):

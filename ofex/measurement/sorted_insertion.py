@@ -79,7 +79,6 @@ def optimal_sorted_insertion(op: QubitOperator,
     Returns:
 
     """
-    from ofex.measurement.iterative_coefficient_splitting import init_ics
 
     op = deepcopy(op)
     if () in op.terms:
@@ -89,7 +88,7 @@ def optimal_sorted_insertion(op: QubitOperator,
             raise Warning('Constant term is ignored in sorted insertion.')
 
     from ofex.measurement.iterative_coefficient_splitting.ics_prepare import init_split
-    ham_frags, (pauli_list, grp_pauli_list, pauli_grp_list), c_vec = (
+    ham_frags, (pauli_list, grp_pauli_list, pauli_grp_list) = (
         init_split(op, anticommute, method=init_method))
 
     if debug:

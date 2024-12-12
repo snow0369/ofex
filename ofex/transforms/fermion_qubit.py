@@ -7,7 +7,7 @@ from openfermion import QubitOperator, FermionOperator, jordan_wigner, bravyi_ki
 from openfermion.config import EQ_TOLERANCE
 
 from ofex.linalg.sparse_tools import sparse_apply_operator
-from ofex.state.binary_fock import BinaryFockVector
+from ofex.state import BinaryFockVector
 from ofex.state.state_tools import to_sparse_dict, to_dense, compress_sparse, get_num_qubits, state_type_transform, \
     pretty_print_state
 from ofex.state.types import DenseState, SparseStateDict, State, type_state

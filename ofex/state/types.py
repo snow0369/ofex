@@ -7,6 +7,9 @@ from scipy.sparse import lil_matrix, spmatrix
 from ofex.exceptions import OfexTypeError
 from ofex.state.binary_fock import BinaryFockVector
 
+__all__ = ["DenseState", "SparseStateDict", "ScipySparse", "State",
+           "STR_STATE_TYPES", "is_dense_state", "is_sparse_state", "is_scipy_sparse_state", "type_state"]
+
 DenseState = np.ndarray
 SparseStateDict = Dict[BinaryFockVector, Number]
 ScipySparse = lil_matrix

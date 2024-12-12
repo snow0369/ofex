@@ -9,6 +9,9 @@ from ofex.operators.symbolic_operator_tools import operator, coeff
 from ofex.operators.types import SinglePauli
 
 
+__all__ = ["is_z_only", "single_pauli_commute_chk", "dict_to_operator", "normalize_by_lcu_norm"]
+
+
 def _single_pauli_to_dict(op: SinglePauli) -> Dict[int, str]:
     idx_op = dict()
     for idx, single_op in op:
@@ -81,7 +84,7 @@ def normalize_by_lcu_norm(ham: QubitOperator,
     level = 1 : Sorted Insertion
     level = 2 : SI with norm optimization
     """
-    from ofex.measurement.sorted_insertion import sorted_insertion, optimal_sorted_insertion
+    from ofex.measurement import sorted_insertion, optimal_sorted_insertion
 
     if () in ham.terms:
         if np.isclose(ham.terms[()], 0.0):

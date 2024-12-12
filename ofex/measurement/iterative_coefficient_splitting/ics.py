@@ -7,7 +7,7 @@ from scipy.linalg import eigh
 
 from ofex.measurement.iterative_coefficient_splitting.ics_utils import _synthesize_group, \
     _calculate_groupwise_std, _generate_cov_list, _add_epsilon_shot
-from ofex.measurement.pauli_variance import pauli_variance, pauli_covariance
+from ofex.measurement.pauli_variance import pauli_variance
 from ofex.measurement.types import PauliCovDict, TransitionPauliCovDict
 from ofex.operators.symbolic_operator_tools import coeff, compare_operators
 
@@ -186,8 +186,8 @@ def run_ics(ham: QubitOperator,
                 mu = projector.T @ tot_vmat @ phi_s
                 vmat_tilde = projector.T @ tot_vmat @ projector
                 diag_v, u_v = eigh(vmat_tilde)
-                for i in range(len(diag_v)):
-                    if diag_v[i] < truncate_epsilon:
+                for i, dv in enumerate(diag_v):
+                    if dv < truncate_epsilon:
                         diag_v[i] = 0.0
                 vmat_tilde = u_v @ np.diag(diag_v) @ u_v.T.conj()
                 phi, res, rank, sing = np.linalg.lstsq(vmat_tilde, -mu, rcond=lstsq_rcond)
@@ -275,20 +275,20 @@ def run_ics(ham: QubitOperator,
 
 
 if __name__ == "__main__":
-    import json
 
     from openfermion import get_fermion_operator
     from ofex.utils.chem import molecule_example
-    from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
+    from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
     from ofex.state.chem_ref_state import hf_ground
-    from ofex.measurement.sorted_insertion import sorted_insertion
-    from ofex.propagator.exact import exact_rte
-    from ofex.measurement.iterative_coefficient_splitting import init_ics
+    from ofex.measurement import sorted_insertion
+    from ofex.propagator import exact_rte
     from ofex.linalg.sparse_tools import apply_operator
     from ofex.state.state_tools import pretty_print_state
 
 
     def ics_test():
+        from ofex.measurement.iterative_coefficient_splitting import init_ics
+
         mol_name = "LiH"
         transform = 'symmetry_conserving_bravyi_kitaev'
         debug = True

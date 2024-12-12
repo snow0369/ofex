@@ -12,16 +12,16 @@ STATE_PRINT_LSB_FIRST = True
 class BinaryFockVector(tuple):
     @property
     def num_qubits(self) -> int:
-        return self.__len__()
+        return len(self)
 
     @property
     def num_spin_orbitals(self) -> int:
-        return self.__len__()
+        return len(self)
 
     @property
     def num_spatial_orbitals(self) -> int:
-        assert self.__len__() % 2 == 0
-        return self.__len__() // 2
+        assert len(self) % 2 == 0
+        return len(self) // 2
 
     def __new__(cls,
                 inp: Sequence[Union[int, bool]], ):

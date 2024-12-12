@@ -8,16 +8,12 @@ from openfermion import FermionOperator, get_fermion_operator, normal_ordered
 
 from ofex.linalg.sparse_tools import expectation
 from ofex.operators.symbolic_operator_tools import compare_operators
-from ofex.state.binary_fock import BinaryFockVector
+from ofex.state import BinaryFockVector
 from ofex.state.chem_ref_state import hf_ground, cisd_ground
 from ofex.state.state_tools import compare_states, pretty_print_state
-from ofex.test_scripts.random_object import random_state_spdict
-from ofex.transforms.bravyi_kitaev_deprecated import bravyi_kitaev as bravyi_kitaev_original, \
-    inv_bravyi_kitaev_state
-from ofex.transforms.bravyi_kitaev_deprecated import bravyi_kitaev_state
-from ofex.transforms.bravyi_kitaev_tree_state import bravyi_kitaev_tree_state, \
-    inv_bravyi_kitaev_tree_state
-from ofex.transforms.fermion_qubit import fermion_to_qubit_operator, fermion_to_qubit_state
+from test_scripts.random_object import random_state_spdict
+from ofex.transforms.bravyi_kitaev_deprecated import bravyi_kitaev as bravyi_kitaev_original
+from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state, qubit_to_fermion_state
 from ofex.utils.chem import molecule_example
 from ofex.utils.dict_utils import dict_allclose
 
@@ -39,18 +35,7 @@ def bravyi_kitaev_test(num_qubits):
 def state_transform_test(num_qubits, transform, **kwargs):
     fermion_state = random_state_spdict(num_qubits)
     qubit_state_1 = fermion_to_qubit_state(fermion_state, transform, **kwargs)
-    if transform == "bravyi_kitaev":
-        qubit_state_2 = bravyi_kitaev_state(fermion_state)
-        fermion_state_2 = inv_bravyi_kitaev_state(qubit_state_2)
-    elif transform == "bravyi_kitaev_tree":
-        qubit_state_2 = bravyi_kitaev_tree_state(fermion_state)
-        fermion_state_2 = inv_bravyi_kitaev_tree_state(qubit_state_2)
-    elif transform == "jordan_wigner":
-        qubit_state_2 = fermion_state
-        fermion_state_2 = qubit_state_2
-    else:
-        raise NotImplementedError(transform)
-    assert dict_allclose(qubit_state_1, qubit_state_2), '\n' + compare_states(qubit_state_1, qubit_state_2)
+    fermion_state_2 = qubit_to_fermion_state(qubit_state_1, transform, **kwargs)
     assert dict_allclose(fermion_state, fermion_state_2), '\n' + compare_states(fermion_state, fermion_state_2)
 
 

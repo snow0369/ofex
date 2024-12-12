@@ -6,6 +6,8 @@ from scipy.sparse import spmatrix, identity
 
 from ofex.operators.symbolic_operator_tools import is_constant
 
+__all__ = ["single_pauli_expm", "reflective_pauli_expm"]
+
 
 def single_pauli_expm(pauli: QubitOperator,
                       n_qubits: Optional[int] = None) -> spmatrix:

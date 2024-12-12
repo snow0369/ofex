@@ -2,9 +2,7 @@ import numpy as np
 from openfermion import get_fermion_operator, normal_ordered, QubitOperator, get_linear_qubit_operator_diagonal, \
     get_sparse_operator
 
-from ofex.clifford.clifford_tools import tableau_to_pauli
-from ofex.clifford.pauli_diagonalization import diagonalizing_clifford
-from ofex.clifford.simulation import clifford_simulation
+from ofex.clifford import tableau_to_pauli, diagonalizing_clifford, clifford_simulation
 from ofex.measurement.sorted_insertion import sorted_insertion
 from ofex.operators.symbolic_operator_tools import clean_imaginary
 from ofex.state.state_tools import pretty_print_state

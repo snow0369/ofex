@@ -14,6 +14,9 @@ from ofex.state.state_tools import to_scipy_sparse, get_num_qubits, state_type_t
 from ofex.state.types import State, is_dense_state, type_state, ScipySparse
 from ofex.utils.binary import hamming_weight
 
+__all__ = ["transition_amplitude", "expectation", "apply_operator", "diagonalization", "sparse_apply_operator",
+           "state_dot"]
+
 
 def transition_amplitude(operator: Union[QubitOperator, spmatrix, LinearOperator],
                          state1: State,

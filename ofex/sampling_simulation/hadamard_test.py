@@ -15,12 +15,24 @@ def hadamard_test_general(overlap: complex,
                           coeff: Number = 1.0,) \
         -> ProbDist:
     """
-    Generate probability distributions for a Hadamard Test whose expectation value is c * <φ1|φ2>.
-
-    :param overlap: The value of <φ1|φ2>
-    :param coeff: (Optional) Additional coefficient
-    :return:
-        probdist_real, probdist_imag: Probability distributions for real and imaginary parts.
+    Computes the probability distribution for a Hadamard Test.
+    
+    This function generates a probability distribution for a Hadamard Test, where the expectation value 
+    is computed as c * <φ1|φ2>. The function supports both real and imaginary components of the overlap.
+    
+    Args:
+        overlap (complex): The overlap value <φ1|φ2>, expected as a complex number.
+        imaginary (bool): If True, computes the probability distribution for the imaginary component of 
+            the overlap. If False, computes for the real component.
+        coeff (Number, optional): An additional scaling coefficient applied to the probabilities. 
+            Defaults to 1.0.
+    
+    Returns:
+        ProbDist: A probability distribution for the chosen component (real or imaginary) of the 
+        expectation value.
+    
+    Raises:
+        ValueError: If the absolute value of the overlap exceeds 1.0, indicating a non-unitary operator.
     """
     ab_overlap = abs(overlap)
     if not (np.isclose(ab_overlap, 1.0, atol=EQ_TOLERANCE) or ab_overlap < 1.0):
@@ -41,14 +53,28 @@ def hadamard_test_qubit_operator(ref_state_1: State,
                                  sparse_2: bool = False,) \
         -> Tuple[ProbDist, ProbDist]:
     """
-    Generate probability distributions for a Hadamard Test whose expectation value is c * <φ1|U|φ2>.
+    Computes probability distributions for the Hadamard Test expectation value for a qubit operator.
 
-    :param ref_state_1: Reference state φ1
-    :param ref_state_2: Reference state φ2
-    :param unitary: (Optional) Unitary applied to φ2
-    :param coeff: (Optional) Additional coefficient
-    :return:
-        probdist_real, probdist_imag: Probability distributions for real and imaginary parts.
+    This function calculates the real and imaginary components of the expectation value 
+    `coeff * <φ1|U|φ2>`, where `U` is an optional unitary operator. When the coefficient `coeff` 
+    is zero, the function returns trivial distributions.
+
+    Args:
+        ref_state_1 (State): The first reference state |φ1⟩.
+        ref_state_2 (State): The second reference state |φ2⟩.
+        unitary (Optional[QubitOperator]): An optional unitary operator U applied to |φ2⟩. 
+            If not provided, no unitary is applied.
+        coeff (float, optional): A scaling coefficient applied to the probabilities. Defaults to 1.0.
+        sparse_1 (bool, optional): A flag indicating if `ref_state_1` is in sparse format. Defaults to False.
+        sparse_2 (bool, optional): A flag indicating if `ref_state_2` is in sparse format. Defaults to False.
+
+    Returns:
+        Tuple[ProbDist, ProbDist]: A tuple containing two probability distributions:
+            - The first distribution (ProbDist) corresponds to the real component of the expectation value.
+            - The second distribution (ProbDist) corresponds to the imaginary component of the expectation value.
+
+    Raises:
+        ValueError: If the coefficient `coeff` is not a finite number.
     """
     if np.isclose(coeff, 0, atol=EQ_TOLERANCE):
         probdist_real = ProbDist({coeff: 1})

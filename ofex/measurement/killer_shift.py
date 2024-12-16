@@ -4,15 +4,15 @@ from typing import Tuple, Any, Dict, Optional
 
 import numpy as np
 import scipy.optimize
-from openfermion import FermionOperator, QubitOperator, normal_ordered, get_fermion_operator
+from openfermion import FermionOperator, QubitOperator, normal_ordered
 
 from ofex.linalg.sparse_tools import sparse_apply_operator
-from ofex.measurement.sorted_insertion import sorted_insertion
+from ofex.measurement.pauli_grouping import sorted_insertion
 from ofex.operators.fermion_operator_tools import cre_ann
 from ofex.state import BinaryFockVector
 from ofex.state.state_tools import compress_sparse
-from ofex.transforms.fermion_factorization import ham_to_ei_spin
 from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
+from ofex.transforms.fermion_factorization import ham_to_ei_spin
 
 
 def killer_shift_opt_fermion_hf(fham: FermionOperator,
@@ -22,6 +22,45 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
                                 repeat_opt: int = 1,
                                 f2q_kwargs: Optional[Dict[str, Any]] = None) \
         -> Tuple[FermionOperator, QubitOperator, float]:
+    """
+    Perform the killer shift optimization for a given fermionic Hamiltonian 
+    and Hartree-Fock (HF) vector.
+    
+    This method applies the killer shift algorithm to reduce the measurement cost 
+    in the transitional amplitude <φ0|H|φ1>, where φ0 corresponds to a single 
+    Slater determinant. The algorithm identifies a Hermitian operator T such that 
+    T|φ0> = t|φ0>, where t is a real constant, minimizing the norm of H - T. It 
+    supports varying levels of optimization and is based on the methodologies 
+    described in the paper [Arxiv:2409.02504](https://arxiv.org/abs/2409.02504).
+    
+    Args:
+        fham (FermionOperator): The input fermionic Hamiltonian to which the 
+            killer shift optimization is applied.
+        hf_vector (BinaryFockVector): The Hartree-Fock state represented as a 
+            binary vector, serving as the reference state for the killer shift.
+        transform (str): Specifies the transformation method for mapping fermionic 
+            operators to qubit operators (e.g., 'Jordan-Wigner' or 'Bravyi-Kitaev'), 
+            supported in the function `ofex.transform.fermion_to_qubit_operator`.
+        optimization_level (int, optional): The optimization level used in the killer 
+            shift procedure. Available options:
+                - 0: Use the number operator only.
+                - 1: Include contributions from one-body operators.
+                - 2: Include contributions from both one- and two-body operators 
+                  (default: 1).
+        repeat_opt (int, optional): The number of optimization iterations to 
+            perform for refining the solution (default: 1).
+        f2q_kwargs (Optional[Dict[str, Any]], optional): Additional keyword arguments 
+            passed to the fermion-to-qubit transformation functions (default: None).
+    
+    Returns:
+        Tuple[FermionOperator, QubitOperator, float]: A tuple containing:
+            - FermionOperator: The optimized fermionic Hamiltonian with reduced 
+              norm after applying the killer shift.
+            - QubitOperator: The corresponding qubit Hamiltonian obtained after 
+              the fermion-to-qubit mapping and applying the killer shift.
+            - float: The energy constant resulting from the killer shift 
+              transformation.
+    """
     if f2q_kwargs is None:
         f2q_kwargs = dict()
     if optimization_level not in [0, 1, 2]:
@@ -144,81 +183,3 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
     const = const.real
 
     return fham - shift, pham - shift_pauli, const
-
-
-if __name__ == "__main__":
-    from ofex.utils.chem import molecule_example
-    from ofex.state.chem_ref_state import hf_ground
-
-
-    def betas(pham: QubitOperator):
-        fh = sorted_insertion(pham, anticommute=False)
-        lcu = sorted_insertion(pham, anticommute=True)
-        return sum([x.induced_norm(order=2) for x in fh]), sum([x.induced_norm(order=2) for x in lcu])
-
-
-    def shift_test():
-        mol_list = ["H2", "LiH", "BeH2", "H2O"]
-        tr_list = ["jordan_wigner", "bravyi_kitaev", "symmetry_conserving_bravyi_kitaev"]
-        for mol_name, transform in product(mol_list, tr_list):
-            print(f"mol = {mol_name}, transform = {transform}")
-            mol = molecule_example(mol_name)
-            hf = hf_ground(mol)
-            assert len(hf) == 1
-            hf = list(hf.keys())[0]
-            fham = mol.get_molecular_hamiltonian()
-            fham = get_fermion_operator(fham)
-            if transform == "jordan_wigner":
-                kwargs = dict()
-            elif transform == "bravyi_kitaev":
-                kwargs = {'n_qubits': mol.n_qubits}
-            elif transform == 'symmetry_conserving_bravyi_kitaev':
-                kwargs = {'active_fermions': mol.n_electrons,
-                          'active_orbitals': mol.n_qubits}
-            else:
-                raise AssertionError
-            pham = fermion_to_qubit_operator(fham, transform, **kwargs)
-            pham = pham - pham.constant
-            beta, antibeta = betas(pham)
-            print("\tOriginal")
-            print(f"\t\tnorm     = {pham.induced_norm(order=1)}")
-            print(f"\t\tSI norm  = {beta}")
-            print(f"\t\tASI norm = {antibeta}")
-            # print(pham.pretty_string(num_tabs=2))
-
-            _, shifted_pham_0, const = killer_shift_opt_fermion_hf(fham, hf, transform,
-                                                                   optimization_level=0,
-                                                                   f2q_kwargs=kwargs)
-            beta, antibeta = betas(shifted_pham_0)
-            print("\tShifted 0")
-            print(f"\t\tnorm     = {shifted_pham_0.induced_norm(order=1)}")
-            print(f"\t\tSI norm  = {beta}")
-            print(f"\t\tASI norm = {antibeta}")
-            print(f"\t\tshift_const = {const}")
-            # print(shifted_pham_0.pretty_string(num_tabs=2))
-
-            _, shifted_pham_1, const = killer_shift_opt_fermion_hf(fham, hf, transform,
-                                                                   optimization_level=1,
-                                                                   f2q_kwargs=kwargs)
-            beta, antibeta = betas(shifted_pham_1)
-            print("\tShifted 1")
-            print(f"\t\tnorm     = {shifted_pham_1.induced_norm(order=1)}")
-            # print(shifted_pham_1.pretty_string(num_tabs=2))
-            print(f"\t\tSI norm  = {beta}")
-            print(f"\t\tASI norm = {antibeta}")
-            print(f"\t\tshift_const = {const}")
-
-            _, shifted_pham_2, const = killer_shift_opt_fermion_hf(fham, hf, transform,
-                                                                   optimization_level=2,
-                                                                   repeat_opt=5,
-                                                                   f2q_kwargs=kwargs)
-            beta, antibeta = betas(shifted_pham_2)
-            print("\tShifted 2")
-            print(f"\t\tnorm     = {shifted_pham_2.induced_norm(order=1)}")
-            # print(shifted_pham_1.pretty_string(num_tabs=2))
-            print(f"\t\tSI norm  = {beta}")
-            print(f"\t\tASI norm = {antibeta}")
-            print(f"\t\tshift_const = {const}")
-
-
-    shift_test()

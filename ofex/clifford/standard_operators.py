@@ -6,6 +6,24 @@ from ofex.clifford.clifford_tools import gf
 
 
 def clifford_op_str(op, *args) -> str:
+    """
+    Converts a Clifford operation and its arguments into a string representation.
+    
+    Args:
+        op (str): The operation to be represented. Supported operations are:
+            - "H": Hadamard gate (applies to 1 qubit)
+            - "S": Phase gate (applies to 1 qubit)
+            - "CX" (or "CNOT"): Controlled-X gate (applies to 2 qubits)
+            - "CZ": Controlled-Z gate (applies to 2 qubits)
+            - "QSW": Qubit swap operation (applies to 2 qubits)
+        *args: The integers representing the qubits the operation applies to.
+    
+    Returns:
+        str: The string representation of the operation and its target qubits.
+    
+    Raises:
+        ValueError: If the operation is not supported or the number of arguments does not match the required format.
+    """
     if op in ["H", "S"]:
         if len(args) != 1:
             raise ValueError
@@ -20,6 +38,21 @@ def clifford_op_str(op, *args) -> str:
 
 def hadamard(arr: FieldArray, ph: FieldArray, idx: int, cliff_hist: Optional[List[str]] = None) \
         -> Tuple[FieldArray, FieldArray]:
+    """
+    Applies the Hadamard gate to the specified qubit.
+
+    Args:
+        arr (FieldArray): The input Pauli tableau (a binary symplectic matrix) which is being transformed.
+        ph (FieldArray): The phase vector.
+        idx (int): The qubit index to apply the Hadamard gate.
+        cliff_hist (Optional[List[str]]): History of Clifford operations (if provided).
+
+    Returns:
+        Tuple[FieldArray, FieldArray]: Updated operator matrix and phase vector.
+
+    Raises:
+        AssertionError: If the input matrix does not have the correct dimensions.
+    """
     arr, ph = gf(arr), gf(ph)
     assert arr.shape[0] % 2 == 0
     n_qubits = arr.shape[0] // 2
@@ -32,6 +65,21 @@ def hadamard(arr: FieldArray, ph: FieldArray, idx: int, cliff_hist: Optional[Lis
 
 def s_gate(arr: FieldArray, ph: FieldArray, idx: int, cliff_hist: Optional[List[str]] = None) \
         -> Tuple[FieldArray, FieldArray]:
+    """
+    Applies the S (phase) gate to the specified qubit.
+
+    Args:
+        arr (FieldArray): The input Pauli tableau (a binary symplectic matrix) which is being transformed.
+        ph (FieldArray): The phase vector.
+        idx (int): The qubit index to apply the S gate.
+        cliff_hist (Optional[List[str]]): History of Clifford operations (if provided).
+
+    Returns:
+        Tuple[FieldArray, FieldArray]: Updated operator matrix and phase vector.
+
+    Raises:
+        AssertionError: If the input matrix does not have the correct dimensions.
+    """
     arr, ph = gf(arr), gf(ph)
     assert arr.shape[0] % 2 == 0
     n_qubits = arr.shape[0] // 2
@@ -44,6 +92,23 @@ def s_gate(arr: FieldArray, ph: FieldArray, idx: int, cliff_hist: Optional[List[
 
 def cx(arr: FieldArray, ph: FieldArray, idx_c: int, idx_t: int, cliff_hist: Optional[List[str]] = None) \
         -> Tuple[FieldArray, FieldArray]:
+    """
+    Applies the CX (CNOT) gate to a pair of qubits.
+
+    Args:
+        arr (FieldArray): The input Pauli tableau (a binary symplectic matrix) which is being transformed.
+        ph (FieldArray): The phase vector.
+        idx_c (int): The control qubit index.
+        idx_t (int): The target qubit index.
+        cliff_hist (Optional[List[str]]): History of Clifford operations (if provided).
+
+    Returns:
+        Tuple[FieldArray, FieldArray]: Updated operator matrix and phase vector.
+
+    Raises:
+        AssertionError: If the input matrix does not have the correct dimensions.
+        ValueError: If the control and target qubit indices are the same.
+    """
     arr, ph = gf(arr), gf(ph)
     assert arr.shape[0] % 2 == 0
     n_qubits = arr.shape[0] // 2
@@ -61,6 +126,23 @@ def cx(arr: FieldArray, ph: FieldArray, idx_c: int, idx_t: int, cliff_hist: Opti
 
 def cz(arr: FieldArray, ph: FieldArray, idx_1: int, idx_2: int, cliff_hist: Optional[List[str]] = None) \
         -> Tuple[FieldArray, FieldArray]:
+    """
+    Applies the CZ (controlled-Z) gate to a pair of qubits.
+
+    Args:
+        arr (FieldArray): The input Pauli tableau (a binary symplectic matrix) which is being transformed.
+        ph (FieldArray): The phase vector.
+        idx_1 (int): The index of the first qubit.
+        idx_2 (int): The index of the second qubit.
+        cliff_hist (Optional[List[str]]): History of Clifford operations (if provided).
+
+    Returns:
+        Tuple[FieldArray, FieldArray]: Updated operator matrix and phase vector.
+
+    Raises:
+        AssertionError: If the input matrix does not have the correct dimensions.
+        ValueError: If the two qubit indices are the same.
+    """
     arr, ph = gf(arr), gf(ph)
     assert arr.shape[0] % 2 == 0
     n_qubits = arr.shape[0] // 2
@@ -77,6 +159,22 @@ def cz(arr: FieldArray, ph: FieldArray, idx_1: int, idx_2: int, cliff_hist: Opti
 
 def qsw(arr: FieldArray, ph: FieldArray, idx_1: int, idx_2: int, cliff_hist: Optional[List[str]] = None) \
         -> Tuple[FieldArray, FieldArray]:
+    """
+    Swaps the positions of two qubits.
+
+    Args:
+        arr (FieldArray): The input Pauli tableau (a binary symplectic matrix) which is being transformed.
+        ph (FieldArray): The phase vector.
+        idx_1 (int): The index of the first qubit.
+        idx_2 (int): The index of the second qubit.
+        cliff_hist (Optional[List[str]]): History of Clifford operations (if provided).
+
+    Returns:
+        Tuple[FieldArray, FieldArray]: Updated operator matrix and phase vector.
+
+    Raises:
+        AssertionError: If the input matrix does not have the correct dimensions.
+    """
     arr, ph = gf(arr), gf(ph)
     assert arr.shape[0] % 2 == 0
     n_qubits = arr.shape[0] // 2

@@ -1,10 +1,28 @@
 from openfermion import MajoranaOperator, FermionOperator
 
-from ofex.operators.qubit_operator_tools import dict_to_operator
+from ofex.operators.symbolic_operator_tools import dict_to_operator
 
 
 # TODO : Implement the f2m mapping
 def majorana_to_fermion(maj: MajoranaOperator) -> FermionOperator:
+    """
+    Convert a MajoranaOperator into its equivalent FermionOperator representation 
+    using the following mapping rules:
+
+    ∙ m_{2k} = a_k† + a_k
+    ∙ m_{2k+1} = 1j * (a_k† - a_k)
+    
+    Each Majorana operator is expressed in terms of Fermionic creation (a_k†) 
+    and annihilation (a_k) operators according to these definitions.
+    
+    Args:
+        maj (MajoranaOperator): A MajoranaOperator instance to be converted into
+            its equivalent FermionOperator representation.
+    
+    Returns:
+        FermionOperator: The resulting FermionOperator equivalent to the input 
+            MajoranaOperator after applying the mapping rules.
+    """
     ret_f_sum = FermionOperator()
     for m_op, coeff in maj.terms.items():
         f_sum = FermionOperator.identity() * coeff

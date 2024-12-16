@@ -1,3 +1,28 @@
+"""
+This module provides functions and tools for manipulating and factorizing fermionic Hamiltonians.
+
+The module contains utilities to convert fermion Hamiltonians into various representations,
+perform double factorization of electron integrals, and handle reflection or number operator
+transformations. It also includes helper functions for one-body and two-body terms, eigenvalue 
+decomposition of tensors, and verification of results.
+
+Core functionalities include:
+1. Hamiltonian conversion to/from electron integral tensors in spatial and spin orbital formats.
+2. Double factorization of electron integrals with optional reflection operators.
+3. Construction of Hamiltonians from factorized forms.
+4. Calculation of norms for reflection-based factorizations.
+
+Common operations performed by the module involve manipulating electron integrals, normal-ordering
+fermion operators, and expressing Hamiltonians in highly factorized forms.
+
+Available functions:
+- ham_to_ei_spatial, ei_to_ham_spatial
+- ham_to_ei_spin, ei_to_ham_spin
+- double_factorization
+- number_factorization_to_reflection
+- double_factorization_to_hamiltonian
+- calculate_reflect_norm
+"""
 from collections import Counter
 from functools import partial
 from itertools import product
@@ -10,7 +35,7 @@ from scipy.linalg import eigh
 
 from ofex.operators.fermion_operator_tools import cre_ann, one_body_excitation, one_body_number, one_body_reflection, \
     two_body_reflection
-from ofex.operators.qubit_operator_tools import dict_to_operator
+from ofex.operators.symbolic_operator_tools import dict_to_operator
 from ofex.operators.types import SingleFermion
 from ofex.transforms.fermion_rotation import fermion_rotation_operator
 
@@ -23,11 +48,33 @@ FermionFragment = Tuple[FermionOperator, np.ndarray]
 
 
 def _sorted_tuple(p: int, q: int, r: int, s: int) -> SingleFermion:
+    """
+    Generate a normal-ordered tuple of creation and annihilation operators.
+
+    Args:
+        p, q: Indices for creation operators.
+        r, s: Indices for annihilation operators.
+
+    Returns:
+        A tuple of normal-ordered creation and annihilation operators,
+        first sorted by index for creation operators, then for annihilation operators.
+    """
     return tuple(sorted([(p, 1), (q, 1)], reverse=True, key=lambda x: x[0]) +
                  sorted([(r, 0), (s, 0)], reverse=True, key=lambda x: x[0]))
 
 
 def _bring_all_two_spatial(p_s, q_s, r_s, s_s, twobody: FermionOperator, new_twobody=None):
+    """
+    Collect two-electron interaction terms for spatial orbitals from a FermionOperator.
+
+    Args:
+        p_s, q_s, r_s, s_s: Indices of the spatial orbitals.
+        twobody: Original FermionOperator containing two-body terms.
+        new_twobody: Partial dictionary of terms to append.
+
+    Returns:
+        Normal-ordered FermionOperator including relevant two-electron terms.
+    """
     def spatial_twobody(_p_s, _q_s, _r_s, _s_s):
         _op_list = list()
         _op_list.append(_sorted_tuple(2 * _p_s, 2 * _q_s, 2 * _r_s, 2 * _s_s))
@@ -59,6 +106,17 @@ def _bring_all_two_spatial(p_s, q_s, r_s, s_s, twobody: FermionOperator, new_two
 
 
 def _bring_all_two_spin(p, q, r, s, twobody: FermionOperator, new_twobody=None):
+    """
+    Collect two-electron interaction terms for spin orbitals from a FermionOperator.
+
+    Args:
+        p, q, r, s: Indices of the spin orbitals.
+        twobody: Original FermionOperator containing two-body terms.
+        new_twobody: Partial dictionary of terms to append.
+
+    Returns:
+        Normal-ordered FermionOperator including relevant two-electron terms.
+    """
     op_list = [
         _sorted_tuple(p, q, r, s),
         _sorted_tuple(r, q, p, s),
@@ -79,29 +137,47 @@ def _bring_all_two_spin(p, q, r, s, twobody: FermionOperator, new_twobody=None):
 
 
 def _one_body_excitation_spatial(idx1, idx2):
+    """
+    Generate a one-body excitation operator for spatial orbitals.
+
+    Args:
+        idx1: Index of the creation operator.
+        idx2: Index of the annihilation operator.
+
+    Returns:
+        FermionOperator: One-body operator for the given indices.
+    """
+    if idx1 == idx2:
+        return one_body_excitation(idx1, idx2, spin_idx=False, hermitian=False) / 2
     return one_body_excitation(idx1, idx2, spin_idx=False, hermitian=False)
 
 
 def ham_to_ei_spatial(fham: FermionOperator,
-                      n_spinorb: int) -> Tuple[np.ndarray, np.ndarray, float]:
+                      n_spinorb: int)\
+        -> Tuple[np.ndarray, np.ndarray, float]:
     """
-    Returns spatial one-body and two-body electron integral tensors for given Fermion hamiltonian.
+    Converts a Fermion Hamiltonian into spatial one-body and two-body electron integral tensors.
+
+    This function processes the input Fermion Hamiltonian into spatial orbital tensors, separating the one-body
+    and two-body electronic integrals as well as the constant energy contribution. It ensures normal ordering
+    of the Hamiltonian terms and constructs the corresponding tensors for spatial orbitals.
 
     Notation:
         E_{pq} = a†_{p↑}a_{q↑} + a†_{p↓}a_{q↓}
 
-    H =  ∑_{p,q} oei[p, q] E_{pq}
-        +∑_{pqrs} tei[p,q,r,s]/2 E_{pq} * E_{rs}
-        +const
+        H = ∑_{pq} oei[p,q] E_{pq}
+          + (1/2) ∑_{pqrs} tei[p,q,r,s] E_{pq} * E_{rs}
+          + const
 
     Args:
-        fham: Fermion Hamiltonian
-        n_spinorb: Number of spin orbitals
+        fham (FermionOperator): The input Fermion Hamiltonian.
+        n_spinorb (int): The total number of spin orbitals (must be an even number).
 
     Returns:
-        spatial_oei: Spatial one-body tensor
-        spatial_tei: Spatial two-body tensor
-        const: constant
+        Tuple[np.ndarray, np.ndarray, float]:
+            - spatial_oei (ndarray): A 2D tensor with one-body electron integrals for spatial orbitals.
+            - spatial_tei (ndarray): A 4D tensor with two-body electron integrals for spatial orbitals.
+            - const (float): The constant term in the Hamiltonian.
     """
     spatial_oei = np.zeros((n_spinorb // 2, n_spinorb // 2), dtype=complex)
     const = 0.0
@@ -316,26 +392,31 @@ def ham_to_ei_spatial(fham: FermionOperator,
     return spatial_oei, spatial_tei, const
 
 
-def ei_to_ham_spatial(spatial_oei: np.ndarray, spatial_tei: np.ndarray, const: float) -> FermionOperator:
+def ei_to_ham_spatial(spatial_oei: np.ndarray,
+                      spatial_tei: np.ndarray,
+                      const: float)\
+        -> FermionOperator:
     """
-    Returns Fermion hamiltonian from the spatial one-body and two-body tensors.
-    (Inverse function of ham_to_ei)
+    Constructs a Fermion Hamiltonian from the spatial one-body and two-body electron integral tensors.
+    (Inverse function of ham_to_ei_spatial)
+
+    This method uses the provided one-body and two-body integral tensors, as well as a constant term, to
+    construct a normalized Fermion Hamiltonian.
 
     Notation:
         E_{pq} = a†_{p↑}a_{q↑} + a†_{p↓}a_{q↓}
 
-    H =  ∑_{p,q} oei[p, q] E_{pq}
-        +∑_{pqrs} tei[p,q,r,s]/2 E_{pq} * E_{rs}
-        +const
+        H = ∑_{p,q} oei[p, q] E_{pq}
+            + 1/2 ∑_{pqrs} tei[p, q, r, s] E_{pq} * E_{rs}
+            + const
 
     Args:
-        spatial_oei: Spatial one-body tensor
-        spatial_tei: Spatial two-body tensor
-        const: Constant
+        spatial_oei (np.ndarray): A 2D array containing the spatial one-body electron integrals.
+        spatial_tei (np.ndarray): A 4D array containing the spatial two-body electron integrals.
+        const (float): A constant energy term to include in the Hamiltonian.
 
     Returns:
-        ham: Complete hamiltonian
-
+        FermionOperator: The resulting Fermion Hamiltonian.
     """
     ham = FermionOperator()
     n_orb = spatial_oei.shape[0]
@@ -350,25 +431,33 @@ def ei_to_ham_spatial(spatial_oei: np.ndarray, spatial_tei: np.ndarray, const: f
     return ham + const
 
 
-def ham_to_ei_spin(fham: FermionOperator, n_spinorb: int) -> Tuple[np.ndarray, np.ndarray, float]:
+def ham_to_ei_spin(fham: FermionOperator,
+                   n_spinorb: int)\
+        -> Tuple[np.ndarray, np.ndarray, float]:
     """
-    Returns spin one-body and two-body tensors in spin orbital for given Fermion hamiltonian.
+    Converts a Fermion Hamiltonian into spin one-body and two-body electron integral tensors.
 
-    Notation:
+    This function separates the provided Fermion Hamiltonian into spin orbital tensors, which include 
+    one-body and two-body electron integrals as well as a constant energy term. The method ensures 
+    normal ordering of the Hamiltonian terms and calculates the appropriate tensors for spin orbitals.
+
+    Mathematical Notation:
         E_{pq} = a†_{p}a_{q}
 
-    H =  ∑_{p,q} oei[p, q] E_{pq}
-        +∑_{pqrs} tei[p,q,r,s]/2 E_{pq} * E_{rs}
-        +const
+        H = ∑_{p,q} oei[p, q] * E_{pq}
+            + (1/2) ∑_{p,q,r,s} tei[p, q, r, s] * E_{pq} * E_{rs}
+            + const
 
     Args:
-        fham: Fermion Hamiltonian
-        n_spinorb: Number of spin orbitals
+        fham (FermionOperator): The input Fermion Hamiltonian in normal order.
+        n_spinorb (int): The total number of spin orbitals.
 
     Returns:
-        spin_oei: Spin one-body tensor
-        spin_tei: Spin two-body tensor
-        const: constant
+        Tuple[np.ndarray, np.ndarray, float]: A tuple containing:
+            - spin_oei (np.ndarray): A 2D array (n_spinorb x n_spinorb) representing spin one-body electron integrals.
+            - spin_tei (np.ndarray): A 4D array (n_spinorb x n_spinorb x n_spinorb x n_spinorb) 
+                                     representing spin two-body electron integrals.
+            - const (float): The constant energy term in the Hamiltonian.
     """
     spin_oei = np.zeros((n_spinorb, n_spinorb), dtype=complex)
     two_body = dict()
@@ -482,26 +571,32 @@ def ham_to_ei_spin(fham: FermionOperator, n_spinorb: int) -> Tuple[np.ndarray, n
     return spin_oei, spin_tei, const
 
 
-def ei_to_ham_spin(spin_oei: np.ndarray, spin_tei: np.ndarray, const: float) -> FermionOperator:
+def ei_to_ham_spin(spin_oei: np.ndarray,
+                   spin_tei: np.ndarray, const: float)\
+        -> FermionOperator:
     """
-    Returns Fermion hamiltonian from the spin one-body and two-body tensors.
-    (Inverse function of ham_to_ei)
-
+    Constructs a Fermion Hamiltonian from the spin one-body and two-body electron integral tensors.
+    (Inverse function of ham_to_ei_spin)
+    
+    This function takes one-body and two-body spin integral tensors, along with a constant term, and converts
+    them back into a FermionOperator representation of the Hamiltonian. The result includes creation and
+    annihilation operators for spin orbitals.
+    
     Notation:
-        E_{pq} = a_{p}a_{q}
-
-    H =  ∑_{p,q} oei[p, q] E_{pq}
-        +∑_{pqrs} tei[p,q,r,s]/2 E_{pq} * E_{rs}
-        +const
-
+        E_{pq} = a†_{p}a_{q}
+    
+        H = ∑_{p,q} oei[p, q] E_{pq}
+            + (1/2) ∑_{p,q,r,s} tei[p, q, r, s] * E_{pq} * E_{rs}
+            + const
+    
     Args:
-        spin_oei: spin one-body tensor
-        spin_tei: spin two-body tensor
-        const: Constant
-
+        spin_oei (np.ndarray): A 2D array (n_spinorb x n_spinorb) representing spin one-body electron integrals.
+        spin_tei (np.ndarray): A 4D array (n_spinorb x n_spinorb x n_spinorb x n_spinorb)
+                               representing spin two-body electron integrals.
+        const (float): The constant energy term in the Hamiltonian.
+    
     Returns:
-        ham: Complete hamiltonian
-
+        FermionOperator: The resulting Fermion Hamiltonian.
     """
     ham = FermionOperator()
     n_spinorb = spin_oei.shape[0]
@@ -522,33 +617,42 @@ def double_factorization(oei: np.ndarray,
                          tei: np.ndarray,
                          reflection: bool = False) -> Tuple[List[np.ndarray], List[np.ndarray], float]:
     """
-    Perform double factorization from one-body and two-body tensors.
-
-    Notations:
-        n_p = n_{p↑} + n_{p↓}
-        r_{p↑} = 2n_{p↑} - 1, r_{p↓} = 2n_{p↓} - 1
-        r_p = r_{p↑} + r_{p↓}
-
-    H = Hamiltonian constructed by one-body and two-body electron integrals (oei, tei).
-
-    Returns lists of h and u matrices such that:
-    1) reflection=False
-        H = u0 (∑_{p} h[0][p] n_p) u0† + 1/2∑_{m≥1} um (∑_{pq} h[m][p,q] n_p n_q) um†
-    2) reflection=True
-        H = u0 (∑_{p} h[0][p] r_p) u0† + 1/2∑_{m≥1} um (∑_{pq} h[m][p,q] r_p r_q) um† + const
-    um(•)um† : Orbital rotation specified by spatial_u_list[m]. (Refer to operator_mix_orbital(•, spatial_v=True))
-
-    Similar conversion also happens if oei and tei are written in spin orbitals.
-
+    Perform double factorization of a Fermionic Hamiltonian using one-body and two-body spatial/spin electron
+    integral tensors.
+    
+    This method factorizes a Fermionic Hamiltonian, represented by the one-body (oei) and two-body (tei) 
+    electron integrals, into a sequence of matrices (h_list) and unitary operators (u_list). The factorization 
+    can be performed with either number operators or reflection operators, based on the optional argument 
+    `reflection`.
+    
+    Notation:
+        - n_p = n_{p↑} + n_{p↓} (number operator)
+        - r_{p↑} = 2n_{p↑} - 1, r_{p↓} = 2n_{p↓} - 1 (reflection operators)
+        - r_p = r_{p↑} + r_{p↓}
+    
+    Double-Factorized Hamiltonian (H):
+        1) If reflection=False:
+            H = u0 (∑_{p} h[0][p] n_p) u0† 
+                + 1/2 ∑_{m >= 1} um (∑_{pq} h[m][p,q] n_p n_q) um†
+        2) If reflection=True:
+            H = u0 (∑_{p} h[0][p] r_p) u0† 
+                + 1/2 ∑_{m >= 1} um (∑_{pq} h[m][p,q] r_p r_q) um† + const
+        
+        Here, um represents a unitary rotation operator corresponding to spatial/spin orbital transformations.
+    
     Args:
-        oei: One-body tensor
-        tei: Two-body tensor
-        reflection: In terms of reflection operator?
-
+        oei (np.ndarray): 2D tensor of one-body electron integrals (dimension: n_orb x n_orb) in spin or spatial
+            orbitals.
+        tei (np.ndarray): 4D tensor of two-body electron integrals (dimension: n_orb x n_orb x n_orb x n_orb) in
+            spin or spatial orbitals.
+        reflection (bool): If True, factorizes in terms of reflection operators; defaults to False.
+    
     Returns:
-        spatial_h_list: Coefficients; h[0] is 1D array, h[m>0] are 2D.
-        spatial_u_list: Orbital rotation unitaries;
-        const: Remaining constant, 0 if reflection=False,
+        Tuple[List[np.ndarray], List[np.ndarray], float]: 
+            - h_list: List of coefficient matrices; h_list[0] is a 1D array (one-body coefficients), 
+              while h_list[m > 0] are 2D arrays (two-body coefficients).
+            - u_list: List of unitary rotation matrices corresponding to orbital rotations.
+            - const: Scalar constant representing the remaining contribution, which is zero if reflection=False.
     """
     n_orb = oei.shape[0]
     h_0, u_0 = eigh(oei)
@@ -577,27 +681,44 @@ def number_factorization_to_reflection(h_list: List[np.ndarray],
     """
     Transforms the factorization with number operators into that of reflection operators.
 
-    Notations:
-        n_p = n_{p↑} + n_{p↓}
-        r_{p↑} = 2n_{p↑} - 1, r_{p↓} = 2n_{p↓} - 1
-        r_p = r_{p↑} + r_{p↓}
+    Notation:
+        - n_p = n_{p↑} + n_{p↓} (number operator for spatial orbitals)
+        - r_{p↑} = 2n_{p↑} - 1, r_{p↓} = 2n_{p↓} - 1 (reflection operators for spin orbitals)
+        - r_p = r_{p↑} + r_{p↓} (reflection operator for spatial orbitals)
 
-    Transform h, u such that
-    H = u0 (∑_{p} h[0][p] n_p) u0† + ∑_{m≥1} um (∑_{pq} h[m][p,q] n_p n_q) um†
-    into h', u' such that
-    H = u0 (∑_{p} h'[0][p] r_p) u0† + ∑_{m≥1} u'm (∑_{pq} h'[m][p,q] r_p r_q) u'm† + const
+    Transformation:
+        Given a factorization with number operators:
+        H = u0 (∑_{p} h[0][p] n_p) u0† + ∑_{m≥1} um (∑_{pq} h[m][p,q] n_p n_q) um†,
 
-    Also, the similar conversion happens when h_list and u_list are in terms of spin orbital operator.
+        this function transforms h and u such that the resulting Hamiltonian uses 
+        reflection operators:
+        H = u0 (∑_{p} h'[0][p] r_p) u0† + ∑_{m≥1} u'm (∑_{pq} h'[m][p,q] r_p r_q) u'm† + const.
+
+    Similar transformations apply when the inputs are specified in terms of spin orbital operators.
 
     Args:
-        h_list: Coefficients for factorized hamiltonian in the number operator form.
-        u_list: List of rotation unitary
-        is_spin:
+        h_list (List[np.ndarray]): A list of coefficient matrices for the input Hamiltonian in
+                                   the number operator form. The first element is a 1D array
+                                   representing the one-body coefficients, and subsequent elements
+                                   are 2D arrays representing two-body coefficients.
+        u_list (List[np.ndarray]): A list of unitary rotation matrices corresponding to orbital 
+                                   transformations, where each matrix has dimensions n_orb x n_orb.
+        is_spin (bool): Indicates if the inputs (h_list, u_list) correspond to spin orbital operators.
+                        - True: Spin orbital operators.
+                        - False: Spatial orbital operators.
 
     Returns:
-        ref_h_list: Coefficients for factorized hamiltonian in the reflection operator form.
-        ref_u_list: List of rotation unitary
-        const: Remaining constant, equivalent to the trace of original form.
+        Tuple[List[np.ndarray], List[np.ndarray], float]:
+            - ref_h_list (List[np.ndarray]): The transformed coefficient matrices for the Hamiltonian
+                                             in the reflection operator form.
+            - ref_u_list (List[np.ndarray]): The list of rotation unitary matrices corresponding to
+                                             the reflection operator representation.
+            - const (float): The constant energy term arising during the transformation, equivalent
+                             to the trace of the original one-body coefficient matrix. This term 
+                             ensures energy conservation.
+
+    Raises:
+        ValueError: If the resulting constant term is not a real number.
     """
     n_orb = h_list[0].shape[0]
     h0, u0 = h_list[0], u_list[0]
@@ -633,16 +754,31 @@ def number_factorization_to_reflection(h_list: List[np.ndarray],
     return ref_h_list, ref_u_list, const
 
 
-def calculate_reflect_norm(ref_h_list: List[np.ndarray], frag_type: str) -> float:
+def calculate_reflect_norm(ref_h_list: List[np.ndarray],
+                           frag_type: str)\
+        -> float:
     """
-    For the factorization with reflected operators, return the norm.
+    Calculate the norm of a factorized Hamiltonian represented in the reflection operator form.
+
+    This method computes the norm for a Hamiltonian decomposed into reflection operators, based on the 
+    specified fragment type ("LCU" or "FH"). The norm is calculated based on either the L1 or L2 norm, 
+    depending on the fragment type because the terms are individually counted in LCU while they are grouped
+    in FH type.
 
     Args:
-        ref_h_list: Coefficients for factorized hamiltonian in the reflection operator form.
-        frag_type: Type of the fragment, either of "LCU" or "FH".
+        ref_h_list (List[np.ndarray]): A list of coefficient matrices for the factorized Hamiltonian in
+                                       reflection operator form. The first element corresponds to the
+                                       one-body coefficients, while subsequent elements are two-body
+                                       coefficient matrices.
+        frag_type (str): The type of fragment used in the factorization. 
+                         - "LCU": Use the L1 norm for the norm calculation.
+                         - "FH": Use the L2 norm for the norm calculation.
 
     Returns:
-        norm: Resulting norm.
+        float: The computed norm of the Hamiltonian based on the given fragment type.
+
+    Raises:
+        ValueError: If the provided `frag_type` is not "LCU" or "FH".
     """
     if frag_type not in ["LCU", "FH"]:
         raise ValueError(f"Invalid frag_type: {frag_type}")
@@ -662,19 +798,31 @@ def calculate_reflect_norm(ref_h_list: List[np.ndarray], frag_type: str) -> floa
 def double_factorization_to_hamiltonian(h_list: List[np.ndarray],
                                         u_list: List[np.ndarray],
                                         is_spin: bool,
-                                        is_reflection: bool = False) -> FermionOperator:
+                                        is_reflection: bool = False)\
+        -> FermionOperator:
     """
-    Transform lists of h and unitaries to a single Hamiltonian in FermionSum.
-
+    Transform lists of coefficient matrices (h_list) and unitary operators (u_list) into a single 
+    FermionOperator Hamiltonian.
+    
+    This method reconstructs a Hamiltonian from its factorized representation, using the provided
+    coefficient matrices and orbital rotation matrices. Depending on the input parameters, it supports
+    both spin and spatial orbital representations, as well as reflection-based operators.
+    
     Args:
-        h_list: Coefficients for factorized hamiltonian.
-        u_list: List of rotation unitary
-        is_spin: Is h_list and u_list is in terms of spin orbital?
-        is_reflection: Does h correspond to reflection operators?
-
+        h_list (List[np.ndarray]): A list of coefficient matrices for the factorized Hamiltonian.
+            - h_list[0] is a 1D array for one-body coefficients.
+            - h_list[m > 0] are 2D arrays for two-body coefficients.
+        u_list (List[np.ndarray]): A list of unitary matrices corresponding to orbital rotations.
+            Each matrix should have dimensions n_orb x n_orb.
+        is_spin (bool): Indicates whether the coefficient matrices and unitaries are in terms of spin orbitals.
+            - True: Spin orbital representation.
+            - False: Spatial orbital representation.
+        is_reflection (bool): Specifies whether the coefficient matrices correspond to reflection operators.
+            - True: Use reflection operators.
+            - False: Use number operators.
+    
     Returns:
-        ham: Resulting hamiltonian
-
+        FermionOperator: A FermionOperator representing the reconstructed Hamiltonian.
     """
     ham = FermionOperator()
     n_orb = h_list[0].shape[0]

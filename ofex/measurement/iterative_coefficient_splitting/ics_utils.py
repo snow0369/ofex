@@ -2,10 +2,8 @@ from itertools import product
 from typing import Tuple, List, Optional
 
 import numpy as np
-from openfermion import QubitOperator
 from scipy.linalg import eigh
 
-from ofex.operators.qubit_operator_tools import dict_to_operator
 from ofex.operators.symbolic_operator_tools import operator
 
 
@@ -20,54 +18,6 @@ def _truncate(mat: np.ndarray):
         assert np.isclose(x, 0.0) or x > 0, d
     d[d < 0] = 0
     return v @ np.diag(d) @ (v.T.conj())
-
-
-def _synthesize_group(sep_reim, c_opt, pauli_list, grp_pauli_list, size_grp, ham, debug, correct_sum=True):
-    # single_terms, leftover, anticommute, debug):
-    grp_ham_re, grp_ham_im = list(), list()
-    if sep_reim:
-        grp_ham_list = [grp_ham_re, grp_ham_im]
-        num_split_pauli = c_opt.shape[0] // 2
-    else:
-        grp_ham_list = [grp_ham_re]
-        num_split_pauli = c_opt.shape[0]
-
-    for j, grp_ham in enumerate(grp_ham_list):
-        offset = j * num_split_pauli
-        count_pauli = 0
-        for idx_grp, grp in enumerate(grp_pauli_list):
-            block_coeff = c_opt[count_pauli + offset: count_pauli + offset + size_grp[idx_grp]]
-            p_dict = dict()
-            for idx_p, alloc_coeff in zip(grp, block_coeff):
-                p_dict[operator(pauli_list[idx_p])] = alloc_coeff
-            grp_ham.append(dict_to_operator(p_dict, QubitOperator))
-            count_pauli += size_grp[idx_grp]
-
-    if not correct_sum:
-        return grp_ham_list
-
-    # Checksum
-    for j, grp_ham in enumerate(grp_ham_list):
-        if len(grp_ham) > 1:
-            ham_check = sum(grp_ham[1:], grp_ham[0])
-            if not ham_check == ham:
-                # Make Correction
-                diff = ham_check - ham
-                if debug:
-                    print(f"Mismatching hamiltonaian : diff_norm={diff.induced_norm(order=2)}")
-                    print(diff)
-                for op, coeff in diff.terms.items():
-                    included_grp = [i for i in range(len(grp_ham)) if op in grp_ham[i]]
-                    if len(included_grp) == 0:
-                        continue
-                    coeff_split = coeff / len(included_grp)
-                    for i in included_grp:
-                        grp_ham_list[j][i] = grp_ham[i] + QubitOperator(op, coeff_split)
-                assert ham.isclose(QubitOperator.accumulate(grp_ham), tol=1e-6), \
-                    QubitOperator.accumulate(grp_ham) - ham
-        else:
-            assert grp_ham[0] == ham
-    return grp_ham_list
 
 
 def _calculate_groupwise_std(transition: bool,

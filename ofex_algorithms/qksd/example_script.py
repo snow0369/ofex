@@ -14,9 +14,9 @@ from ofex_algorithms.qksd.qksd_simulation import ideal_qksd_toeplitz, ideal_qksd
 from ofex_algorithms.qksd.qksd_utils import trunc_eigh
 from ofex.measurement.iterative_coefficient_splitting import init_ics, run_ics
 from ofex.measurement import killer_shift_opt_fermion_hf
-from ofex.measurement.sorted_insertion import sorted_insertion
+from ofex.measurement.pauli_grouping import sorted_insertion
 from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
-from ofex.propagator import exact_rte, trotter_rte_by_si_lcu
+from ofex.propagator import exact_rte, trotter_rte_by_si_ref
 from ofex.state.chem_ref_state import hf_ground, cisd_ground
 from ofex.state.state_tools import get_num_qubits
 from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
@@ -111,7 +111,7 @@ def _prepare():
     if os.path.isfile(trot_fname):
         prop_trot = np.load(trot_fname)
     else:
-        prop_trot = trotter_rte_by_si_lcu(pham_prop, time_step, n_qubits, n_trotter=n_trotter)
+        prop_trot = trotter_rte_by_si_ref(pham_prop, time_step, n_qubits, n_trotter=n_trotter)
         np.save(trot_fname, prop_trot.toarray())
 
     ham_frag = sorted_insertion(pham, anticommute=False)

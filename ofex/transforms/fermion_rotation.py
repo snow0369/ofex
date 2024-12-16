@@ -8,26 +8,34 @@ from ofex.state.types import State, type_state
 from ofex.utils.dict_utils import add_values
 
 
-def fermion_rotation_operator(fham: FermionOperator, v_mat: np.ndarray,
+def fermion_rotation_operator(fop: FermionOperator,
+                              v_mat: np.ndarray,
                               spatial_v: bool = False) -> FermionOperator:
     """
-    Transforms the hamiltonian by the matrix mixing the orbitals.
-
+    Transforms the FermionOperator using an orbital mixing matrix.
+    
+    This function takes a FermionOperator and applies a transformation based on the provided
+    orbital mixing matrix (v_mat). The matrix may optionally account for spin-orbital mixing
+    when spatial_v is set to True.
+    
     Args:
-        fham: Original Hamiltonian
-        v_mat: Mixing matrix
-        spatial_v:
-
+        fop (FermionOperator): The original FermionOperator.
+        v_mat (np.ndarray): The orbital mixing matrix. Each element represents the transformation
+            coefficients between orbitals.
+        spatial_v (bool): Whether v_mat is in spatial orbital. If True, considers spin-orbital
+            mixing by applying the Kronecker product of v_mat with the identity matrix for spin
+            states. Defaults to False.
+    
     Returns:
-        trans_fham: Transformed hamiltonian
-
+        FermionOperator: A new FermionOperator representing the transformed Hamiltonian after
+        applying the orbital mixing defined by v_mat.
     """
     ret = FermionOperator()
     if spatial_v:
         v_mat = np.kron(v_mat, np.eye(2))
     v_mat = np.linalg.inv(v_mat)
-    fham = normal_ordered(fham)
-    for op, coeff in fham.terms.items():
+    fop = normal_ordered(fop)
+    for op, coeff in fop.terms.items():
         op_cre, op_ann = cre_ann(op)
         tmp_fsum_1 = FermionOperator() + coeff
         for i, c in enumerate(op_cre + op_ann):
@@ -45,6 +53,28 @@ def fermion_rotation_operator(fham: FermionOperator, v_mat: np.ndarray,
 def fermion_rotation_state(state: State,
                            v_mat: np.ndarray,
                            spatial_v: bool) -> State:
+    """
+    Transforms a Fermionic state represented in the Fock basis using
+    an orbital mixing matrix.
+
+    This function applies a rotation on the input state according to the
+    orbital mixing matrix `v_mat`. If `spatial_v` is set to True, the mixing
+    matrix is expanded to include spin-orbital interactions.
+
+    The function maintains type consistency by converting the final state back
+    to its original representation.
+
+    Args:
+        state (State): The input quantum state in Fock representation.
+        v_mat (np.ndarray): The orbital mixing matrix. Each element represents the transformation
+            coefficients between orbitals.
+        spatial_v (bool): Whether v_mat is in spatial orbital. If True, considers spin-orbital
+            mixing by applying the Kronecker product of v_mat with the identity matrix for spin
+            states. Defaults to False.
+
+    Returns:
+        State: The rotated quantum state in its original representation.
+    """
     num_qubits = get_num_qubits(state)
     input_type = type_state(state)
     state = to_sparse_dict(state)

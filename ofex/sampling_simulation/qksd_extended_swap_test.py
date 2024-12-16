@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Any
 
 import numpy as np
 from openfermion import QubitOperator, FermionOperator, get_linear_qubit_operator_diagonal
@@ -36,11 +36,36 @@ def _fermion_to_pauli(ref_state: State,
 
 def prepare_qksd_est_op(operator: Union[QubitOperator, FermionFragment],
                         n_qubits: int,
-                        **f2q_kwargs):
+                        **f2q_kwargs)\
+        -> Tuple[np.ndarray, Any, str]:
+    """
+    Prepares the diagonalized operator representation for simulation of the Extended Swap Test (EST) for
+    Quantum Krylov Subspace Diagonalization (QKSD).
+
+    This function generates a diagonalized operator in the qubit computational basis, allowing for efficient 
+    simulation and probability computation. The operator can either be a QubitOperator (representing Pauli 
+    operators) or a FermionFragment (used for fermionic systems). The function identifies the type of the 
+    operator, diagonalizes it, and returns the corresponding diagonal representation alongside the simulation 
+    object and type metadata.
+
+    Args:
+        operator (Union[QubitOperator, FermionFragment]): The operator to be diagonalized with polynomial
+            resources. Can be either a QubitOperator with mutually commuting Pauli operators, or a FermionFragment,
+            which is a tuple of (FermionOperator, np.ndarray) (Refer to ofex.transform.double_factorization).
+        n_qubits (int): The number of qubits in the system.
+        **f2q_kwargs: Additional keyword arguments passed to fermion-to-qubit transformations, including
+            'transform' keyword, required for FermionFragment input only. See ofex.transforms.fermion_to_qubit_operator.
+
+    Returns:
+        Tuple[np.ndarray, Any, str]: A tuple containing:
+            - The diagonal representation of the operator as a real NumPy array.
+            - The simulation object (Clifford history or orbital permutation matrix).
+            - The simulation type ("PAULI" for Pauli-based simulations, "FERMION" for fermionic simulations).
+    """
     if isinstance(operator, QubitOperator):  # Pauli simulation
         # Find clifford
         op_mat, op_coeff, cl_hist = diagonalizing_clifford(operator, n_qubits)
-        op_pauli = tableau_to_pauli(op_mat, None, op_coeff)
+        op_pauli = tableau_to_pauli(op_mat, op_coeff, None)
         op_pauli = QubitOperator.accumulate(op_pauli)
         # Clifford Simulation of ref vectors
         sim_obj = cl_hist
@@ -69,6 +94,22 @@ def prepare_qksd_est_state(ref_state: State,
                            sim_obj,
                            sim_type: str,
                            **f2q_kwargs):
+    """
+    Prepares the QKSD Extended Swap Test state in the diagonalized operator basis. This method transforms 
+    the input reference state into the diagonalizing basis based on the simulation type (PAULI or FERMION).
+
+    Args:
+        ref_state (State): The input reference state.
+        sim_obj (Any): The simulation object; output of prepare_qksd_est_op. For PAULI simulations,
+            this is the Clifford history; for FERMION simulations, this is the orbital permutation matrix.
+        sim_type (str): Type of simulation; output of prepare_qksd_est_op. Must be either "PAULI" (Pauli
+            simulation) or "FERMION" (fermionic simulation).
+        **f2q_kwargs: Additional keyword arguments passed to fermion-to-qubit transformations, including
+            'transform' keyword, required for FermionFragment input only. See ofex.transforms.fermion_to_qubit_operator.
+
+    Returns:
+        State: The transformed state in the diagonalizing basis of the given operator.
+    """
     ref_state = to_dense(ref_state)
     if not np.isclose(norm(ref_state), 1.0):
         raise ValueError("Ref is not normalized.")
@@ -84,13 +125,45 @@ def prepare_qksd_est_state(ref_state: State,
 
 def qksd_extended_swap_test(ref_state_1: State,  # Qubit state
                             ref_state_2: State,  # Qubit state
-                            operator,  # : Union[QubitOperator, FermionFragment, np.ndarray],
+                            operator: Union[QubitOperator, FermionFragment, Tuple[np.ndarray, Any, str]],
                             imaginary: bool,
                             eig_degen_tol=1e-8,
                             prepared_op=False,
                             prepared_state: Tuple[bool, bool] = (False, False),
                             verbose_prob=False,
                             **f2q_kwargs) -> JointProbDist:
+    """
+    Perform the Quantum Krylov Subspace Diagonalization (QKSD) Extended Swap Test.
+
+    This function calculates the joint probability distribution of outcomes for the simultaneous measurement
+    of <φ(0)|φ(t)> and <φ(0)|O|φ(t)> under the QKSD framework using the Extended Swap Test. The method works with
+    operators that are either pre-diagonalized or need to be diagonalized during runtime, and supports both
+    Pauli and fermionic operator types.
+
+    Args:
+        ref_state_1 (State): The first input reference state (qubit state).
+        ref_state_2 (State): The second input reference state (qubit state).
+        operator (Union[QubitOperator, FermionFragment, Tuple[np.ndarray, Any, str]]): The operator to be used in the 
+            Extended Swap Test. It can be:
+              - A `QubitOperator` representing Pauli operators,
+              - A `FermionFragment`, which is a tuple of `(FermionOperator, np.ndarray)` for fermionic systems, or
+              - A tuple `(np.ndarray, Any, str)` representing a pre-diagonalized operator by prepare_qksd_est_op.
+        imaginary (bool): If True, performs the imaginary part of the Extended Swap Test; otherwise, 
+            performs the real part.
+        eig_degen_tol (float, optional): Eigenvalue degeneracy tolerance for detecting similar probability 
+            events. Defaults to 1e-8.
+        prepared_op (bool, optional): Indicates if the operator is already diagonalized. Defaults to False.
+        prepared_state (Tuple[bool, bool], optional): Indicates if the input reference states are already 
+            prepared in the diagonalizing basis. Defaults to (False, False).
+        verbose_prob (bool, optional): If True, computes individual probability contributions for each 
+            Pauli term (currently not implemented, may be implemented for the boot-straping covariance estimation
+            in future). Defaults to False.
+        **f2q_kwargs: Additional arguments for fermion-to-qubit transformations, especially mandatory for 
+            fermionic systems if any unprepared objects are provided.
+
+    Returns:
+        JointProbDist: A joint probability distribution object containing the computed probabilities.
+    """
     prob_dict = dict()
 
     # 1. Prepare diagonalized operators and reference states in the diagonalizing basis.

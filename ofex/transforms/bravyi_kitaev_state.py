@@ -1,22 +1,60 @@
+"""
+This module provides functions for performing the Bravyi-Kitaev transformation to states,
+a method for encoding fermionic states into qubit representations. The transformation 
+is described in detail in the paper: https://arxiv.org/abs/1208.5986.
+
+It includes functions to convert between Fock state representations and Bravyi-Kitaev 
+encoded representations, as well as utilities for constructing the transformation matrices.
+"""
+
 import numpy as np
 from galois import FieldArray
 
 from ofex.clifford.clifford_tools import gf
+from ofex.state import BinaryFockVector
 from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import SparseStateDict
 
 
 def bravyi_kitaev_state(fock_state: SparseStateDict) -> SparseStateDict:
+    """
+    Convert a Fermionic Fock state representation to its Bravyi-Kitaev encoding.
+    Refer to the paper: https://arxiv.org/abs/1208.5986 for more details.
+
+    Args:
+        fock_state (SparseStateDict): A sparse representation of the input Fermionic Fock state.
+
+    Returns:
+        SparseStateDict: The Bravyi-Kitaev encoded representation of the input state.
+    """
     return _bravyi_kitaev_state(fock_state, inv=False)
 
 
 def inv_bravyi_kitaev_state(fock_state: SparseStateDict) -> SparseStateDict:
+    """
+    Convert a Bravyi-Kitaev encoded state back to its Fermionic Fock state representation.
+    Refer to the paper: https://arxiv.org/abs/1208.5986 for more details.
+
+    Args:
+        fock_state (SparseStateDict): A sparse representation of the input Bravyi-Kitaev state.
+
+    Returns:
+        SparseStateDict: The Fermionic Fock state representation of the input state.
+    """
     return _bravyi_kitaev_state(fock_state, inv=True)
 
 
 def _bravyi_kitaev_state(input_state: SparseStateDict, inv: bool) -> SparseStateDict:
-    from ofex.state import BinaryFockVector
+    """
+    Perform the Bravyi-Kitaev or inverse Bravyi-Kitaev transformation on a given state.
 
+    Args:
+        input_state (SparseStateDict): A sparse representation of the input state (Fock or Bravyi-Kitaev).
+        inv (bool): Whether to apply the inverse transformation.
+
+    Returns:
+        SparseStateDict: The transformed state in the chosen encoding.
+    """
     ret_dict = dict()
     num_qubits = get_num_qubits(input_state)
     beta_mat = beta_matrix(num_qubits)
@@ -30,7 +68,16 @@ def _bravyi_kitaev_state(input_state: SparseStateDict, inv: bool) -> SparseState
 
 
 def beta_matrix(n: int, inv: bool = False) -> FieldArray:
-    # Construct beta_n matrix (size with n)
+    """
+    Construct the beta_n matrix used for Bravyi-Kitaev transformations.
+
+    Args:
+        n (int): The number of qubits (size of the matrix).
+        inv (bool, optional): Whether to construct the inverse of the matrix. Default is False.
+
+    Returns:
+        FieldArray: The constructed beta_n matrix or its inverse.
+    """
     def _custom_log(x):
         # x = 2^(exp)-res (res >= 0)
         tmp_x = x

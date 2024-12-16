@@ -1,3 +1,11 @@
+"""
+Module containing functions and utilities for manipulating quantum chemical states.
+
+This module provides methods to compute Hartree Fock ground states, configuration interaction (CISD)
+wavefunctions, and generate configuration state functions (CSFs) for quantum chemistry. It integrates
+tools for handling fermionic and qubit states, as well as utilities for processing molecular data.
+"""
+
 from itertools import product, combinations
 from typing import List, Tuple, Optional
 
@@ -20,6 +28,19 @@ def hf_ground(mol: MolecularData,
               active_idx: Optional[List[int]] = None,
               fermion_to_qubit_map: Optional[str] = None,
               **kwargs) -> SparseStateDict:
+    # TODO: access attributes of `mol` and find the ground state.
+    """
+    Generate the Hartree-Fock ground state as a sparse state dictionary.
+
+    Args:
+        mol: An instance of MolecularData which contains molecule information.
+        active_idx: List of indices specifying the active orbitals. If None, all orbitals are active.
+        fermion_to_qubit_map: Optional string specifying the mapping from fermions to qubits.
+        **kwargs: Additional arguments for fermion to qubit mapping.
+
+    Returns:
+        SparseStateDict: A dictionary representing the Hartree-Fock ground state.
+    """
     n_spinorb, n_electrons = mol.n_qubits, mol.n_electrons
     if active_idx is None:
         active_idx = list(range(n_spinorb))
@@ -30,7 +51,17 @@ def hf_ground(mol: MolecularData,
     return state
 
 
-def cisd_ground(mol: MolecularData):
+def cisd_ground(mol: MolecularData) -> SparseStateDict:
+    """
+    Compute the CISD (Configuration Interaction with Single and Double excitations)
+    ground state as a sparse state dictionary.
+
+    Args:
+        mol: An instance of MolecularData with molecule information.
+
+    Returns:
+        SparseStateDict: A dictionary representing the CISD ground state.
+    """
     mol.load()
     if 'cisd' not in mol._pyscf_data or mol._pyscf_data['cisd'] is None:
         mol = run_driver(mol, run_cisd=True, driver='pyscf')
@@ -67,21 +98,21 @@ def csf_states(n_orbital: int,
                cs_excitation: int = 0,
                os_excitation: int = 0) -> List[SparseStateDict]:
     """
-    Generate configuration state functions.
+    Generate Configuration State Functions (CSFs) based on specified spin and electron constraints.
+    Refer to Helgaker, T., et al. (2000). Spin in Second Quantization. In Molecular Electronic-Structure Theory.
+    https://doi.org/10.1002/9781119019572.ch2
 
     Args:
-        n_orbital: Number of spatial orbitals
-        n_electrons: Number of total electrons
-        multiplicity: Multiplicity (integer >=1)
-        projected_spin: Value of M, integer multiplication of +-1/2
-        n_open: Number of open shell
-        cs_excitation: Number of excited closed shells
-        os_excitation: Number of excited open shells
+        n_orbital: Number of spatial orbitals.
+        n_electrons: Total number of electrons in the system.
+        multiplicity: Spin multiplicity of the states (e.g., 1 for singlet, 3 for triplet).
+        projected_spin: Projected value of the total spin (M_s), in half-integer steps.
+        n_open: Number of open shells. If None, defaults to multiplicity - 1.
+        cs_excitation: Number of excited closed shell electrons.
+        os_excitation: Number of excited open shell electrons.
 
     Returns:
-        csf_states: 3D integer np array. csf_state[i,j] is the Fock vector of determinant j in the csf i.
-        coeff: 2D float np array. coeff[i % N,j] is the coefficient of csf_state[i, j] where N = coeff.shape[0]
-
+        List[SparseStateDict]: A list of sparse state dictionaries representing the CSFs.
     """
     # return : List[List[List[int]]]
     #  First qubit = lowest energy
@@ -144,17 +175,21 @@ def csf_states(n_orbital: int,
 def generate_coupling_coeff(total_spin: float, projected_spin: float, n_open: int) \
         -> Tuple[List[List[int]], List[List[int]], np.ndarray]:
     """
+    Generate the coupling coefficients, T-vectors, and P-vectors for open shell electrons.
+    Refer to Helgaker, T., et al. (2000). Spin in Second Quantization. In Molecular Electronic-Structure Theory.
+    https://doi.org/10.1002/9781119019572.ch2
 
     Args:
-        total_spin: value of S, integer(>=0) multiple of 1/2
-        projected_spin: value of M, integer(>=0) multiple of +-1/2
-        n_open: number of opened shell
+        total_spin: The value of total spin (S), given as a non-negative half-integer multiple.
+        projected_spin: The projected spin value (M), given as a half-integer multiple.
+        n_open: The number of open shells in the system.
 
     Returns:
-        T_list : the list of double of original T vector
-        P_list : the list of double of original P vector
-        coeff_mat: 2D float np array, coeff_mat[i,j] = the coefficient of determinant j in the csf i.
-
+        Tuple:
+            T_list (List[List[int]]): The list of doubled T-vectors representing spin couplings.
+            P_list (List[List[int]]): The list of doubled P-vectors representing spin projections.
+            coeff_mat (np.ndarray): A 2D array where each element is the coefficient of 
+                                    a determinant in a given CSF.
     """
 
     def _genealogical_coeff(_s: int, _m: int, _tn: int, _sigma: int):
@@ -219,34 +254,3 @@ def generate_coupling_coeff(total_spin: float, projected_spin: float, n_open: in
                                      _sigma=p_list[j][k] if k == 0 else (p_list[j][k] - p_list[j][k - 1]))
         coeff_mat[i, j] = d
     return t_list, p_list, coeff_mat
-
-
-if __name__ == "__main__":
-    def _test_generate_coupling_coeff():
-        T_list, P_list, coeff_mat = generate_coupling_coeff(total_spin=1,
-                                                            projected_spin=0,
-                                                            n_open=4)
-        print(T_list)
-        print(P_list)
-        print(coeff_mat)
-
-
-    def _test_generate_reference_state():
-        n_orbitals = 6
-        n_electrons = 4
-        multiplicity = 3
-        projected_spin = 0.0
-        n_open = 2
-        cs_excitation = 1
-        os_excitation = 2
-        states = csf_states(n_orbital=n_orbitals, n_electrons=n_electrons,
-                            multiplicity=multiplicity, projected_spin=projected_spin,
-                            n_open=n_open,
-                            cs_excitation=cs_excitation,
-                            os_excitation=os_excitation)
-        for s in states:
-            print(pretty_print_state(s))
-
-
-    # _test_generate_coupling_coeff()
-    _test_generate_reference_state()

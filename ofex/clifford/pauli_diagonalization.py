@@ -4,8 +4,8 @@ import numpy as np
 from galois import FieldArray
 from openfermion import QubitOperator
 
-from ofex.clifford.clifford_tools import pauli_to_tableau, gf, is_zero_gf, print_tableau_side_by_side, is_equal_gf, \
-    print_tableau
+from ofex.clifford.clifford_tools import pauli_to_tableau, gf, is_zero_gf, str_tableau_side_by_side, is_equal_gf, \
+    str_tableau
 from ofex.clifford.simulation import clifford_apply
 from ofex.clifford.standard_operators import hadamard, clifford_op_str, cx, cz, s_gate
 
@@ -15,10 +15,30 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
                            debug=False) \
         -> Tuple[FieldArray, np.ndarray, List[str]]:
     """
-        Returns:
-            mat : Pauli tableau of transformed operators
-            coeff : coefficients of transformed operators
-            clifford_history : Operation history
+    Diagonalizes a set of mutually commuting Pauli operators using Clifford gates.
+    
+    This function computes the Clifford operations needed to transform a set of commuting 
+    Pauli operators into a diagonal form, represented by a Pauli tableau. It ensures 
+    commutation among the input operators, generates the tableau, and applies gate 
+    transformations step by step to achieve diagonalization.
+    
+    Parameters:
+        pauli_list (Union[List[QubitOperator], QubitOperator]): A single or list of 
+            mutually commuting Pauli operators.
+        num_qubits (int): The number of qubits involved in the operators.
+        debug (bool, optional): If True, outputs debug information for intermediate 
+            transformation steps. Defaults to False.
+    
+    Returns:
+        Tuple[FieldArray, np.ndarray, List[str]]:
+            - mat (FieldArray): A Pauli tableau of diagonalized operators.
+                These are Z-type operators, and the upper half is zero.
+            - coeff (np.ndarray): The coefficients of the transformed Pauli operators.
+            - clifford_history (List[str]): A log of the Clifford operations (as strings) 
+                applied during the diagonalization process.
+    
+    Raises:
+        ValueError: If the input Pauli operators do not commute.
     """
 
     clifford_list: List[str] = list()
@@ -53,7 +73,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
 
     if debug:
         print("GAUSS")
-        print_tableau_side_by_side(a_mat, None, b_mat, b_ph)
+        print(str_tableau_side_by_side(a_mat, None, b_mat, b_ph))
 
     # 2. MAX X RANK
     c_mat, c_ph = gf(b_mat), gf(b_ph)
@@ -70,7 +90,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
         print("\nMAX_X_RANK")
         print(f"rank_X : {np.linalg.matrix_rank(b_mat[:num_qubits, :].T)} ->"
               f"{np.linalg.matrix_rank(c_mat[:num_qubits, :].T)}")
-        print_tableau_side_by_side(b_mat, b_ph, c_mat, c_ph)
+        print(str_tableau_side_by_side(b_mat, b_ph, c_mat, c_ph))
         print(clifford_list)
 
     # 3-1. ZEROING OUT UPPER TRIANGULAR MATRIX
@@ -100,7 +120,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
 
     if debug:
         print("\nZERO X")
-        print_tableau_side_by_side(c_mat, c_ph, d_mat, d_ph)
+        print(str_tableau_side_by_side(c_mat, c_ph, d_mat, d_ph))
         print(clifford_list)
 
     # 3-2. Diag X
@@ -135,7 +155,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
 
     if debug:
         print("\nDIAG X")
-        print_tableau_side_by_side(d_mat, d_ph, d1_mat, d1_ph)
+        print(str_tableau_side_by_side(d_mat, d_ph, d1_mat, d1_ph))
         print(clifford_list)
     d_mat, d_ph = d1_mat, d1_ph
 
@@ -154,7 +174,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
 
     if debug:
         print("\nZERO Z")
-        print_tableau_side_by_side(d_mat, d_ph, e_mat, e_ph)
+        print(str_tableau_side_by_side(d_mat, d_ph, e_mat, e_ph))
         print(clifford_list)
 
     # 6. TURNING PAULI X TO Z
@@ -171,7 +191,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
 
     if debug:
         print("\nFINAL")
-        print_tableau(f_mat, f_ph)
+        print(str_tableau(f_mat, f_ph))
         print(clifford_list)
 
     # clifford_mat = clifford_compiler(clifford_list, num_qubits)

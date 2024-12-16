@@ -9,7 +9,7 @@ from openfermion import FermionOperator, MajoranaOperator, QubitOperator, normal
 from openfermion.config import EQ_TOLERANCE
 
 from ofex.operators.fermion_operator_tools import cre_ann
-from ofex.operators.qubit_operator_tools import dict_to_operator
+from ofex.operators.symbolic_operator_tools import dict_to_operator
 from ofex.state import BinaryFockVector
 from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import SparseStateDict

@@ -1,5 +1,5 @@
 from itertools import product
-from typing import Union, Dict, Sequence
+from typing import Union, Dict, Sequence, Callable
 
 import numpy as np
 from openfermion import QubitOperator, FermionOperator, jordan_wigner, bravyi_kitaev, bravyi_kitaev_tree, \
@@ -19,33 +19,49 @@ def fermion_to_qubit_operator(fermion_op: FermionOperator,
                               transform: str,
                               **kwargs) -> QubitOperator:
     """
-
-    TODO: Complete bksf for FermionOperator
-
+    Convert a FermionOperator to a QubitOperator using a specified transformation.
+    
     Args:
-        fermion_op:
-        transform:
-        kwargs:
-
+        fermion_op (FermionOperator): The input operator in the fermionic basis to be transformed.
+        transform (str): The transformation method to be applied. Supported options:
+                         "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
+                         "binary_code_transform", "symmetry_conserving_bravyi_kitaev".
+        kwargs: Additional arguments required for some transformations, such as:
+                - "n_qubits" (int): Number of qubits for transformations "bravyi_kitaev" and "bravyi_kitaev_tree".
+                - "code" (BinaryCode): The binary code for "binary_code_transform".
+                - "active_fermions" (int) and "active_orbitals" (int): For "symmetry_conserving_bravyi_kitaev".
+    
     Returns:
-
+        QubitOperator: The transformed operator in the qubit representation.
+    
+    Raises:
+        ValueError: If the provided transform method is not supported.
+                    If required arguments in kwargs are missing for certain transformations.
     """
+    # TODO: Complete bksf for FermionOperator
     if transform == "jordan_wigner":
         return jordan_wigner(fermion_op)
     elif transform == "bravyi_kitaev":
-        # 'n_qubits' might be provided in kwargs.
-        return bravyi_kitaev(fermion_op, **kwargs)
+        if 'n_qubits' not in kwargs:
+            raise ValueError("n_qubits must be provided in kwargs.")
+        return bravyi_kitaev(fermion_op, n_qubits=kwargs['n_qubits'])
     elif transform == "bravyi_kitaev_tree":
-        # 'n_qubits' might be provided in kwargs.
-        return bravyi_kitaev_tree(fermion_op, **kwargs)
+        if 'n_qubits' not in kwargs:
+            raise ValueError("n_qubits must be provided in kwargs.")
+        return bravyi_kitaev_tree(fermion_op, n_qubits=kwargs['n_qubits'])
     elif transform == "binary_code_transform":
-        # 'code: BinaryCode' should be provided in kwargs.
-        return binary_code_transform(fermion_op, **kwargs)
+        if 'code' not in kwargs:
+            raise ValueError("code must be provided in kwargs.")
+        return binary_code_transform(fermion_op, code=kwargs['code'])
     elif transform == "symmetry_conserving_bravyi_kitaev":
-        # 'active_fermions: int' and
-        # 'active_orbitals: int' should be provided in kwargs.
         # Two-qubit reduction.
-        return symmetry_conserving_bravyi_kitaev(fermion_op, **kwargs)
+        if 'active_fermions' not in kwargs:
+            raise ValueError("active_fermions must be provided in kwargs.")
+        if 'active_orbitals' not in kwargs:
+            raise ValueError("active_orbitals must be provided in kwargs.")
+        return symmetry_conserving_bravyi_kitaev(fermion_op,
+                                                 active_fermions=kwargs['active_fermions'],
+                                                 active_orbitals=kwargs['active_orbitals'])
     else:
         raise ValueError(f"{transform} is not a supported transform.")
 
@@ -53,6 +69,21 @@ def fermion_to_qubit_operator(fermion_op: FermionOperator,
 def fermion_to_qubit_state(fermion_state: State,
                            transform: str,
                            **kwargs) -> State:
+    """
+    Convert a fermionic state to a qubit state using a specified transformation.
+
+    Args:
+        fermion_state (State): The input state in the fermionic basis to be transformed.
+        transform (str): The transformation method to be applied. Supported options:
+                         "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
+                         "symmetry_conserving_bravyi_kitaev".
+        kwargs: Additional arguments required for specific transformations, such as:
+                - "active_orbitals" (int): For symmetry-conserving transformations. If not provided, the number
+                    of full orbitals is used.
+
+    Returns:
+        State: The transformed state in the qubit representation.
+    """
     if transform == "jordan_wigner":
         return fermion_state
 
@@ -68,7 +99,6 @@ def fermion_to_qubit_state(fermion_state: State,
         #parity_set = [node.index for node in fenwick_tree.get_parity_set(index)]
         #ancestors = [node.index for node in fenwick_tree.get_update_set(index)]
         #ancestor_children = [node.index for node in fenwick_tree.get_remainder_set(index)]
-
         active_orbitals = kwargs.get("active_orbitals", get_num_qubits(fermion_state))
         fermion_state_reorder = reorder_state(fermion_state, up_then_down, phase=True)
 
@@ -91,6 +121,29 @@ def fermion_to_qubit_state(fermion_state: State,
 def fermion_to_qubit_state_general(state: SparseStateDict,
                                    transform: str,
                                    **kwargs) -> SparseStateDict:
+    """
+    Convert a general fermionic state to a qubit state using the specified transformation.
+    Because this function transforms the creation operator to qubit form and multiplies it by the state,
+    it is computationally expensive.
+    This function is not recommended for large systems; and used for debugging and other transform
+    not specified in the fermion_to_qubit_state function.
+
+    Args:
+        state (SparseStateDict): The input state in the fermionic basis to be transformed.
+        transform (str): The transformation to apply. Supported options include
+                         "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
+                         and others. The "symmetry_conserving_bravyi_kitaev" 
+                         transformation is not implemented.
+        kwargs: Additional arguments required for some transformations, such as:
+                - "n_qubits" (int): Number of qubits for transformations "bravyi_kitaev" and "bravyi_kitaev_tree".
+                - "code" (BinaryCode): The binary code for "binary_code_transform".
+                - "active_fermions" (int) and "active_orbitals" (int): For "symmetry_conserving_bravyi_kitaev".
+    Returns:
+        SparseStateDict: The transformed state in the qubit basis.
+    
+    Raises:
+        NotImplementedError: If the "symmetry_conserving_bravyi_kitaev" transformation is requested.
+    """
     # Inefficient
     new_state = dict()
 
@@ -115,6 +168,26 @@ def fermion_to_qubit_state_general(state: SparseStateDict,
 def qubit_to_fermion_state(qubit_state: State,
                            transform: str,
                            **kwargs) -> Union[DenseState, SparseStateDict]:
+    """
+    Convert a qubit state to a fermionic state using a specified transformation.
+
+    Args:
+        qubit_state (State): Input state in the qubit basis to be transformed.
+        transform (str): The transformation method to apply. Supported options:
+                         "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
+                         "symmetry_conserving_bravyi_kitaev".
+        kwargs: Additional arguments required for some transformations, such as:
+                - "active_fermions" (int): Number of active fermions for the symmetry-conserving transformation.
+                - "active_orbitals" (int): For symmetry-conserving transformations. If not provided, the number
+                    of full orbitals is used.
+
+    Returns:
+        Union[DenseState, SparseStateDict]: Transformed fermionic state in sparse or dense form.
+
+    Raises:
+        ValueError: If required arguments for specific transformations are missing.
+        NotImplementedError: For unspecified transformation methods.
+    """
     if transform == "jordan_wigner":
         return qubit_state
 
@@ -127,6 +200,8 @@ def qubit_to_fermion_state(qubit_state: State,
     elif transform == "bravyi_kitaev_tree":
         fermion_state = inv_bravyi_kitaev_tree_state(qubit_state)
     elif transform == "symmetry_conserving_bravyi_kitaev":
+        if 'active_fermions' not in kwargs:
+            raise ValueError("active_fermions must be provided in kwargs.")
         active_fermions = kwargs['active_fermions']
         active_orbitals = kwargs.get("active_orbitals", get_num_qubits(qubit_state) + 2)
         remainder = active_fermions % 4
@@ -155,8 +230,23 @@ def qubit_to_fermion_state(qubit_state: State,
         return fermion_state
 
 
-def reorder_state(state: SparseStateDict, order_function, reverse=False, phase=False)\
-        -> SparseStateDict:
+def reorder_state(state: SparseStateDict,
+                  order_function: Callable[[int, int], int],
+                  reverse=False,
+                  phase=False) -> SparseStateDict:
+    """
+    Reorder the modes of a fermionic state according to a specified ordering function.
+
+    Args:
+        state (SparseStateDict): The input fermionic state as a sparse dictionary.
+        order_function (Callable[[int, int], int]): A function that determines the new positions 
+                        of the current modes based on the total number of modes.
+        reverse (bool): If True, undoes the reordering using the inverse mode map. Default is False.
+        phase (bool): If True, accounts for the phase changes incurred during reordering. Default is False.
+
+    Returns:
+        SparseStateDict: A new fermionic state with reordered modes according to the specified function.
+    """
     num_modes = get_num_qubits(state)
     inv_mode_map = {mode_idx: order_function(mode_idx, num_modes) for mode_idx in range(num_modes)}
     mode_map = {val: key for key, val in inv_mode_map.items()}
@@ -186,6 +276,24 @@ def reorder_state(state: SparseStateDict, order_function, reverse=False, phase=F
 
 def remove_indices_state(state: SparseStateDict, indices: Sequence[int],
                          check_symmetry_conserved=True) -> SparseStateDict:
+    """
+    Removes specified mode indices from a fermionic state, projecting the state
+    while checking for symmetry conservation if required.
+
+    Args:
+        state (SparseStateDict): The input state in the sparse fermionic basis.
+        indices (Sequence[int]): Indices of the modes to be removed from the state.
+        check_symmetry_conserved (bool): Whether to enforce symmetry conservation 
+            in the removed modes. If symmetry is not conserved, raises a ValueError.
+
+    Returns:
+        SparseStateDict: A new fermionic state with the specified modes removed
+        and optionally verified for symmetry conservation.
+    
+    Raises:
+        ValueError: If symmetry conservation is violated when check_symmetry_conserved
+        is set to True.
+    """
     new_state = dict()
     check_f = None
     num_modes = get_num_qubits(state)
@@ -207,6 +315,20 @@ def remove_indices_state(state: SparseStateDict, indices: Sequence[int],
 
 def recover_indices_state(state: SparseStateDict,
                           pos_fill: Dict[int, Union[int, bool]]) -> SparseStateDict:
+    """
+    Restore selected modes to a sparse fermionic state by filling specific
+    positions with predefined values.
+
+    Args:
+        state (SparseStateDict): The input sparse state to be modified. It contains
+                                 the current fermionic configuration with some indices removed.
+        pos_fill (Dict[int, Union[int, bool]]): A dictionary specifying the indices to be
+                                 restored and the corresponding fixed values to insert at those positions.
+
+    Returns:
+        SparseStateDict: A new fermionic state with the specified positions restored.
+                         The inserted positions are filled with the provided values in pos_fill.
+    """
     new_state = dict()
     for fock, coeff in state.items():
         new_fock = list(fock)

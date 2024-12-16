@@ -1,10 +1,27 @@
+"""
+This module provides utilities and functions for handling quantum state operations
+and sparse matrix computations. Key functionalities include quantum state transitions, 
+expectation value calculations, operator applications, diagonalization of operators, 
+and state manipulation in both dense and sparse formats.
+
+The primary goal of this module is to enhance the efficiency and scalability of 
+quantum operator applications and computations by leveraging sparse representations 
+where applicable.
+
+Definitions:
+- State: Representations of quantum states using formats like numpy arrays, sparse matrices, or dictionaries as
+    supported by `ofex.state.types`.
+- Operator: Quantum operators applied to states, supporting formats like QubitOperator, scipy sparse matrices,
+    or LinearOperators.
+"""
+
 from __future__ import annotations
 
 from typing import Union, Tuple, Optional
 
 import numpy as np
 import scipy
-from openfermion import QubitOperator, LinearQubitOperator, get_sparse_operator
+from openfermion import QubitOperator, LinearQubitOperator, get_sparse_operator, FermionOperator
 from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator
 
@@ -23,19 +40,21 @@ def transition_amplitude(operator: Union[QubitOperator, spmatrix, LinearOperator
                          state2: State,
                          sparse1: bool = False,
                          sparse2: bool = False) -> complex:
-    """Compute the transitional amplitude, <φ1|O|φ2>.
-
+    """
+    Compute the transitional amplitude, <φ1|O|φ2>.
+    
     Args:
-        operator: (QubitOperator or scipy.sparse.spmatrix or scipy.sparse.linalg.LinearOperator)
-        state1: (ofex.state.SparseStateDict, numpy.ndarray or scipy.sparse.spmatrix): A numpy array
-                representing a pure state or a sparse matrix representing a density
-                matrix. If `unitary` is a LinearOperator, then this must be a
-                numpy array.
-        state2: If None, then the expectation value of the state1 is calculated.
-        sparse:
-
+        operator: The operator to apply, which can be a QubitOperator, a scipy sparse matrix, 
+                  or a scipy LinearOperator.
+        state1: A quantum state supported as defined in `ofex.state.types` (e.g., a numpy array, 
+                sparse matrix, or dict).
+        state2: A second quantum state in the same format as `state1`. If set to None, the expectation 
+                value of `state1` is calculated instead.
+        sparse1: A boolean indicating whether to perform sparse operations for `state1`.
+        sparse2: A boolean indicating whether to perform sparse operations for `state2`.
+    
     Returns:
-        A complex number giving the transitional amplitude.
+        A complex number representing the transitional amplitude between the two states.
     """
     if sparse1 and sparse2:
         s1, s2 = get_sparsity(state1), get_sparsity(state2)
@@ -55,11 +74,40 @@ def transition_amplitude(operator: Union[QubitOperator, spmatrix, LinearOperator
 def expectation(operator: Union[QubitOperator, spmatrix, LinearOperator],
                 state: State,
                 sparse: bool = False) -> complex:
-    return transition_amplitude(operator, state, state, sparse, sparse)
+    """
+    Compute the expectation value <φ|O|φ>.
+
+    Args:
+        operator: The operator for which the expectation value is calculated. This can be a 
+                  QubitOperator, a scipy sparse matrix, or a LinearOperator.
+        state: A quantum state supported as defined in `ofex.state.types` (e.g., a numpy array,
+               sparse matrix, or dict).
+        sparse: A boolean indicating whether to perform sparse operations for `state`.
+
+    Returns:
+        A complex number representing the expectation value of the operator for the given state.
+    """
+    if sparse:
+        return state_dot(state, sparse_apply_operator(operator, state))
+    else:
+        return state_dot(state, apply_operator(operator, state))
 
 
 def apply_operator(operator: Union[QubitOperator, spmatrix, LinearOperator],
                    state: State) -> State:
+    """
+    Apply a given operator to a quantum state.
+
+    Args:
+        operator: The operator to apply, which can be a QubitOperator, scipy sparse matrix, 
+                  or a LinearOperator.
+        state: A quantum state supported as defined in `ofex.state.types` (e.g., a numpy array,
+               sparse matrix, or dict).
+
+    Returns:
+        The resulting quantum state after applying the operator, preserving the input type.
+        If the state is zero, it returns the same state without modification.
+    """
     if is_zero(state):
         return state
     input_type = type_state(state)
@@ -77,11 +125,28 @@ def apply_operator(operator: Union[QubitOperator, spmatrix, LinearOperator],
         raise AssertionError
 
 
-def diagonalization(operator,
+def diagonalization(operator:Union[QubitOperator, FermionOperator],
                     n_qubits: int,
                     sparse_eig: bool,
                     n_eigen: Optional[int] = None,
                     **kwargs) -> Union[Tuple[np.ndarray, np.ndarray], np.ndarray]:
+    """
+    Compute the eigenvalues and eigenvectors of an operator.
+
+    Args:
+        operator: QubitOperator or FermionOperator to be diagonalized.
+        n_qubits: The number of qubits represented in the operator.
+        sparse_eig: A boolean value indicating whether to compute eigenvalues for a sparse 
+                    operator representation.
+        n_eigen: The number of eigenvalues/vectors to calculate if `sparse_eig` is True.
+                 Defaults to None, indicating all eigenvalues/vectors.
+        **kwargs: Additional arguments to be passed to the scipy eigensolver.
+
+    Returns:
+        If `sparse_eig` is True, returns a tuple (eigenvalues, eigenvectors) for the 
+        sparse representation.
+        Otherwise, returns a dense numpy array of eigenvalues and eigenvectors.
+    """
     operator = get_sparse_operator(operator, n_qubits=n_qubits)
     if sparse_eig:
         which = kwargs.pop('which', "SA")
@@ -93,6 +158,18 @@ def diagonalization(operator,
 
 def sparse_apply_operator(operator: QubitOperator,
                           state: State) -> State:
+    """
+    Apply a QubitOperator to a state using sparse representations.
+
+    Args:
+        operator: The QubitOperator to apply.
+        state: The quantum state to which the operator will be applied. This can 
+               be specified in sparse or dense format.
+
+    Returns:
+        The resulting state after applying the operator, preserving the original 
+        state format.
+    """
     input_type = type_state(state)
     if input_type == 'sparse_dict':
         new_dict = dict()
@@ -145,6 +222,19 @@ def sparse_apply_operator(operator: QubitOperator,
 
 
 def state_dot(state_1: State, state_2: State) -> complex:
+    """
+    Compute the Hermitian dot product <state_1|state_2> between two quantum states.
+    
+    Args:
+        state_1: The first quantum state, which can be in any supported format defined 
+                 in `ofex.state.types` (e.g., numpy array, scipy sparse matrix, or dict).
+        state_2: The second quantum state in the computation, in the same formats 
+                 supported as `state_1`.
+
+    Returns:
+        A complex number representing the Hermitian dot product of `state_1` and `state_2`. 
+        If either state represents a "zero" state, the result will be zero.
+    """
     if is_zero(state_1) or is_zero(state_2):
         return 0.0
     dense_1, dense_2 = is_dense_state(state_1), is_dense_state(state_2)

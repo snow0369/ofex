@@ -9,4 +9,7 @@ galois~=0.3.7
 qiskit>=0.45,<1
 filelock~=3.13.1
 matplotlib~=3.8.2
-qiskit-aer~=0.14.2
+qiskit-aer~=0.13.3
+
+pytest~=8.2.2
+tqdm~=4.66.4

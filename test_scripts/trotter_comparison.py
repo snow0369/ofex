@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
-from ofex.propagator import exact_rte, exact_ite, trotter_rte_by_si_lcu, trotter_ite_by_si_lcu, trotter_rte_by_single_pauli, \
+from ofex.propagator import exact_rte, exact_ite, trotter_rte_by_si_ref, trotter_ite_by_si_ref, trotter_rte_by_single_pauli, \
     trotter_rte_by_si_comm, trotter_ite_by_si_comm, trotter_ite_by_single_pauli
 from ofex.transforms.fermion_qubit import fermion_to_qubit_operator
 from ofex.utils.chem import molecule_example
@@ -41,7 +41,7 @@ def trotter_comparison():
         for n_trotter in range(1, max_trotter + 1):
             print(f"n_trotter = {n_trotter} / {max_trotter}")
             tm = time()
-            rte_trot_lcu = trotter_rte_by_si_lcu(pham, t, n_qubits, n_trotter, exact_sparse)
+            rte_trot_lcu = trotter_rte_by_si_ref(pham, t, n_qubits, n_trotter, exact_sparse)
             tm_rte_trot_lcu = time() - tm
             diff_rte_lcu = np.linalg.norm((rte_exact - rte_trot_lcu).toarray(), ord=2)
             print(f"\tdiff_rte_lcu   = {diff_rte_lcu} (time = {tm_rte_trot_lcu})")
@@ -59,7 +59,7 @@ def trotter_comparison():
             print(f"\tdiff_rte_pauli = {diff_rte_pauli} (time = {tm_rte_trot_pauli})")
 
             tm = time()
-            ite_trot_lcu = trotter_ite_by_si_lcu(pham, beta, n_qubits, n_trotter, exact_sparse)
+            ite_trot_lcu = trotter_ite_by_si_ref(pham, beta, n_qubits, n_trotter, exact_sparse)
             tm_ite_trot_lcu = time() - tm
             diff_ite_lcu = np.linalg.norm((ite_exact - ite_trot_lcu).toarray(), ord=2)
             print(f"\tdiff_ite_lcu   = {diff_ite_lcu} (time = {tm_ite_trot_lcu})")

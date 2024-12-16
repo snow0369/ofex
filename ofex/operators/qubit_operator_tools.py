@@ -1,15 +1,24 @@
+"""
+This module provides utility functions for operations related to QubitOperator and SinglePauli objects.
+
+Functions included:
+- is_z_only: Checks if a QubitOperator contains only Z-type Pauli operators.
+- single_pauli_commute_chk: Determines whether two SinglePauli or QubitOperator objects commute.
+- normalize_by_lcu_norm: Normalizes a QubitOperator using Linear Combination of Unitaries (LCU) norms to
+  ensure its eigenspectrum resides in [-1, 1].
+"""
+
 from typing import Dict, Union, Tuple
 
 import numpy as np
-from openfermion import QubitOperator, FermionOperator
+from openfermion import QubitOperator
 from openfermion.config import EQ_TOLERANCE
-from openfermion.ops.operators.symbolic_operator import COEFFICIENT_TYPES
 
 from ofex.operators.symbolic_operator_tools import operator, coeff
 from ofex.operators.types import SinglePauli
 
 
-__all__ = ["is_z_only", "single_pauli_commute_chk", "dict_to_operator", "normalize_by_lcu_norm"]
+__all__ = ["is_z_only", "single_pauli_commute_chk", "normalize_by_lcu_norm"]
 
 
 def _single_pauli_to_dict(op: SinglePauli) -> Dict[int, str]:
@@ -21,6 +30,15 @@ def _single_pauli_to_dict(op: SinglePauli) -> Dict[int, str]:
 
 
 def is_z_only(op: QubitOperator) -> bool:
+    """
+    Check if a given QubitOperator consists only of Z-type Pauli operators,
+
+    Args:
+        op (QubitOperator): The QubitOperator to check.
+
+    Returns:
+        bool: True if the operator consists only of Z-type operators, False otherwise.
+    """
     for op in op.terms.keys():
         if any([x[1].upper() not in ["I", "Z"] for x in op]):
             return False
@@ -28,7 +46,20 @@ def is_z_only(op: QubitOperator) -> bool:
 
 
 def single_pauli_commute_chk(op1: Union[SinglePauli, QubitOperator],
-                             op2: Union[SinglePauli, QubitOperator], ):
+                             op2: Union[SinglePauli, QubitOperator]) -> bool:
+    """
+    Check if two single Pauli operators or QubitOperators commute.
+
+    Args:
+        op1 (Union[SinglePauli, QubitOperator]): The first operator to compare.
+        op2 (Union[SinglePauli, QubitOperator]): The second operator to compare.
+
+    Returns:
+        bool: True if the operators commute, False otherwise.
+
+    Raises:
+        ValueError: If either operator has an imaginary coefficient.
+    """
     if isinstance(op1, QubitOperator):
         if not np.isclose(coeff(op1).imag, 0.0, atol=EQ_TOLERANCE):
             raise ValueError("Coeff should be real.")
@@ -51,38 +82,34 @@ def single_pauli_commute_chk(op1: Union[SinglePauli, QubitOperator],
     return commute
 
 
-def dict_to_operator(op_dict, base) -> Union[QubitOperator, FermionOperator]:
-    if base not in [QubitOperator, FermionOperator]:
-        raise TypeError(f"Unknown base type {base}.")
-    op = base()
-
-    new_op_dict = dict()
-    for term, coefficient in op_dict.items():
-        if not isinstance(coefficient, COEFFICIENT_TYPES):
-            raise ValueError(
-                'Coefficient must be a numeric type. Got {}'.format(
-                    type(coefficient)))
-        if term is None:
-            continue
-        elif isinstance(term, (list, tuple)):
-            term = op._parse_sequence(term)
-        elif isinstance(term, str):
-            term = op._parse_string(term)
-        else:
-            raise ValueError('term specified incorrectly.')
-        coefficient, term = op._simplify(term, coefficient=coefficient)
-        new_op_dict[term] = coefficient
-    op.terms = new_op_dict
-    return op
-
-
 def normalize_by_lcu_norm(ham: QubitOperator,
                           level: int = 1,
                           **kwargs) -> Tuple[QubitOperator, float]:
     """
-    level = 0 : Pauli 1 norm
-    level = 1 : Sorted Insertion
-    level = 2 : SI with norm optimization
+    Normalize a QubitOperator using different methods to calculate its Linear Combination of Unitaries (LCU) norm.
+
+    The eigenspectrum of the normalized operator is guaranteed to be less than one, while this computation is
+    much more efficient than normalization by spectral norm.
+    Better normalization makes the spectrum more separated within the range [-1, 1], which corresponds to 
+    normalization using smaller norms.
+
+    This function supports multiple levels of normalization strategies. Before normalization, it ensures that
+    any constant term in the Hamiltonian is removed.
+
+    Args:
+        ham (QubitOperator): The Hamiltonian to normalize.
+        level (int, optional): Specifies the normalization strategy:
+            - level = 0: Uses the Pauli 1-norm for normalization.
+            - level = 1: Applies the Sorted Insertion (SI) method based on commutation relationships.
+            - level = 2: Uses the optimally sorted insertion (SI) method that minimizes norms.
+        **kwargs: Additional arguments for optimization when `level=2`.
+
+    Returns:
+        Tuple[QubitOperator, float]: A tuple where the first element is the normalized Hamiltonian,
+                                     and the second element is the calculated norm.
+
+    Raises:
+        ValueError: If the Hamiltonian contains a constant term or if the specified level is invalid.
     """
     from ofex.measurement import sorted_insertion, optimal_sorted_insertion
 

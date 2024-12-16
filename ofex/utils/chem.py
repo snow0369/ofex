@@ -1,3 +1,14 @@
+"""
+This module provides tools and methods for working with molecular geometries 
+and quantum chemistry calculations. It includes utilities for generating linear 
+and bent molecular structures, defining example molecular geometries, and running 
+quantum chemistry simulations using various drivers.
+
+Main functionalities:
+- Define linear and bent molecular geometries.
+- Predefine common molecules with standard parameters.
+- Run quantum chemistry calculations using drivers like PySCF and Psi4.
+"""
 import os
 import subprocess
 import warnings
@@ -29,41 +40,58 @@ default_param = {
 
 
 def linear_geometry(atoms: List[str],
-                    distances: Union[Number, List[Number]]) -> MoleculeGeometry:
-    """Return geometry of atoms for linear geometry.
+                    distances: Union[float, List[float]]) -> MoleculeGeometry:
+    """
+    Generate a linear molecular geometry based on specified atoms and interatomic distances.
+
+    This function positions a series of atoms in a one-dimensional linear arrangement,
+    computing their coordinates such that each atom is separated from its neighbors
+    by the specified distances.
 
     Args:
-        atoms: list of atoms with length of n. example) ['H', 'Be', 'H']
-        distances: list of interatomic distances with length of n-1. example) [1.5, 1.5] or 1.5
+        atoms (List[str]): A list of atom symbols with length `n`. Example: ['H', 'Be', 'H'].
+        distances (Union[float, List[float]]): A single numeric value or a list of `n-1` distances
+            representing interatomic separations in angstrom. If a single value is provided, it will be
+            uniformly applied between all atoms. Example: 1.5 or [1.5, 1.5].
 
     Returns:
-        geometry: geometry fed to the ``Molecule`` object initialization.
+        MoleculeGeometry: A list of tuples where each tuple contains the atomic symbol
+            and its 3D coordinates (0.0, 0.0, z) in a linear arrangement. Example: [('H', (0.0, 0.0, 0.0)), 
+            ('Be', (0.0, 0.0, 1.5)), ('H', (0.0, 0.0, 3.0))].
 
+    Raises:
+        ValueError: If the number of distances provided does not match the number of atoms - 1.
     """
 
     if isinstance(distances, Number):
         distances = [distances for _ in range(len(atoms) - 1)]
     if len(distances) != len(atoms) - 1:
-        raise ValueError(f"The number of distances {len(distances)} is not equal to the number of atoms - 1 {len(atoms) - 1}")
+        raise ValueError(f"The number of distances {len(distances)} is not equal to the number of atoms - 1"
+                         f"{len(atoms) - 1}")
     position = [sum(distances[:i]) for i in range(len(atoms))]
     return [(a, (0.0, 0.0, p)) for a, p in zip(atoms, position)]
 
 
 def bent_geometry(central: str,
                   peripheral: Union[str, List[str]],
-                  distances: Union[Number, List[Number]],
-                  angle: Number) -> MoleculeGeometry:
-    """Return geometry of atoms for bent geometry.
-
+                  distances: Union[float, List[float]],
+                  angle: float) -> MoleculeGeometry:
+    """
+    Generate the 3D geometry of a bent molecule.
+    
     Args:
-        central: The central atom. example) 'O'
-        peripheral: The peripheral atoms. example) ['H', 'H']
-        distances: Distances between central and peripheral atoms. example) [0.97, 0.97] or 0.97
-        angle: angle between the bonds in degree. example) 104.5
-
+        central (str): The central atom. Example: 'O'.
+        peripheral (Union[str, List[str]]): The peripheral atoms. Example: 'H' or ['H', 'H'].
+        distances (Union[float, List[float]]): Distances from the central atom to the peripheral atoms in angstrom.
+            Example: 0.97 or [0.97, 0.97].
+        angle (float): Angle between the bonds in degrees. Example: 104.5.
+    
     Returns:
-        geometry: geometry fed to the ``Molecule`` object initialization.
-
+        MoleculeGeometry: A list of tuples representing atom names and their 3D coordinates.
+            Example: [('O', (0, 0, 0)), ('H', (0, 0.97, 0)), ('H', (0, 0.825, 0.509))].
+    
+    Raises:
+        ValueError: If less than two peripheral atoms or distances are specified.
     """
 
     if isinstance(peripheral, str):
@@ -81,17 +109,27 @@ def bent_geometry(central: str,
 
 def molecule_example(molecule_name: str,
                      param: Optional[Union[Number, List[Number]]] = None,
+                     geometry: Optional[MoleculeGeometry] = None,
                      **kwargs) -> MolecularData:
-    """Return a ``Molecule`` object from molecule name and parameters for geometry configuration.
-
+    """
+    Generate a `Molecule` object using a predefined molecular name and its geometry parameters.
+    
     Args:
-        molecule_name: "H2", "H4", "HeH+", "LiH", "BeH2", "H2O" supported.
-        param: [distance1, distance2, ... angle1, angle2] or just a real number.
-        **kwargs: Keyword arguments for ``Molecule`` object initialization
-
+        molecule_name (str): Supported molecules include "H2", "H4", "HeH+", "LiH", "BeH2", "H2O", and "Li2O".
+        param (Optional[Union[Number, List[Number]]]): Parameters for the geometry. Examples:
+            - Single distance (e.g., 0.74 for "H2").
+            - List of distances and angles (e.g., [0.957, 0.957, 104.5] for "H2O").
+        geometry (Optional[MoleculeGeometry]): Custom molecular geometry as a list of tuples.
+            If not provided, a default geometry based on `molecule_name` and `param` will be used.
+        **kwargs: Additional keyword arguments passed to the `Molecule` object initialization, such as:
+            - `basis` (str): Basis set to use. Default is "sto-3g".
+            - `multiplicity` (int): Spin multiplicity. Default is 1.
+    
     Returns:
-        molecule: an example of ``Molecule`` object.
-
+        MolecularData: A `Molecule` object with the defined geometry and properties.
+    
+    Raises:
+        ValueError: If the `molecule_name` is not recognized.
     """
     basis = 'sto-3g' if 'basis' not in kwargs else kwargs['basis']
     if 'basis' in kwargs:
@@ -101,31 +139,32 @@ def molecule_example(molecule_name: str,
         kwargs.pop('multiplicity')
     charge = 0
 
-    if param is None:
-        param = default_param[molecule_name]
-    if molecule_name == "H2":
-        geometry = linear_geometry(['H', 'H'], param)
-    elif molecule_name == "H4":
-        geometry = linear_geometry(['H', 'H', 'H', 'H'], param)
-    elif molecule_name == "HeH+":
-        charge = 1
-        geometry = linear_geometry(['He', 'H'], param)
-    elif molecule_name == "LiH":
-        geometry = linear_geometry(['Li', 'H'], param)
-    elif molecule_name == "BeH2":
-        if isinstance(param, Number):
-            param = [param, param]
-        geometry = linear_geometry(['H', 'Be', 'H'], param)
-    elif molecule_name == "H2O":
-        if isinstance(param, Number):
-            param = [param, param, default_param["H2O"][2]]
-        geometry = bent_geometry("O", "H", param[:2], param[2])
-    elif molecule_name == 'Li2O':
-        geometry = [['Li', [0, 0, -param]],
-                    ['O', [0, 0, 0]],
-                    ['Li', [0, 0, param]]]
-    else:
-        raise NameError(f"{molecule_name} is not in the example list.")
+    if geometry is None:
+        if param is None:
+            param = default_param[molecule_name]
+        if molecule_name == "H2":
+            geometry = linear_geometry(['H', 'H'], param)
+        elif molecule_name == "H4":
+            geometry = linear_geometry(['H', 'H', 'H', 'H'], param)
+        elif molecule_name == "HeH+":
+            charge = 1
+            geometry = linear_geometry(['He', 'H'], param)
+        elif molecule_name == "LiH":
+            geometry = linear_geometry(['Li', 'H'], param)
+        elif molecule_name == "BeH2":
+            if isinstance(param, Number):
+                param = [param, param]
+            geometry = linear_geometry(['H', 'Be', 'H'], param)
+        elif molecule_name == "H2O":
+            if isinstance(param, Number):
+                param = [param, param, default_param["H2O"][2]]
+            geometry = bent_geometry("O", "H", param[:2], param[2])
+        elif molecule_name == 'Li2O':
+            geometry = [['Li', [0, 0, -param]],
+                        ['O', [0, 0, 0]],
+                        ['Li', [0, 0, param]]]
+        else:
+            raise ValueError(f"{molecule_name} is not in the example list.")
 
     mol = MolecularData(geometry,
                         basis,
@@ -148,6 +187,32 @@ def run_driver(molecule: MolecularData,
                run_fci: bool = False,
                driver: str = 'pyscf',
                **kwargs) -> MolecularData:
+    """
+    Execute quantum chemistry calculations for a molecule using a specified driver.
+
+    This function supports running various levels of theory calculations, including SCF, MP2, CISD, CCSD, and FCI,
+    for molecules represented as `MolecularData` objects. It works with multiple external drivers such as `pyscf` 
+    and `psi4`.
+
+    Args:
+        molecule (MolecularData): A molecule object including its geometry, charge, and multiplicity.
+        run_scf (bool): If True, perform a Self-Consistent Field (SCF) calculation. Default is True.
+        run_mp2 (bool): If True, perform a 2nd order Møller–Plesset (MP2) calculation. Default is False.
+        run_cisd (bool): If True, perform a Configuration Interaction with Single and Double Excitations
+            (CISD) calculation. Default is False.
+        run_ccsd (bool): If True, perform a Coupled Cluster with Single and Double Excitations (CCSD)
+            calculation. Default is False.
+        run_fci (bool): If True, perform a Full Configuration Interaction (FCI) calculation. Default is False.
+        driver (str): The quantum chemistry driver to use ('pyscf' or 'psi4'). Default is 'pyscf'.
+        **kwargs: Additional arguments specific to the quantum chemistry driver used.
+
+    Returns:
+        MolecularData: The input molecule object updated with the results of the calculations.
+
+    Raises:
+        ValueError: If an unsupported driver is specified.
+        AttributeError: If a required class or updated module is not available for the driver.
+    """
     if driver.lower() == 'psi4':
         return run_psi4(molecule, run_scf, run_mp2, run_cisd, run_ccsd, run_fci, **kwargs)
     elif driver.lower() == 'pyscf':
@@ -174,7 +239,8 @@ def run_psi4(molecule: MolecularData,
              delete_output: bool = False,
              memory: int = 8000,
              template_file: Optional[str] = None) -> MolecularData:
-    """This function runs a Psi4 calculation.
+    """
+    This function runs a Psi4 calculation.
     Modified the original function to use psi4 in the environment variable
 
     Args:

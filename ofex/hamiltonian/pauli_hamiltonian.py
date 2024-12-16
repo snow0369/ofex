@@ -2,6 +2,16 @@ import openfermion as of
 
 
 def chain_pauli(num_qubits: int, p_type: str) -> of.QubitOperator:
+    """
+    Generate the Pauli-based chain Hamiltonian as a QubitOperator.
+
+    Args:
+        num_qubits (int): The number of qubits in the system.
+        p_type (str): The type of Pauli operator ('X', 'Y', 'Z').
+
+    Returns:
+        of.QubitOperator: The QubitOperator representing the chain Hamiltonian.
+    """
     p_type = p_type.upper()
     if p_type not in ("X", "Y", "Z"):
         raise ValueError(f"Unknown pauli")
@@ -12,6 +22,17 @@ def chain_pauli(num_qubits: int, p_type: str) -> of.QubitOperator:
 
 
 def ring_pauli(num_qubits: int, p_type: str) -> of.QubitOperator:
+    """
+    Generate the Pauli-based ring Hamiltonian as a QubitOperator.
+
+    Args:
+        num_qubits (int): The number of qubits in the system.
+        p_type (str): The type of Pauli operator ('X', 'Y', 'Z').
+
+    Returns:
+        of.QubitOperator: The QubitOperator representing the ring Hamiltonian, 
+                          where the last qubit also interacts with the first.
+    """
     p_type = p_type.upper()
     if p_type not in ("X", "Y", "Z"):
         raise ValueError(f"Unknown pauli")
@@ -25,18 +46,45 @@ def ring_pauli(num_qubits: int, p_type: str) -> of.QubitOperator:
 
 
 def zz_1d(num_qubits: int) -> of.QubitOperator:
+    """
+    Generate the Z-Z interaction Hamiltonian for a 1D chain of qubits.
+
+    Args:
+        num_qubits (int): The number of qubits in the system.
+
+    Returns:
+        of.QubitOperator: The QubitOperator representing the Z-Z Hamiltonian.
+    """
     qubit_op = chain_pauli(num_qubits, "Z")
     # return get_sparse_operator(qubit_op, num_qubits)
     return qubit_op
 
 
 def heisenberg_1d(num_qubits) -> of.QubitOperator:
+    """
+    Generate the Heisenberg Hamiltonian for a 1D open chain of spins.
+
+    Args:
+        num_qubits (int): The number of qubits in the system.
+
+    Returns:
+        of.QubitOperator: The QubitOperator representing the Heisenberg Hamiltonian.
+    """
     qubit_op = chain_pauli(num_qubits, "X") + chain_pauli(num_qubits, "Y") + chain_pauli(num_qubits, "Z")
     # return get_sparse_operator(qubit_op, num_qubits)
     return qubit_op
 
 
 def heisenberg_1d_ring(num_qubits) -> of.QubitOperator:
+    """
+    Generate the Heisenberg Hamiltonian for a 1D closed ring of spins.
+
+    Args:
+        num_qubits (int): The number of qubits in the system.
+
+    Returns:
+        of.QubitOperator: The QubitOperator representing the Heisenberg Hamiltonian on a closed ring.
+    """
     qubit_op = ring_pauli(num_qubits, "X") + ring_pauli(num_qubits, "Y") + ring_pauli(num_qubits, "Z")
     # return get_sparse_operator(qubit_op, num_qubits)
     return qubit_op

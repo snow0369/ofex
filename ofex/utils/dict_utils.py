@@ -1,3 +1,11 @@
+"""
+This module provides a collection of utility functions for working with nested dictionaries.
+It includes functions for recursive operations such as updating, traversing, and assigning
+values within nested dictionaries. The module also supports mathematical operations like
+addition and subtraction of dictionary values, as well as comparison utilities that handle
+both numeric and non-numeric data types.
+"""
+
 from copy import deepcopy
 from numbers import Number
 from typing import Optional, Any, Callable
@@ -10,6 +18,16 @@ __all__ = ["recursive_dict_update", "recursive_dict_keys", "recursive_dict_items
 
 
 def recursive_dict_update(previous: dict, additional: dict) -> dict:
+    """
+    Recursively updates a dictionary with values from another dictionary.
+
+    Args:
+        previous (dict): The original dictionary to be updated.
+        additional (dict): The dictionary containing new values.
+
+    Returns:
+        dict: A new dictionary with the values from `additional` merged into `previous`.
+    """
     previous = deepcopy(previous)
     for k in additional:
         add_v = additional[k]
@@ -24,6 +42,14 @@ def recursive_dict_update(previous: dict, additional: dict) -> dict:
 
 
 def nested_dict_assign(dictionary: dict, key_list: list, value: Any):
+    """
+    Assigns a value to a nested key in a dictionary.
+
+    Args:
+        dictionary (dict): The dictionary to modify.
+        key_list (list): A list of keys defining the nested structure.
+        value (Any): The value to assign to the nested key.
+    """
     prev_key = key_list[0]
     prev_dict = dictionary
     for k in key_list[1:]:
@@ -35,6 +61,16 @@ def nested_dict_assign(dictionary: dict, key_list: list, value: Any):
 
 
 def recursive_dict_keys(dictionary: dict, max_depth=None):
+    """
+    Recursively yields all keys in a nested dictionary.
+
+    Args:
+        dictionary (dict): The dictionary whose keys to traverse.
+        max_depth (int, optional): The maximum depth to traverse. If None, no limit.
+
+    Yields:
+        tuple: The keys in the dictionary as nested tuples.
+    """
     def _get_key(key, _):
         return key
 
@@ -42,6 +78,16 @@ def recursive_dict_keys(dictionary: dict, max_depth=None):
 
 
 def recursive_dict_items(dictionary: dict, max_depth=None):
+    """
+    Recursively yields all key-value pairs in a nested dictionary.
+
+    Args:
+        dictionary (dict): The dictionary whose items to traverse.
+        max_depth (int, optional): The maximum depth to traverse. If None, no limit.
+
+    Yields:
+        tuple: A tuple containing the key path and the value.
+    """
     def _get_item(key, value):
         return key, value
 
@@ -49,6 +95,18 @@ def recursive_dict_items(dictionary: dict, max_depth=None):
 
 
 def _recursive_dict_items(dictionary: dict, current_keys, max_depth, f: Callable):
+    """
+    Helper function used to recursively traverse a nested dictionary.
+
+    Args:
+        dictionary (dict): The dictionary to traverse.
+        current_keys (tuple): The current path of keys being traversed.
+        max_depth (int, optional): The maximum depth for traversal.
+        f (Callable): A function to format the keys and values.
+
+    Yields:
+        Any: Processed key-value pairs based on `f`.
+    """
     for key, value in dictionary.items():
         new_keys = current_keys + (key,)
         if isinstance(value, dict) and (max_depth is None or len(new_keys) < max_depth):
@@ -58,6 +116,16 @@ def _recursive_dict_items(dictionary: dict, current_keys, max_depth, f: Callable
 
 
 def add_values(a: Optional[dict], b: Optional[dict]) -> Optional[dict]:
+    """
+    Adds the values of two dictionaries by matching their keys.
+
+    Args:
+        a (dict or None): The first dictionary with numeric values.
+        b (dict or None): The second dictionary with numeric values.
+
+    Returns:
+        dict or None: A new dictionary containing the sum of values for matching keys, or None if both are None.
+    """
     if a is None and b is None:
         return None
     elif a is None:
@@ -74,6 +142,16 @@ def add_values(a: Optional[dict], b: Optional[dict]) -> Optional[dict]:
 
 
 def sub_values(a: Optional[dict], b: Optional[dict]) -> Optional[dict]:
+    """
+    Subtracts the values of the second dictionary from the first dictionary by matching keys.
+
+    Args:
+        a (dict or None): The first dictionary with numeric values.
+        b (dict or None): The second dictionary with numeric values.
+
+    Returns:
+        dict or None: A new dictionary containing the difference of values for matching keys, or None if both are None.
+    """
     if a is None and b is None:
         return None
     elif a is None:
@@ -92,6 +170,17 @@ def sub_values(a: Optional[dict], b: Optional[dict]) -> Optional[dict]:
 
 
 def dict_allclose(a: dict, b: dict, atol=EQ_TOLERANCE) -> bool:
+    """
+    Checks whether two dictionaries are approximately equal, element-wise.
+
+    Args:
+        a (dict): The first dictionary to compare.
+        b (dict): The second dictionary to compare.
+        atol (float): The absolute tolerance for comparison of numerical values.
+
+    Returns:
+        bool: True if all values are close within the given tolerance, False otherwise.
+    """
     for k in set(a.keys()).union(b.keys()):
         if k not in a.keys() or k not in b.keys():
             return False
@@ -111,6 +200,19 @@ def compare_dict(dict_1, dict_2,
                  repr_func: Callable[[Any, Number], str],
                  str_len=40,
                  atol=EQ_TOLERANCE) -> str:
+    """
+    Compares two dictionaries and generates a formatted string of differences.
+
+    Args:
+        dict_1 (dict): The first dictionary to compare.
+        dict_2 (dict): The second dictionary to compare.
+        repr_func (Callable): A function to format the key-value pairs for display.
+        str_len (int): The length of the formatted string for each dictionary entry.
+        atol (float): The absolute tolerance for numerical comparisons.
+
+    Returns:
+        str: A multi-line string summarizing the differences between `dict_1` and `dict_2`.
+    """
     keys = set(dict_1.keys()).union(dict_2.keys())
     try:
         keys = sorted(keys)

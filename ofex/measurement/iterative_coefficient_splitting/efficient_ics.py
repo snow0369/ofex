@@ -60,6 +60,37 @@ def efficient_ics(ham: QubitOperator,
                   checksum_atol: float = 1e-6,
                   max_iter=10000,
                   ) -> Tuple[List[QubitOperator], float]:
+    """
+    Compute an efficient Iterative Coefficient Splitting (ICS) by optimizing the norm.
+    
+    This function partitions Pauli operators into compatible groups while optimizing the two-norm 
+    of resulting group operators. It performs iterative coefficient reallocation to minimize the 
+    discrepancy between the input Hamiltonian and the resulting grouped operators. Unlike the 
+    standard ICS method, which relies on the covariance of Pauli operators with assumed states, 
+    this method skips covariance computation entirely, making it faster but not necessarily more 
+    accurate than the standard ICS.
+    
+    Args:
+        ham (QubitOperator): The input Hamiltonian represented as a QubitOperator. 
+                             A constant term in the Hamiltonian is not allowed.
+        initial_grp (Tuple[List[QubitOperator], List[List[int]], List[List[int]]]): 
+            Initial grouping of the Hamiltonian into compatible groups:
+            - pauli_list: List of all Pauli operators from the Hamiltonian.
+            - grp_pauli_list: List of Pauli operators in each group.
+            - pauli_grp_list: List mapping Pauli operators to their respective group indices.
+            Those are the output of ofex.measurement.iterative_coefficient_splitting.init_efficient_ics
+        conv_th (float): Convergence threshold for coefficient optimization. Default is 1e-6.
+        checksum_atol (float): Tolerance for checksum verifications. Default is 1e-6.
+        max_iter (int): Maximum number of iterations for convergence. Default is 10000.
+    
+    Returns:
+        Tuple[List[QubitOperator], float]: 
+            - A list of grouped QubitOperators (operators with reallocated coefficients).
+            - The total two-norm of the grouped operators.
+    
+    Raises:
+        ValueError: If the Hamiltonian contains a non-zero constant term.
+    """
     if ham.constant != 0.0:
         raise ValueError
 

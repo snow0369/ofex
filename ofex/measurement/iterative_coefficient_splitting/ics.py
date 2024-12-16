@@ -5,10 +5,10 @@ from openfermion import QubitOperator
 from openfermion.config import EQ_TOLERANCE
 from scipy.linalg import eigh
 
-from ofex.measurement.iterative_coefficient_splitting.ics_utils import _synthesize_group, \
-    _calculate_groupwise_std, _generate_cov_list, _add_epsilon_shot
-from ofex.measurement.pauli_variance import pauli_variance
+from ofex.measurement.iterative_coefficient_splitting.ics_utils import (_calculate_groupwise_std, _generate_cov_list,
+                                                                        _add_epsilon_shot)
 from ofex.measurement.types import PauliCovDict, TransitionPauliCovDict
+from ofex.measurement.utils import synthesize_group
 from ofex.operators.symbolic_operator_tools import coeff, compare_operators
 
 
@@ -25,21 +25,43 @@ def run_ics(ham: QubitOperator,
             debug: bool = False, ) \
         -> Tuple[List[QubitOperator], np.ndarray, float, Optional[np.ndarray]]:
     """
+    Runs the Iterative Coefficient Splitting (ICS) optimization algorithm for Hamiltonian decomposition.
+
+    References:
+        - https://arxiv.org/abs/2201.01471
+        - https://arxiv.org/abs/2409.02504
 
     Args:
-        ham: Initial Hamiltonian
-        initial_grp:
-        cov_dict: Covariances, (key : tuple of pauli string, value : real (and imaginary for transition = True))
-        transition: Calculation for transition amplitude (ref1 and ref2 are different)
-        conv_atol: Threshold for the optimization convergence.
-        max_iter: Maximum number of iteration in ics optimization
-        lstsq_rcond:
-        initial_c:
-        debug: STDOUT for debugging
-
+        ham (QubitOperator): Initial Hamiltonian that needs to be decomposed.
+        initial_grp (Tuple[List[QubitOperator], List[List[int]], List[List[int]]]): 
+            Initial grouping of the Hamiltonian into compatible groups:
+            - pauli_list: List of all Pauli operators from the Hamiltonian.
+            - grp_pauli_list: List of Pauli operators in each group.
+            - pauli_grp_list: List mapping Pauli operators to their respective group indices.
+            Those are the output of ofex.measurement.iterative_coefficient_splitting.init_ics
+        cov_dict (Union[PauliCovDict, TransitionPauliCovDict]): 
+            A dictionary of covariances. The keys are tuples of Pauli strings, and the values are either real parts
+            or a combination of real and imaginary parts (for `transition=True`).
+        transition (bool, optional): If set to True, calculates transition amplitudes (applies when `ref1` and 
+            `ref2` are different states).
+        sep_reim (bool, optional): If True, separates the real and imaginary covariance elements. Valid only with 
+            `transition=True`.
+        conv_atol (float, optional): Absolute tolerance for convergence. Default is 1e-6.
+        conv_rtol (Optional[float], optional): Relative tolerance for convergence (default: 1e-4). If None, only absolute
+            tolerance will be used.
+        max_iter (int, optional): Maximum number of iterations allowed for the ICS optimization loop. Default is 10,000.
+        lstsq_rcond (float, optional): Cut-off value for singular values in least-squares optimization. Default: 1e-6.
+        initial_c (Optional[np.ndarray], optional): Initial coefficients for optimization. If None, automatically populated.
+        debug (bool, optional): If True, prints debugging information to the console.
+    
     Returns:
-        group_hamiltonian, shot_allocation_real, shot_allocation_imag, optimal_variance, c_opt
-
+        Tuple:
+            - List[QubitOperator]: Grouped Hamiltonians obtained from the optimization process.
+            - np.ndarray: If `transition` is `True`, a 2D array with shape `(2, n_frag)` containing shot allocations 
+              for the real and imaginary parts. If `transition` is `False`, a 1D array with shot allocations for 
+              the real part only.
+            - float: Final optimal measurement variance achieved.
+            - Optional[np.ndarray]: Optimized coefficients for the group Hamiltonians.
     """
     if ham.constant != 0.0:
         raise ValueError
@@ -236,8 +258,8 @@ def run_ics(ham: QubitOperator,
 
                 if debug:
                     print(f"it {it} : {sum_std ** 2}")
-                    grp_ham_list = _synthesize_group(sep_reim, c_opt, pauli_list, grp_pauli_list, size_grp, ham, debug,
-                                                     correct_sum=False)
+                    grp_ham_list = synthesize_group(sep_reim, c_opt, pauli_list, grp_pauli_list, size_grp, ham, debug,
+                                                    correct_sum=False)
                     for grp_ham in grp_ham_list:
                         checksum = QubitOperator.accumulate(grp_ham)
                         if not checksum.isclose(ham):
@@ -256,8 +278,8 @@ def run_ics(ham: QubitOperator,
                 raise e
 
     # 5. Synthesize group
-    grp_ham_list = _synthesize_group(sep_reim, c_opt, pauli_list, grp_pauli_list, size_grp, ham,
-                                     debug)  # , leftover, anticommute, debug)
+    grp_ham_list = synthesize_group(sep_reim, c_opt, pauli_list, grp_pauli_list, size_grp, ham,
+                                    debug)  # , leftover, anticommute, debug)
     final_variance = 0.5 * c_opt.T @ tot_vmat @ c_opt
 
     n_frag = len(grp_ham_list[0])
@@ -272,79 +294,3 @@ def run_ics(ham: QubitOperator,
         return grp_ham_list[0], shots, final_variance, c_opt
     else:
         return grp_ham_list, shots, final_variance, c_opt
-
-
-if __name__ == "__main__":
-
-    from openfermion import get_fermion_operator
-    from ofex.utils.chem import molecule_example
-    from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
-    from ofex.state.chem_ref_state import hf_ground
-    from ofex.measurement import sorted_insertion
-    from ofex.propagator import exact_rte
-    from ofex.linalg.sparse_tools import apply_operator
-    from ofex.state.state_tools import pretty_print_state
-
-
-    def ics_test():
-        from ofex.measurement.iterative_coefficient_splitting import init_ics
-
-        mol_name = "LiH"
-        transform = 'symmetry_conserving_bravyi_kitaev'
-        debug = True
-        anticommute = False
-
-        mol = molecule_example(mol_name)
-        fham = mol.get_molecular_hamiltonian()
-        fham = get_fermion_operator(fham)
-        n_qubits = mol.n_qubits
-        if transform == "jordan_wigner":
-            kwargs = dict()
-        elif transform == "bravyi_kitaev":
-            kwargs = {'n_qubits': mol.n_qubits}
-        elif transform == 'symmetry_conserving_bravyi_kitaev':
-            kwargs = {'active_fermions': mol.n_electrons,
-                      'active_orbitals': mol.n_qubits}
-            n_qubits -= 2
-        else:
-            raise AssertionError
-
-        pham = fermion_to_qubit_operator(fham, transform, **kwargs)
-        pham = pham - pham.constant
-
-        norm = sum([u.induced_norm(order=2) for u in sorted_insertion(pham, anticommute=True)])
-        prop = exact_rte(pham, t=6 * np.pi / norm, n_qubits=n_qubits)
-
-        ref1 = fermion_to_qubit_state(hf_ground(mol), transform, **kwargs)
-        print(prop.shape)
-        print(pretty_print_state(ref1))
-        ref2 = apply_operator(prop, ref1)
-
-        initial_grp, cov_dict = init_ics(pham, ref1, ref2,
-                                         num_workers=15,
-                                         anticommute=anticommute, debug=debug)
-
-        grp_ham, shots, final_var, c_opt = run_ics(pham,
-                                                   initial_grp,
-                                                   cov_dict,
-                                                   transition=True,
-                                                   conv_atol=1e-6,
-                                                   debug=debug)
-        print(final_var)
-        print("== ICS VAR ==")
-        ev_var = pauli_variance(ref1, ref2, grp_ham, shots, )
-        print(ev_var)
-        print(np.sum(shots))
-
-        print("== SI  VAR ==")
-        si_group = sorted_insertion(pham, anticommute)
-        m_si_real = np.array([x.induced_norm(order=2) for x in si_group])
-        m_si_imag = np.array(m_si_real)
-        div = sum(m_si_real) + sum(m_si_imag)
-        m_si_real, m_si_imag = m_si_real / div, m_si_imag / div
-        ev_var_si = pauli_variance(ref1, ref2, si_group, shots)
-        print(ev_var_si)
-        print(sum(m_si_real) + sum(m_si_imag))
-
-
-    ics_test()

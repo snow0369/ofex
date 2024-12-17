@@ -25,7 +25,7 @@ from ofex.utils.dict_utils import dict_allclose, compare_dict
 __all__ = ["get_num_qubits", "get_state_dim", "get_sparsity", "pretty_print_state", "compare_states",
            "to_dense", "to_scipy_sparse", "to_sparse_dict", "state_type_transform",
            "fock_vector_to_dense_state", "fock_vector_to_scipy_state",
-           "compress_sparse", "allclose", "norm", "normalize", "is_zero"]
+           "compress_sparse", "state_allclose", "norm", "normalize", "is_zero"]
 
 
 def get_num_qubits(state: State) -> int:
@@ -288,9 +288,9 @@ def compress_sparse(state: Union[SparseStateDict, ScipySparse], atol=EQ_TOLERANC
         return new_state
 
 
-def allclose(state_1: State,
-             state_2: State,
-             atol=EQ_TOLERANCE) -> bool:
+def state_allclose(state_1: State,
+                   state_2: State,
+                   atol=EQ_TOLERANCE) -> bool:
     """
     Checks if two quantum states are approximately equal within a tolerance.
 

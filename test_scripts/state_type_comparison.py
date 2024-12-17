@@ -10,7 +10,7 @@ from openfermion import get_sparse_operator, generate_linear_qubit_operator
 from openfermion.config import EQ_TOLERANCE
 
 from ofex.linalg.sparse_tools import apply_operator, sparse_apply_operator
-from ofex.state.state_tools import to_dense, allclose, compare_states
+from ofex.state.state_tools import to_dense, state_allclose, compare_states
 from test_scripts.random_object import random_state_all, random_qubit_operator
 import warnings
 
@@ -69,8 +69,8 @@ def benchmark_operator_state_mult(n_qubits,
     standard_state2 = mul_results[standard_name2]
     for idx_key, (key_tot, mul_out) in enumerate(mul_results.items()):
         try:
-            assert allclose(standard_state1, mul_out, atol=EQ_TOLERANCE)
-            assert allclose(standard_state2, mul_out, atol=EQ_TOLERANCE)
+            assert state_allclose(standard_state1, mul_out, atol=EQ_TOLERANCE)
+            assert state_allclose(standard_state2, mul_out, atol=EQ_TOLERANCE)
         except AssertionError as e:
             print(operator)
             print(state_dict)

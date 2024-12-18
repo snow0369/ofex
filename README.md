@@ -105,6 +105,8 @@ print(expectation(z1, state_1_sparse))  # -1.0
 
 ## **API Overview**
 
+[Full API Documentation](https://html-preview.github.io/?url=https%3A%2F%2Fgithub.com%2Fsnow0369%2Fofex%2Fblob%2Fadd_codebase%2Fdocs%2Fapi_reference%2Findex.html)
+
 | Module                          | Description                                                                                 |
 |---------------------------------|---------------------------------------------------------------------------------------------|
 | `ofex.clifford`                 | Clifford operations and tools (tableaus, Pauli diagonalization).                            |

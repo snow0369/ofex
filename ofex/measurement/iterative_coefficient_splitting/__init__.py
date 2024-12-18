@@ -7,7 +7,7 @@ The module includes:
 """
 
 from .ics import run_ics
-from .efficient_ics import efficient_ics
+from .efficient_ics import run_efficient_ics
 from .ics_prepare import init_ics, init_efficient_ics
 
-__all__ = ["run_ics", "efficient_ics", "init_ics", "init_efficient_ics"]
+__all__ = ["init_ics", "run_ics", "init_efficient_ics", "run_efficient_ics"]

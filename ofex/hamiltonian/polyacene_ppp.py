@@ -7,6 +7,8 @@ from ofex.constant import EV_TO_HARTREE, DEG_TO_RADIAN
 from ofex.operators.fermion_operator_tools import one_body_excitation, one_body_number
 from ofex.state import BinaryFockVector
 
+__all__ = ["PolyacenePPP"]
+
 SPIN_DOWN, SPIN_UP = 0, 1
 
 
@@ -15,10 +17,10 @@ class PolyacenePPP:
     The PolyacenePPP class represents a linear polyacene molecule described using the Pariser-Parr-Pople (PPP) model
     for quantum chemistry calculations. It provides methods for computing molecular Hamiltonians, electron-electron
     repulsion, hopping terms, and other properties based on the PPP approximation.
-    
+
     Reference:
-        Chakraborty, H., & Shukla, A. (2013). Pariser–Parr–Pople Model Based Investigation of Ground and Low-Lying 
-        Excited States of Long Acenes. The Journal of Physical Chemistry A, 117(51), 14220–14229. 
+        Chakraborty, H., & Shukla, A. (2013). Pariser–Parr–Pople Model Based Investigation of Ground and Low-Lying
+        Excited States of Long Acenes. The Journal of Physical Chemistry A, 117(51), 14220–14229.
         doi:10.1021/jp408535u
 
     Attributes:
@@ -28,15 +30,15 @@ class PolyacenePPP:
         bond_length (float): The bond length between adjacent carbon atoms (in Angstroms).
     """
     # Unit = Angstrom, Hartree
-    n_ring: int = 3
+    # n_ring: int = 3
 
-    t0: float = 2.4 * EV_TO_HARTREE
-    t_: float = 2.4 * EV_TO_HARTREE
+    # t0: float = 2.4 * EV_TO_HARTREE
+    # t_: float = 2.4 * EV_TO_HARTREE
 
-    bond_length: float = 1.4
+    # bond_length: float = 1.4
     _bond_angle: float = 120 * DEG_TO_RADIAN
 
-    param_type: str = "standard"
+    # param_type: str = "standard"
 
     @property
     def atom_name(self) -> List[str]:
@@ -69,14 +71,14 @@ class PolyacenePPP:
                  bond_length: float = 1.4, ):
         """
         Initializes the PolyacenePPP object and sets up molecular parameters.
-    
+
         Args:
             n_ring (int): The number of aromatic rings in the polyacene molecule.
             param_type (str): Type of parameters to use ("standard" or "screened").
             t0 (float): Hopping strength value for horizontal bonds.
             t_ (float): Hopping strength value for vertical bonds.
             bond_length (float): The bond length between adjacent carbon atoms (in Angstroms).
-    
+
         Attributes:
             coord_dict (Dict[str, Tuple[float, float]]): A dictionary containing the coordinates of each atom.
         """
@@ -90,14 +92,14 @@ class PolyacenePPP:
     def kappa(self, i: str, j: str):
         """
         Computes the screening parameter based on the parameter type.
-    
+
         Args:
             i (str): Label for the first atom.
             j (str): Label for the second atom.
-    
+
         Returns:
             float: The screening parameter value.
-    
+
         Raises:
             ValueError: If the parameter type is invalid.
         """
@@ -111,10 +113,10 @@ class PolyacenePPP:
     def u(self):
         """
         Computes the on-site repulsion term based on the parameter type.
-    
+
         Returns:
             float: The on-site electron-electron repulsion in Hartree.
-    
+
         Raises:
             ValueError: If the parameter type is invalid.
         """
@@ -128,13 +130,13 @@ class PolyacenePPP:
     def v(self, i: str, j: str):
         """
         Computes the Coulomb interaction between two atomic sites.
-    
+
         Args:
             i (str): Label for the first atom.
             j (str): Label for the second atom.
-    
+
         Returns:
-            float: The Coulomb interaction value in Hartree, accounting for 
+            float: The Coulomb interaction value in Hartree, accounting for
             screening and distance-dependent effects between the atoms.
         """
         rij = self.atom_dist(i, j)
@@ -143,10 +145,10 @@ class PolyacenePPP:
     def _hopping_horizontal(self, part: str) -> FermionOperator:
         """
         Constructs the hopping operator for horizontal bonds in the specified part.
-        
+
         Args:
             part (str): The part of the molecule, either 'L' (lower) or 'U' (upper).
-        
+
         Returns:
             FermionOperator: The horizontal hopping operator for the specified part of the molecule.
         """
@@ -168,7 +170,7 @@ class PolyacenePPP:
     def hopping_lower(self) -> FermionOperator:
         """
         Constructs the hopping operator for horizontal bonds in the lower part of the molecule.
-    
+
         Returns:
             FermionOperator: The lower horizontal hopping operator scaled by -t0.
         """
@@ -177,7 +179,7 @@ class PolyacenePPP:
     def hopping_upper(self) -> FermionOperator:
         """
         Constructs the hopping operator for horizontal bonds in the upper part of the molecule.
-    
+
         Returns:
             FermionOperator: The upper horizontal hopping operator scaled by -t0.
         """
@@ -186,9 +188,9 @@ class PolyacenePPP:
     def hopping_bridge(self) -> FermionOperator:
         """
         Constructs the hopping operator for vertical bonds between the upper and lower parts of the molecule.
-    
+
         Returns:
-            FermionOperator: The bridge hopping operator scaled by -t_.
+            FermionOperator: The bridge hopping operator scaled by `-self.t_`.
         """
         half_num_carbons = 1 + 2 * self.n_ring
         hopping = FermionOperator.accumulate(
@@ -208,7 +210,7 @@ class PolyacenePPP:
     def ee_repulsion(self) -> FermionOperator:
         """
         Constructs the electron-electron repulsion operator, including on-site and Ohno interaction terms.
-    
+
         Returns:
             FermionOperator: The total electron-electron repulsion operator.
         """
@@ -231,9 +233,9 @@ class PolyacenePPP:
     def fermion_hamiltonian(self) -> FermionOperator:
         """
         Constructs the full fermionic Hamiltonian of the molecule, which includes
-        contributions from horizontal hopping, vertical bridge hopping, and 
+        contributions from horizontal hopping, vertical bridge hopping, and
         electron-electron repulsion.
-    
+
         Returns:
             FermionOperator: The full fermionic Hamiltonian of the molecule.
         """
@@ -242,7 +244,7 @@ class PolyacenePPP:
     def get_molecular_hamiltonian(self):
         """
         Retrieves the molecular Hamiltonian for the polyacene molecule.
-    
+
         Returns:
             FermionOperator: The fermionic Hamiltonian of the molecule.
         """
@@ -251,12 +253,12 @@ class PolyacenePPP:
     def _hf_fock(self, parity: bool = True):
         """
         Constructs a Hartree-Fock state based on the parity of orbitals.
-        
+
         Args:
             parity (bool): Determines whether the alternating occupation starts with the 0th orbital or the 1st orbital.
                            If True, the occupation starts from the 1st orbital; if False, the occupation starts from the
                            0th orbital.
-        
+
         Returns:
             List[int]: A list representing the Hartree-Fock state occupation numbers for each orbital.
         """
@@ -276,14 +278,14 @@ class PolyacenePPP:
     def hf_state(self, parity: bool = True):
         """
         Constructs a Hartree-Fock (HF) state for the molecule based on a given parity.
-    
+
         Args:
             parity (bool): Determines whether the alternating occupation starts with the 0th orbital or the 1st orbital.
                            If True, the occupation starts from the 1st orbital; if False, the occupation starts from the
                            0th orbital.
-    
+
         Returns:
-            Dict[BinaryFockVector, float]: The Hartree-Fock state as a dictionary where the key is the 
+            Dict[BinaryFockVector, float]: The Hartree-Fock state as a dictionary where the key is the
                                            BinaryFockVector representing the state and the value is its coefficient.
         """
         fock = self._hf_fock(parity=parity)
@@ -291,12 +293,12 @@ class PolyacenePPP:
 
     def ref_state(self):
         """
-        Constructs the reference (singlet) state as a superposition of Hartree-Fock 
+        Constructs the reference (singlet) state as a superposition of Hartree-Fock
         states with even and odd parities.
-    
+
         Returns:
-            Dict[BinaryFockVector, float]: The reference state as a dictionary of BinaryFockVector 
-                                           to their respective coefficients. 
+            Dict[BinaryFockVector, float]: The reference state as a dictionary of BinaryFockVector
+                                           to their respective coefficients.
         """
         fock_even = self.hf_state(parity=False)
         fock_odd = self.hf_state(parity=True)
@@ -309,11 +311,11 @@ class PolyacenePPP:
         """
         Generates symmetry transformations for the fermionic orbitals
         in the system based on spatial symmetry operations.
-    
+
         Returns:
-            List[List[Tuple[int, int]]]: A list of symmetry transformations, 
+            List[List[Tuple[int, int]]]: A list of symmetry transformations,
                                          where each transformation is represented
-                                         as a list of tuples. Each tuple defines a 
+                                         as a list of tuples. Each tuple defines a
                                          permutation of two orbitals (given by their indices).
                                          The transformations included are:
                                          - σ(x): Reflection across the x-axis.
@@ -324,14 +326,14 @@ class PolyacenePPP:
         l_atoms = sorted([x for x in atoms if x.startswith("L")])
         assert len(u_atoms) == len(l_atoms)
         perm_list = list()
-    
+
         # σ(x)
         sigma_x_swaps = list()
         for ua, la in zip(u_atoms, l_atoms):
             sigma_x_swaps.append((self.spin_idx(ua, SPIN_DOWN), self.spin_idx(la, SPIN_DOWN)))
             sigma_x_swaps.append((self.spin_idx(ua, SPIN_UP), self.spin_idx(la, SPIN_UP)))
         perm_list.append(sigma_x_swaps)
-    
+
         # σ(y)
         sigma_y_swaps = list()
         half_atom = len(u_atoms) // 2
@@ -342,34 +344,34 @@ class PolyacenePPP:
             sigma_y_swaps.append((self.spin_idx(lla, SPIN_DOWN), self.spin_idx(lra, SPIN_DOWN)))
             sigma_y_swaps.append((self.spin_idx(lla, SPIN_UP), self.spin_idx(lra, SPIN_UP)))
         perm_list.append(sigma_y_swaps)
-    
+
         # The i-operation is combination of σ(x) and σ(y)
         # i_swaps = list()
         # for ua, la in zip(u_atoms, l_atoms[::-1]):
         #     i_swaps.append((self.spin_idx(ua, SPIN_DOWN), self.spin_idx(la, SPIN_DOWN)))
         #     i_swaps.append((self.spin_idx(ua, SPIN_UP), self.spin_idx(la, SPIN_UP)))
         # perm_list.append(i_swaps)
-    
+
         return perm_list
 
     # <editor-fold desc="Utilities">
     def spin_idx(self, atom: str, spin: Union[bool, int]):
         """
         Calculates the index of the spin orbital associated with a given atom and spin.
-    
+
         Args:
-            atom (str): The label of the atom, where "U" represents an upper atom 
+            atom (str): The label of the atom, where "U" represents an upper atom
                         and "L" represents a lower atom, followed by a numerical index.
                         Example: "U0", "L1".
-            spin (Union[bool, int]): The spin designation for the orbital. Acceptable 
+            spin (Union[bool, int]): The spin designation for the orbital. Acceptable
                                      values are either:
                                      - 0 or False for SPIN_DOWN
                                      - 1 or True for SPIN_UP
-    
+
         Returns:
-            int: The index of the spin orbital corresponding to the specified atom 
+            int: The index of the spin orbital corresponding to the specified atom
                  and spin.
-    
+
         Raises:
             ValueError: If the atom label does not start with "L" or "U".
         """
@@ -385,15 +387,15 @@ class PolyacenePPP:
     def inv_spatial_idx(self, i: int) -> str:
         """
         Converts a given spin-orbital index into its corresponding spatial atom label.
-    
+
         Args:
             i (int): The index of the spin-orbital.
-    
+
         Returns:
             str: The atom label corresponding to the provided spin-orbital index.
                  This is in the form "U<num>" for upper atoms or "L<num>" for lower atoms,
                  where <num> is the atom number.
-    
+
         """
         half_num_carbons = 1 + 2 * self.n_ring
         if i < half_num_carbons:
@@ -404,11 +406,11 @@ class PolyacenePPP:
     def atom_dist(self, i: str, j: str) -> float:
         """
         Calculates the Euclidean distance between two atoms based on their coordinates.
-    
+
         Args:
             i (str): The label of the first atom (e.g., "U0" or "L1").
             j (str): The label of the second atom (e.g., "U1" or "L0").
-    
+
         Returns:
             float: The Euclidean distance between the two atoms in Angstroms.
         """
@@ -420,14 +422,14 @@ class PolyacenePPP:
         """
         Generates the spatial coordinates for all carbon atoms in the polyacene molecule
         based on the number of aromatic rings and geometric parameters.
-        
+
         The geometry alternates between "upper" (U) and "lower" (L) layers of carbon atoms,
         with positions determined by the bond length and bond angle.
-        
+
         Returns:
             Dict[str, Tuple[float, float]]: A dictionary mapping atom labels to their
-                2D coordinates. The keys are strings in the format "Xn" where X is "U" (upper) 
-                or "L" (lower) and n is an integer. The values are tuples representing the 
+                2D coordinates. The keys are strings in the format "Xn" where X is "U" (upper)
+                or "L" (lower) and n is an integer. The values are tuples representing the
                 (x, y) coordinates of each atom in Angstroms.
         """
         if self.n_ring < 1:

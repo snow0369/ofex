@@ -10,6 +10,8 @@ from ofex.clifford.simulation import clifford_apply
 from ofex.clifford.standard_operators import hadamard, clifford_op_str, cx, cz, s_gate
 
 
+__all__ = ["diagonalizing_clifford"]
+
 def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator],
                            num_qubits: int,
                            debug=False) \

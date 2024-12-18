@@ -11,6 +11,8 @@ from ofex.state.state_tools import get_num_qubits, to_dense
 from ofex.state.types import State
 
 
+__all__ = ["clifford_apply", "clifford_qiskit", "clifford_simulation", "clifford_unitary_mat"]
+
 def clifford_apply(mat: FieldArray,
                    ph: Optional[FieldArray],
                    clifford_hist: List[str])\
@@ -70,11 +72,13 @@ def clifford_qiskit(num_qubits: int,
 
     Args:
         num_qubits (int): The total number of qubits in the circuit.
-        clifford_hist (List[str]): A list of Clifford operations (e.g., "H_<index>", "S_<index>", 
-                                   "CX_<index1>_<index2>", "CZ_<index1>_<index2>", "QSW_<index1>_<index2>").
+        clifford_hist (List[str]): A list of Clifford operations (e.g., ``"H_<index>"``, ``"S_<index>"``,
+                                   ``"CX_<index1>_<index2>"``, ``"CZ_<index1>_<index2>"``,
+                                   ``"QSW_<index1>_<index2>"``).
         init_state (Optional[State]): The initial quantum state. If None, the circuit starts in the
-                                      default |0...0⟩ state.
-        inv (bool): If True, the operations in the Clifford history are applied in reverse order. Defaults to False.
+                                      default ``|0...0⟩`` state.
+        inv (bool): If True, the operations in the Clifford history are applied in reverse order.
+                    Defaults to False.
 
     Returns:
         QuantumCircuit: A Qiskit quantum circuit representing the applied Clifford operations.

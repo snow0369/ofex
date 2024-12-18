@@ -1,5 +1,6 @@
 import openfermion as of
 
+__all__ = ["ring_pauli", "zz_1d", "heisenberg_1d", "heisenberg_1d_ring"]
 
 def chain_pauli(num_qubits: int, p_type: str) -> of.QubitOperator:
     """

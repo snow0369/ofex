@@ -8,6 +8,7 @@ from ofex.utils.binary import int_to_binary, binary_to_int
 STATE_LSB_FIRST = False
 STATE_PRINT_LSB_FIRST = True
 
+__all__ = ["BinaryFockVector"]
 
 class BinaryFockVector(tuple):
     """
@@ -35,7 +36,7 @@ class BinaryFockVector(tuple):
         """
         Returns:
             int: The number of spatial orbitals, calculated as half the number of spin orbitals.
-                 Assumes that the total number of spin orbitals is even.
+            Assumes that the total number of spin orbitals is even.
         """
         assert len(self) % 2 == 0
         return len(self) // 2

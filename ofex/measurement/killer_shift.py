@@ -15,6 +15,8 @@ from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
 from ofex.transforms.fermion_factorization import ham_to_ei_spin
 
 
+__all__ = ["killer_shift_opt_fermion_hf"]
+
 def killer_shift_opt_fermion_hf(fham: FermionOperator,
                                 hf_vector: BinaryFockVector,
                                 transform: str,
@@ -42,11 +44,10 @@ def killer_shift_opt_fermion_hf(fham: FermionOperator,
             operators to qubit operators (e.g., 'Jordan-Wigner' or 'Bravyi-Kitaev'), 
             supported in the function `ofex.transform.fermion_to_qubit_operator`.
         optimization_level (int, optional): The optimization level used in the killer 
-            shift procedure. Available options:
-                - 0: Use the number operator only.
-                - 1: Include contributions from one-body operators.
-                - 2: Include contributions from both one- and two-body operators 
-                  (default: 1).
+            shift procedure. Available options (default: 1):
+            - 0: Use the number operator only.
+            - 1: Include contributions from one-body operators.
+            - 2: Include contributions from both one- and two-body operators.
         repeat_opt (int, optional): The number of optimization iterations to 
             perform for refining the solution (default: 1).
         f2q_kwargs (Optional[Dict[str, Any]], optional): Additional keyword arguments 

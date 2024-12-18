@@ -5,7 +5,7 @@ Functions included:
 - is_z_only: Checks if a QubitOperator contains only Z-type Pauli operators.
 - single_pauli_commute_chk: Determines whether two SinglePauli or QubitOperator objects commute.
 - normalize_by_lcu_norm: Normalizes a QubitOperator using Linear Combination of Unitaries (LCU) norms to
-  ensure its eigenspectrum resides in [-1, 1].
+ensure its eigenspectrum resides in [-1, 1].
 """
 
 from typing import Dict, Union, Tuple

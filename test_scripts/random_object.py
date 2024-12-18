@@ -53,5 +53,5 @@ def random_qubit_operator(n_qubits, num_terms, seed=None, hermitian=True):
     coeff = np.random.rand(num_terms) * 2 - 1
     if not hermitian:
         coeff += (np.random.rand(num_terms) * 2 - 1) * 1j
-    qubit_operators = tableau_to_pauli(pauli_tableau, coeff=coeff)
+    qubit_operators = tableau_to_pauli(pauli_tableau, coeffs=coeff)
     return QubitOperator.accumulate(qubit_operators)

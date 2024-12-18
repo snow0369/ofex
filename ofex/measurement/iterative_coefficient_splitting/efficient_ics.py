@@ -7,6 +7,8 @@ from openfermion import QubitOperator
 from ofex.operators.symbolic_operator_tools import coeff, operator
 
 
+__all__ = ["run_efficient_ics"]
+
 def _checksum_coeff(pauli_grp_coeff_split, coeff_list, atol) -> None:
     for split_list, c in zip(pauli_grp_coeff_split, coeff_list):
         assert np.isclose(sum(split_list), c, atol=atol)
@@ -54,12 +56,12 @@ def _synthesis(pauli_list, pauli_grp_coeff_split, pauli_grp_list, num_grp) -> Li
     return grp_operator
 
 
-def efficient_ics(ham: QubitOperator,
-                  initial_grp: Tuple[List[QubitOperator], List[List[int]], List[List[int]]],
-                  conv_th: float = 1e-6,
-                  checksum_atol: float = 1e-6,
-                  max_iter=10000,
-                  ) -> Tuple[List[QubitOperator], float]:
+def run_efficient_ics(ham: QubitOperator,
+                      initial_grp: Tuple[List[QubitOperator], List[List[int]], List[List[int]]],
+                      conv_th: float = 1e-6,
+                      checksum_atol: float = 1e-6,
+                      max_iter=10000,
+                      ) -> Tuple[List[QubitOperator], float]:
     """
     Compute an efficient Iterative Coefficient Splitting (ICS) by optimizing the norm.
     

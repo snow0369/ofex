@@ -17,6 +17,8 @@ from ofex.transforms import (fermion_to_qubit_operator, fermion_to_qubit_state, 
                              fermion_rotation_state)
 
 
+__all__ = ["qksd_extended_swap_test_run", "prepare_qksd_est_op", "prepare_qksd_est_state"]
+
 def _fermion_to_pauli(ref_state: State,
                       u, transform, **kwargs) -> State:
     num_qubits = get_num_qubits(ref_state)
@@ -123,47 +125,53 @@ def prepare_qksd_est_state(ref_state: State,
     return ref_sim
 
 
-def qksd_extended_swap_test(ref_state_1: State,  # Qubit state
-                            ref_state_2: State,  # Qubit state
-                            operator: Union[QubitOperator, FermionFragment, Tuple[np.ndarray, Any, str]],
-                            imaginary: bool,
-                            eig_degen_tol=1e-8,
-                            prepared_op=False,
-                            prepared_state: Tuple[bool, bool] = (False, False),
-                            verbose_prob=False,
-                            **f2q_kwargs) -> JointProbDist:
-    """
-    Perform the Quantum Krylov Subspace Diagonalization (QKSD) Extended Swap Test.
+def qksd_extended_swap_test_run(ref_state_1: State,  # Qubit state
+                                ref_state_2: State,  # Qubit state
+                                operator: Union[QubitOperator, FermionFragment, Tuple[np.ndarray, Any, str]],
+                                imaginary: bool,
+                                eig_degen_tol=1e-8,
+                                prepared_op=False,
+                                prepared_state: Tuple[bool, bool] = (False, False),
+                                verbose_prob=False,
+                                **f2q_kwargs) -> JointProbDist:
+    r"""
+    Performs the Quantum Krylov Subspace Diagonalization (QKSD) Extended Swap Test.
 
-    This function calculates the joint probability distribution of outcomes for the simultaneous measurement
-    of <φ(0)|φ(t)> and <φ(0)|O|φ(t)> under the QKSD framework using the Extended Swap Test. The method works with
-    operators that are either pre-diagonalized or need to be diagonalized during runtime, and supports both
-    Pauli and fermionic operator types.
+    This function calculates the joint probability distribution of outcomes for the simultaneous measurement of
+    :math:`\braket{ \phi(0) | \phi(t) }` and :math:`\braket{ \phi(0) | O | \phi(t) }` under the QKSD
+    framework using the Extended Swap Test. The method supports operators that are either pre-diagonalized or require
+    diagonalization during runtime, and it works with both Pauli and fermionic operator types.
 
     Args:
-        ref_state_1 (State): The first input reference state (qubit state).
-        ref_state_2 (State): The second input reference state (qubit state).
-        operator (Union[QubitOperator, FermionFragment, Tuple[np.ndarray, Any, str]]): The operator to be used in the 
+        ref_state_1 (State): The first input reference state (qubit state) :math:`\ket{ \phi(0) }`.
+        ref_state_2 (State): The second input reference state (qubit state) :math:`\ket{ \phi(t) }`.
+        operator (Union[QubitOperator, FermionFragment, Tuple[np.ndarray, Any, str]]): The operator used in the
             Extended Swap Test. It can be:
-              - A `QubitOperator` representing Pauli operators,
-              - A `FermionFragment`, which is a tuple of `(FermionOperator, np.ndarray)` for fermionic systems, or
-              - A tuple `(np.ndarray, Any, str)` representing a pre-diagonalized operator by prepare_qksd_est_op.
-        imaginary (bool): If True, performs the imaginary part of the Extended Swap Test; otherwise, 
-            performs the real part.
-        eig_degen_tol (float, optional): Eigenvalue degeneracy tolerance for detecting similar probability 
+
+            - A ``QubitOperator`` representing Pauli operators.
+
+            - A ``FermionFragment``: A tuple of ``(FermionOperator, np.ndarray)`` for fermionic systems.
+
+            - A tuple ``(np.ndarray, Any, str)`` representing a pre-diagonalized operator, generated using
+              the `prepare_qksd_est_op` function.
+
+        imaginary (bool): If True, computes the imaginary part of the Extended Swap Test; otherwise, computes
+            the real part.
+        eig_degen_tol (float, optional): Tolerance for eigenvalue degeneracy when detecting similar probability
             events. Defaults to 1e-8.
-        prepared_op (bool, optional): Indicates if the operator is already diagonalized. Defaults to False.
-        prepared_state (Tuple[bool, bool], optional): Indicates if the input reference states are already 
-            prepared in the diagonalizing basis. Defaults to (False, False).
-        verbose_prob (bool, optional): If True, computes individual probability contributions for each 
-            Pauli term (currently not implemented, may be implemented for the boot-straping covariance estimation
-            in future). Defaults to False.
-        **f2q_kwargs: Additional arguments for fermion-to-qubit transformations, especially mandatory for 
-            fermionic systems if any unprepared objects are provided.
+        prepared_op (bool, optional): Indicates whether the operator has already been diagonalized. Defaults to False.
+        prepared_state (Tuple[bool, bool], optional): Specifies whether the input reference states are already prepared
+            in the diagonalizing basis. Defaults to ``(False, False)``.
+        verbose_prob (bool, optional): If True, computes individual probability contributions for each Pauli term.
+            **Note**: This is currently not implemented but may be added in the future to support bootstrapping
+            covariance estimation. Defaults to False.
+        **f2q_kwargs: Additional keyword arguments for fermion-to-qubit transformations. These are mandatory for
+            fermionic systems when unprepared objects are provided.
 
     Returns:
-        JointProbDist: A joint probability distribution object containing the computed probabilities.
+        JointProbDist: An object containing the joint probability distribution of the computed probabilities.
     """
+
     prob_dict = dict()
 
     # 1. Prepare diagonalized operators and reference states in the diagonalizing basis.

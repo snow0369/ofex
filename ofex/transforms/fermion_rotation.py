@@ -8,6 +8,8 @@ from ofex.state.types import State, type_state
 from ofex.utils.dict_utils import add_values
 
 
+__all__ = ["fermion_rotation_operator", "fermion_rotation_state"]
+
 def fermion_rotation_operator(fop: FermionOperator,
                               v_mat: np.ndarray,
                               spatial_v: bool = False) -> FermionOperator:

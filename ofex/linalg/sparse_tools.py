@@ -9,10 +9,12 @@ quantum operator applications and computations by leveraging sparse representati
 where applicable.
 
 Definitions:
-- State: Representations of quantum states using formats like numpy arrays, sparse matrices, or dictionaries as
-    supported by `ofex.state.types`.
+
+- State: Representations of quantum states using formats like numpy arrays, sparse matrices, or dictionaries
+  as supported by ``ofex.state.types``.
+
 - Operator: Quantum operators applied to states, supporting formats like QubitOperator, scipy sparse matrices,
-    or LinearOperators.
+  or LinearOperators.
 """
 
 from __future__ import annotations

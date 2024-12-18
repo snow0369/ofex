@@ -10,6 +10,11 @@ from ofex.operators.ordering import order_abs_coeff
 from ofex.propagator.exact import exact_expop
 
 
+__all__ = [
+    "trotter_rte_by_si_ref", "trotter_rte_by_si_comm", "trotter_rte_by_single_pauli",
+    "trotter_ite_by_si_ref", "trotter_ite_by_si_comm", "trotter_ite_by_single_pauli"
+]
+
 def trotter_rte_by_si_ref(ham: QubitOperator,
                           t: float,
                           n_qubits: int,

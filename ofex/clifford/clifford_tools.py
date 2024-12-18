@@ -8,8 +8,13 @@ from galois import FieldArray
 from openfermion import QubitOperator
 
 from ofex.exceptions import OfexTypeError
-from ofex.operators.symbolic_operator_tools import single_term, coeff
+from ofex.operators.symbolic_operator_tools import single_term
 from ofex.operators.types import SinglePauli
+
+__all__ = [
+    "pauli_to_tableau", "tableau_to_pauli", "dot_tableau", "str_tableau", "str_tableau_side_by_side",
+    "is_zero_gf", "is_equal_gf"
+]
 
 gf = galois.GF(2)
 
@@ -61,12 +66,14 @@ def pauli_to_tableau(pauli_list: Union[List[QubitOperator], QubitOperator],
 
     Returns:
         Tuple[FieldArray, np.ndarray]:
-            G: A 2N x r integer matrix in tableau form, where 
-                - N is the number of qubits,
-                - r is the number of terms in the Pauli list,
-                - The first N rows represent G_x (X components of Pauli terms),
-                - The next N rows represent G_z (Z components of Pauli terms).
-            coeff: A 1D array of length r corresponding to the coefficients of the Pauli terms.
+
+        - G: A 2N x r integer matrix in tableau form, where
+            - N is the number of qubits,
+            - r is the number of terms in the Pauli list,
+            - The first N rows represent G_x (X components of Pauli terms),
+            - The next N rows represent G_z (Z components of Pauli terms).
+
+        - coeff: A 1D array of length r corresponding to the coefficients of the Pauli terms.
     """
     if isinstance(pauli_list, QubitOperator):
         pauli_list = list(pauli_list.terms.items())
@@ -88,7 +95,7 @@ def pauli_to_tableau(pauli_list: Union[List[QubitOperator], QubitOperator],
 
 
 def tableau_to_pauli(mat: FieldArray,
-                     coeff: Optional[np.ndarray] = None,
+                     coeffs: Optional[np.ndarray] = None,
                      ph: Optional[FieldArray] = None)\
         -> List[QubitOperator]:
     """
@@ -99,7 +106,7 @@ def tableau_to_pauli(mat: FieldArray,
              where N is the number of qubits and r is the number of operators.
              The first N rows represent G_x (X components of the Pauli terms),
              and the next N rows represent G_z (Z components of the Pauli terms).
-        coeff: A 1D NumPy array of coefficients of length r for the operators. If not specified,
+        coeffs: A 1D NumPy array of coefficients of length r for the operators. If not specified,
                default coefficients of +/-1.0 will be assigned depending on the phase (ph) array.
         ph: A 1D FieldArray of length r encoding the phase of each Pauli operator (with values 0 or 1).
             If not provided, all values are assumed to be 0.
@@ -118,20 +125,20 @@ def tableau_to_pauli(mat: FieldArray,
             raise ValueError
     else:
         ph = gf(np.zeros(num_op, dtype=int))
-    if coeff is not None:
-        if coeff.shape[0] != num_op:
+    if coeffs is not None:
+        if coeffs.shape[0] != num_op:
             raise ValueError
-        coeff = [-c if ph[i] else c for i, c in enumerate(coeff)]
+        coeffs = [-c if ph[i] else c for i, c in enumerate(coeffs)]
     else:
-        coeff = [-1.0 if p else 1.0 for p in ph]
+        coeffs = [-1.0 if p else 1.0 for p in ph]
 
     ret = list()
     for op_idx in range(num_op):
-        op_vec, c = mat[:, op_idx], coeff[op_idx]
+        op_vec, c = mat[:, op_idx], coeffs[op_idx]
         op = "".join(["Y" if x and z else "Z" if z else "X" if x else "I"
                       for x, z in zip(op_vec[:num_qubits], op_vec[num_qubits:])])
         op = tuple([(q_idx, p) for q_idx, p in enumerate(op) if p != "I"])
-        ret.append(QubitOperator(op, coeff[op_idx]))
+        ret.append(QubitOperator(op, coeffs[op_idx]))
     return ret
 
 
@@ -228,8 +235,8 @@ def xor_mat(s_t_pair: List[Tuple[int, int]],
     """
     Constructs a matrix `X` over GF(2) such that for an input vector `v`, the 
     resulting vector `w` is defined as:
-        w[j] = v[i] + v[j], if (i, j) is in `s_t_pair`
-        w[j] = v[j], otherwise.
+    - w[j] = v[i] + v[j], if (i, j) is in `s_t_pair`
+    - w[j] = v[j],        otherwise.
 
     Args:
         s_t_pair (List[Tuple[int, int]]): A list of pairs of indices `(i, j)` specifying 

@@ -2,10 +2,12 @@
 This module provides tools for representing and manipulating probability distributions.
 
 Classes:
+
 - ProbDist: Represents a single probability distribution. Contains methods for sampling,
-  computing statistical metrics such as mean, variance, and standard deviation.
+    computing statistical metrics such as mean, variance, and standard deviation.
+
 - JointProbDist: Extends ProbDist to handle multidimensional events (joint distributions),
-  supporting covariance computation and other joint distribution functionalities.
+    supporting covariance computation and other joint distribution functionalities.
 
 These classes are designed for flexibility and support various operations related to
 probabilistic modeling and numerical simulations.

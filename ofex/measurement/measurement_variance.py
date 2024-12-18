@@ -18,50 +18,74 @@ from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import State
 
 
+__all__ = ["fragment_variance", "pauli_covariance", "empirical_pauli_covariance"]
+
 def fragment_variance(grp_ham: List[QubitOperator],
                       state1: Optional[State],
                       state2: Optional[State],
                       shots: np.ndarray,
                       true_cov_dict: Optional[Union[PauliCovDict, TransitionPauliCovDict]] = None,
                       anticommute: bool = False) -> float:
-    """
+    r"""
     Computes the variance of Hamiltonian fragments based on reference states, grouped Hamiltonian terms,
     and measurement shot counts.
-    
-    For the j-th fragment `H_j` in `grp_ham`, the total variance is computed as:
-        V_tot = ∑_j (V_{R,j} / m_{R,j} + V_{I,j} / m_{I,j}),
-    where:
-        - V_{R,j} = 0.5 * (<φ1|H_j²|φ1> + <φ2|H_j²|φ2>) − (Re[<φ1|H_j|φ2>]²),
-        - V_{I,j} = 0.5 * (<φ1|H_j²|φ1> + <φ2|H_j²|φ2>) − (Im[<φ1|H_j|φ2>]²).
-        
-    Here, m_{R,j} (shots_real) and m_{I,j} (shots_imag) represent the real and imaginary shot counts for `H_j`.
-    Note that V_{(R,I),j} = ‖H_j‖₂² − (Re(Im)[<φ1|H_j|φ2>]²) if anticommute=True, indicating the Pauli operators
-    supporting the fragment are anticommutative, where ‖H_j‖₂ is the 2nd order induced norm of H_j(L2 norm of Pauli
-    coefficients or equivalently √Tr[H_j²]).
 
-    **Case Explanation:**
-        - For single-state variance calculations (`state2=None` and `shots.ndim==1`):
-            V_tot = ∑_j (V_{R,j} / m_{R,j}).
-    
-        - For transition-state variance calculations (`state2` provided and `shots.ndim==2`):
-            Both real and imaginary contributions are included in the computation.
-    
-    For further details, see [ArXiv:2409.02504](https://arxiv.org/abs/2409.02504).
-    
+    For the j-th fragment ``H_j`` in ``grp_ham``, the total variance is computed as:
+
+    .. math::
+
+       V_{tot} = \sum_j \left( \frac{V_{R,j}}{m_{R,j}} + \frac{V_{I,j}}{m_{I,j}} \right)
+
+    where:
+
+    - :math:`V_{R,j} = 0.5 \left( \langle \phi_1 | H_j^2 | \phi_1 \rangle + \langle \phi_2 | H_j^2 | \phi_2 \rangle \right)
+      - \text{Re} \left[ \langle \phi_1 | H_j | \phi_2 \rangle \right]^2`.
+    - :math:`V_{I,j} = 0.5 \left( \langle \phi_1 | H_j^2 | \phi_1 \rangle + \langle \phi_2 | H_j^2 | \phi_2 \rangle \right)
+      - \text{Im} \left[ \langle \phi_1 | H_j | \phi_2 \rangle \right]^2`.
+
+    Here, :math:`m_{R,j}` (shots_real) and :math:`m_{I,j}` (shots_imag) represent the real and imaginary shot counts
+    for ``H_j``.
+
+    **Case Explanation**:
+
+    - **Single-state variance calculations** (``state2=None`` and ``shots.ndim==1``):
+
+       .. math::
+
+          V_{tot} = \sum_j \frac{V_{R,j}}{m_{R,j}}.
+
+    - **Transition-state variance calculations** (``state2`` provided and ``shots.ndim==2``):
+
+       Both real and imaginary contributions are included in the computation.
+
+    For further details, see `ArXiv:2409.02504 <https://arxiv.org/abs/2409.02504>`_.
+
     Args:
-        grp_ham (List[QubitOperator]): A list of Hamiltonian fragments represented by QubitOperators.
-        state1 (Optional[State]): The first reference state (required for computation).
-        state2 (Optional[State]): The second reference state (optional; needed for transition-state variance).
-        shots (np.ndarray): Array defining measurement shot counts:
-            - If 1D (shape `[n]`): Represents real shot counts `m_{R,j}`; applicable for single-state variance.
-            - If 2D (shape `[n, 2]`): Represents real `m_{R,j}` and imaginary `m_{I,j}` shot counts; used for 
+        grp_ham (List[QubitOperator]):
+            A list of Hamiltonian fragments represented by QubitOperators.
+
+        state1 (Optional[State]):
+            The first reference state (required for computation).
+
+        state2 (Optional[State]):
+            The second reference state (optional; needed for transition-state variance).
+
+        shots (np.ndarray):
+            Array defining measurement shot counts:
+
+            - If 1D (shape ``[n]``): Represents real shot counts ``m_{R,j}``; applicable for single-state variance.
+            - If 2D (shape ``[n, 2]``): Represents real ``m_{R,j}`` and imaginary ``m_{I,j}`` shot counts; used for
               transition-state variance.
-        true_cov_dict (Optional[Union[PauliCovDict, TransitionPauliCovDict]]): 
+
+        true_cov_dict (Optional[Union[PauliCovDict, TransitionPauliCovDict]]):
             An optional precomputed dictionary storing covariances of Pauli operators.
-        anticommute (bool): If True, applies anticommutation rules during the computation.
-    
+
+        anticommute (bool):
+            If True, applies anticommutation rules during the computation.
+
     Returns:
-        float: Total computed variance, calculated as a sum of contributions from all Pauli operator groups.
+        float:
+            Total computed variance, calculated as a sum of contributions from all Pauli operator groups.
     """
     if shots.ndim == 2:
         shots_real = shots[:, 0]
@@ -143,11 +167,13 @@ def pauli_covariance(pauli_list: List[QubitOperator],
     states (`state2` provided) are used.
     
     Covariance cases (∀P,Q ∈ pauli_list[grp_pauli_list[grp_idx]] ∀grp_idx):
+
         1. Single-state (`state2=None`; operators commute):
-            Cov[P,Q] = <φ1|PQ|φ1> - <φ1|P|φ1><φ1|Q|φ1>
+        Cov[P,Q] = <φ1|PQ|φ1> - <φ1|P|φ1><φ1|Q|φ1>
+
         2. Transition states (`state2` provided):
-            Cov[P,Q]_R = 1/2 (<φ1|{P, Q}|φ1> + <φ2|{P, Q}|φ2>) - Re[<φ1|P|φ2>] * Re[<φ1|Q|φ2>]
-            Cov[P,Q]_I = 1/2 (<φ1|{P, Q}|φ1> + <φ2|{P, Q}|φ2>) - Im[<φ1|P|φ2>] * Im[<φ1|Q|φ2>].
+        Cov[P,Q]_R = 1/2 (<φ1|{P, Q}|φ1> + <φ2|{P, Q}|φ2>) - Re[<φ1|P|φ2>] * Re[<φ1|Q|φ2>]
+        Cov[P,Q]_I = 1/2 (<φ1|{P, Q}|φ1> + <φ2|{P, Q}|φ2>) - Im[<φ1|P|φ2>] * Im[<φ1|Q|φ2>].
         For transitional states, note that anticommute=True, the first term is ignored.
 
     If phase_list is given, Cov[P,Q] * exp(-1j * ph) for ph in phase_list is calculated, which is implemented to

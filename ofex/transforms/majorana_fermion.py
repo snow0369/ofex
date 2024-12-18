@@ -2,6 +2,7 @@ from openfermion import MajoranaOperator, FermionOperator
 
 from ofex.operators.symbolic_operator_tools import dict_to_operator
 
+__all__ = ["majorana_to_fermion"]
 
 # TODO : Implement the f2m mapping
 def majorana_to_fermion(maj: MajoranaOperator) -> FermionOperator:

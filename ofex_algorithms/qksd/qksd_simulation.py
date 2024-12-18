@@ -11,7 +11,7 @@ from scipy.sparse import spmatrix
 
 from ofex_algorithms.qksd.qksd_utils import toeplitz_arr_to_mat
 from ofex.linalg.sparse_tools import apply_operator, state_dot, expectation, sparse_apply_operator
-from ofex.sampling_simulation import (hadamard_test_general, qksd_extended_swap_test, prepare_qksd_est_op,
+from ofex.sampling_simulation import (hadamard_test_general, qksd_extended_swap_test_run, prepare_qksd_est_op,
                                       prepare_qksd_est_state)
 from ofex.sampling_simulation.sampling_base import ProbDist, JointProbDist
 from ofex.state.state_tools import get_num_qubits
@@ -304,9 +304,9 @@ def _sample_qksd_toeplitz(ham_frag: npt.NDArray[QubitOperator],
                             assert op_prepared[idx_h]
                             assert i <= max_basis_required
                             state1, h_frag = ref1_prepared[idx_h], ham_frag[idx_h]
-                            prob_dist = qksd_extended_swap_test(state1, ksd_state, h_frag, imaginary=(part == IMAG),
-                                                                prepared_op=True,
-                                                                prepared_state=(True, False))
+                            prob_dist = qksd_extended_swap_test_run(state1, ksd_state, h_frag, imaginary=(part == IMAG),
+                                                                    prepared_op=True,
+                                                                    prepared_state=(True, False))
                             if use_prob_buffer:
                                 fname = "_".join([str(x) for x in idx_prob]) + ".pkl"
                                 with open(os.path.join(sample_buf_dir, fname), 'wb') as f:
@@ -616,10 +616,10 @@ def _sample_qksd_nontoeplitz(ham_frag: npt.NDArray[QubitOperator],
                             else:
                                 idx_h = (i2 - i1, part, j)
                             state1 = ref1_prepared[j] if prepared_state1 else basis1
-                            prob_dist = qksd_extended_swap_test(state1, basis2, ham_frag[idx_h],
-                                                                imaginary=bool(part),
-                                                                prepared_op=True,
-                                                                prepared_state=(prepared_state1, False))
+                            prob_dist = qksd_extended_swap_test_run(state1, basis2, ham_frag[idx_h],
+                                                                    imaginary=bool(part),
+                                                                    prepared_op=True,
+                                                                    prepared_state=(prepared_state1, False))
                             if use_prob_buffer:
                                 fname = "_".join([str(x) for x in idx_prob]) + ".pkl"
                                 with open(os.path.join(sample_buf_dir, fname), 'wb') as f:

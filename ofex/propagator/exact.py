@@ -9,6 +9,8 @@ from ofex.exceptions import OfexTypeError
 from ofex.linalg.pauli_expm import single_pauli_expm, reflective_pauli_expm
 
 
+__all__ = ["exact_rte", "exact_ite"]
+
 def exact_expop(op: Union[QubitOperator, np.ndarray, spmatrix],
                 n_qubits: Optional[int] = None,
                 exact_sparse=False,

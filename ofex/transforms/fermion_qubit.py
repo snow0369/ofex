@@ -14,6 +14,8 @@ from ofex.state.types import DenseState, SparseStateDict, State, type_state
 from ofex.transforms.bravyi_kitaev_state import bravyi_kitaev_state, inv_bravyi_kitaev_state
 from ofex.transforms.bravyi_kitaev_tree_state import bravyi_kitaev_tree_state, inv_bravyi_kitaev_tree_state
 
+__all__ = ["fermion_to_qubit_operator", "fermion_to_qubit_state", "qubit_to_fermion_state",
+           "fermion_to_qubit_state_general"]
 
 def fermion_to_qubit_operator(fermion_op: FermionOperator,
                               transform: str,
@@ -24,12 +26,15 @@ def fermion_to_qubit_operator(fermion_op: FermionOperator,
     Args:
         fermion_op (FermionOperator): The input operator in the fermionic basis to be transformed.
         transform (str): The transformation method to be applied. Supported options:
-                         "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
-                         "binary_code_transform", "symmetry_conserving_bravyi_kitaev".
+             "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
+             "binary_code_transform", "symmetry_conserving_bravyi_kitaev".
         kwargs: Additional arguments required for some transformations, such as:
-                - "n_qubits" (int): Number of qubits for transformations "bravyi_kitaev" and "bravyi_kitaev_tree".
-                - "code" (BinaryCode): The binary code for "binary_code_transform".
-                - "active_fermions" (int) and "active_orbitals" (int): For "symmetry_conserving_bravyi_kitaev".
+
+            - "n_qubits" (int): Number of qubits for transformations "bravyi_kitaev" and "bravyi_kitaev_tree".
+
+            - "code" (BinaryCode): The binary code for "binary_code_transform".
+
+            - "active_fermions" (int) and "active_orbitals" (int): For "symmetry_conserving_bravyi_kitaev".
     
     Returns:
         QubitOperator: The transformed operator in the qubit representation.
@@ -75,11 +80,11 @@ def fermion_to_qubit_state(fermion_state: State,
     Args:
         fermion_state (State): The input state in the fermionic basis to be transformed.
         transform (str): The transformation method to be applied. Supported options:
-                         "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
-                         "symmetry_conserving_bravyi_kitaev".
+             "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
+             "symmetry_conserving_bravyi_kitaev".
         kwargs: Additional arguments required for specific transformations, such as:
-                - "active_orbitals" (int): For symmetry-conserving transformations. If not provided, the number
-                    of full orbitals is used.
+            - "active_orbitals" (int): For symmetry-conserving transformations. If not provided, the number
+            of full orbitals is used.
 
     Returns:
         State: The transformed state in the qubit representation.
@@ -177,9 +182,11 @@ def qubit_to_fermion_state(qubit_state: State,
                          "jordan_wigner", "bravyi_kitaev", "bravyi_kitaev_tree",
                          "symmetry_conserving_bravyi_kitaev".
         kwargs: Additional arguments required for some transformations, such as:
-                - "active_fermions" (int): Number of active fermions for the symmetry-conserving transformation.
-                - "active_orbitals" (int): For symmetry-conserving transformations. If not provided, the number
-                    of full orbitals is used.
+
+            - "active_fermions" (int): Number of active fermions for the symmetry-conserving transformation.
+
+            - "active_orbitals" (int): For symmetry-conserving transformations. If not provided, the number
+                of full orbitals is used.
 
     Returns:
         Union[DenseState, SparseStateDict]: Transformed fermionic state in sparse or dense form.

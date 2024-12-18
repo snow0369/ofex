@@ -16,7 +16,7 @@ from openfermion.config import EQ_TOLERANCE
 from ofex.linalg.sparse_tools import sparse_apply_operator
 from ofex.operators.fermion_operator_tools import one_body_excitation
 from ofex.state.binary_fock import BinaryFockVector
-from ofex.state.state_tools import pretty_print_state, norm
+from ofex.state.state_tools import norm
 from ofex.state.types import SparseStateDict
 from ofex.transforms.fermion_qubit import fermion_to_qubit_state
 from ofex.utils.chem import run_driver

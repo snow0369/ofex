@@ -15,6 +15,8 @@ from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import SparseStateDict
 from ofex.transforms.majorana_fermion import majorana_to_fermion
 
+__all__ = []
+
 gf = galois.GF(2)
 
 warnings.warn(DeprecationWarning())

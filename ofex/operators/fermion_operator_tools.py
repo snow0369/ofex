@@ -78,22 +78,30 @@ def normal_ordered_single(cre: List[int], ann: List[int]) -> SingleFermion:
 
 def one_body_excitation(p: int, q: int,
                         spin_idx: bool = True, hermitian: bool = True) -> FermionOperator:
-    """
+    r"""
     Generates a one-body excitation operator for the specified indices.
-    
+
     If `spin_idx` is True, the indices are treated as spin-indexed, and the operator is defined as:
-        E_{p,q} = a†_p a_q (+ h.c.)
+
+    .. math::
+
+        E_{p,q} = a^\dagger_p a_q + \text{h.c.}
+
     If `spin_idx` is False, the indices are treated as spatially indexed, and the operator is defined as:
-        E_{p,q} = a†_p↑ a_q↑ + a†_p↓ a_q↓ (+ h.c.)
-    Here, "h.c." refers to the Hermitian conjugate, which is included only when `hermitian` is True, and thus
-    p and q becomes indistinguishable in the resulting operator.
-    
+
+    .. math::
+
+        E_{p,q} = a^\dagger_{p\uparrow} a_{q\uparrow} + a^\dagger_{p\downarrow} a_{q\downarrow} + \text{h.c.}
+
+    Here, "h.c." refers to the Hermitian conjugate, which is included **only** when `hermitian` is True. When included,
+    the indices :math:`p` and :math:`q` become indistinguishable in the resulting operator.
+
     Args:
         p (int): The source fermion index.
         q (int): The target fermion index.
-        spin_idx (bool): Indicates whether the indices are spin-indexed. Defaults to True.
-        hermitian (bool): Specifies whether the resulting operator is Hermitian. Defaults to True.
-    
+        spin_idx (bool, optional): If True, the indices are treated as spin-indexed. Defaults to True.
+        hermitian (bool, optional): If True, the resulting operator is Hermitian. Defaults to True.
+
     Returns:
         FermionOperator: The generated one-body excitation operator.
     """

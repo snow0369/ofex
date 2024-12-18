@@ -13,3 +13,7 @@ qiskit-aer~=0.13.3
 
 pytest~=8.2.2
 tqdm~=4.66.4
+
+# For documenting
+sphinx~=7.4.7
+furo

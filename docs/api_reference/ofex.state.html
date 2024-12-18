@@ -1,0 +1,1037 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="ofex.transforms" href="ofex.transforms.html" /><link rel="prev" title="ofex.sampling_simulation" href="ofex.sampling_simulation.html" />
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>ofex.state - ofex 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">ofex 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">ofex 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">ofex</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ofex</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="ofex.html">ofex package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ofex package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ofex.clifford.html">ofex.clifford</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.hamiltonian.html">ofex.hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.linalg.html">ofex.linalg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.measurement.html">ofex.measurement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.operators.html">ofex.operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.propagator.html">ofex.propagator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.sampling_simulation.html">ofex.sampling_simulation</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">ofex.state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.transforms.html">ofex.transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.utils.html">ofex.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/ofex.state.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-ofex.state">
+<span id="ofex-state"></span><h1>ofex.state<a class="headerlink" href="#module-ofex.state" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ofex.state.</span></span><span class="sig-name descname"><span class="pre">BinaryFockVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ofex/state/binary_fock.html#BinaryFockVector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.BinaryFockVector" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>Represents a binary Fock vector, a tuple-like structure used to describe quantum states
+in terms of occupation numbers of either qubits or spin orbitals.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector.num_qubits">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ofex.state.BinaryFockVector.num_qubits" title="Link to this definition">¶</a></dt>
+<dd><p>Returns:
+int: The number of qubits (or bits) represented by this BinaryFockVector.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector.num_spin_orbitals">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_spin_orbitals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ofex.state.BinaryFockVector.num_spin_orbitals" title="Link to this definition">¶</a></dt>
+<dd><p>Returns:
+int: The number of spin orbitals, equal to the number of qubits.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector.num_spatial_orbitals">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_spatial_orbitals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ofex.state.BinaryFockVector.num_spatial_orbitals" title="Link to this definition">¶</a></dt>
+<dd><p>Returns:
+int: The number of spatial orbitals, calculated as half the number of spin orbitals.
+Assumes that the total number of spin orbitals is even.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector.to_int">
+<span class="sig-name descname"><span class="pre">to_int</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/ofex/state/binary_fock.html#BinaryFockVector.to_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.BinaryFockVector.to_int" title="Link to this definition">¶</a></dt>
+<dd><p>Converts the BinaryFockVector to its integer representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Integer equivalent of the binary Fock vector.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector.marginal_check">
+<span class="sig-name descname"><span class="pre">marginal_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/ofex/state/binary_fock.html#BinaryFockVector.marginal_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.BinaryFockVector.marginal_check" title="Link to this definition">¶</a></dt>
+<dd><p>Checks if the marginal state of the given qubits matches the provided index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubits</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – Indices of qubits to check against.</p></li>
+<li><p><strong>idx</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>Sequence</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>, </em><em>bool</em><em>]</em><em>]</em><em>]</em>) – Expected marginal state, either as
+an integer or a sequence of binary values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the given qubits’ state matches the index, else False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector.apply_pauli">
+<span class="sig-name descname"><span class="pre">apply_pauli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pauli</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/state/binary_fock.html#BinaryFockVector.apply_pauli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.BinaryFockVector.apply_pauli" title="Link to this definition">¶</a></dt>
+<dd><p>Applies a Pauli operator to the BinaryFockVector, modifying its state and calculating
+any associated phase change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pauli</strong> (<em>SinglePauli</em>) – A Pauli operator to apply, which contains indices and
+operation types (X, Y, Z, or I) (e.g. ((0, “X”), (1, “Y”))).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new BinaryFockVector representing the updated
+state and the complex phase factor introduced by the Pauli operations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[<a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.BinaryFockVector">BinaryFockVector</a>, complex]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ofex.state.BinaryFockVector.pretty_string">
+<span class="sig-name descname"><span class="pre">pretty_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fermion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ofex/state/binary_fock.html#BinaryFockVector.pretty_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.BinaryFockVector.pretty_string" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a human-readable string representation of the BinaryFockVector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fermion</strong> (<em>bool</em>) – If True, represents the state in a fermionic format. Otherwise,
+uses a raw binary representation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string representation of the BinaryFockVector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.int_to_fock">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.</span></span><span class="sig-name descname"><span class="pre">int_to_fock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a></span></span><a class="reference internal" href="_modules/ofex/state/binary_fock.html#int_to_fock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.int_to_fock" title="Link to this definition">¶</a></dt>
+<dd><p>Converts an integer to a BinaryFockVector, suited for a specified number of qubits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em>) – The integer index representing the state.</p></li>
+<li><p><strong>num_qubits</strong> (<em>int</em>) – The number of qubits the state should span.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The corresponding binary Fock vector representation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.BinaryFockVector">BinaryFockVector</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – If the integer index exceeds the state space for the given number of qubits.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.fock_to_int">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.</span></span><span class="sig-name descname"><span class="pre">fock_to_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/ofex/state/binary_fock.html#fock_to_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.fock_to_int" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a BinaryFockVector to its integer representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fock</strong> (<a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.BinaryFockVector"><em>BinaryFockVector</em></a>) – The binary Fock vector to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The corresponding integer representation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="module-ofex.state.state_tools">
+<span id="ofex-state-state-tools"></span><h2>ofex.state.state_tools<a class="headerlink" href="#module-ofex.state.state_tools" title="Link to this heading">¶</a></h2>
+<p>This module provides utilities for working with quantum states, including
+state transformations, normalization, sparsity computations, and comparison.</p>
+<p>It supports multiple state formats: dense arrays, sparse dictionaries,
+and Scipy sparse matrices. Additionally, it includes functions for
+Fock vector conversions and pretty-printed representations of quantum states.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.get_num_qubits">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">get_num_qubits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#get_num_qubits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.get_num_qubits" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the number of qubits in the given quantum state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state, which can be dense, sparse, or a Scipy sparse type.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of qubits in the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the dimension of the state is not a power of 2.</p></li>
+<li><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.get_state_dim">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">get_state_dim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#get_state_dim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.get_state_dim" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the dimension of the quantum state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state in dense, sparse, or Scipy sparse format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The dimension of the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.get_sparsity">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">get_sparsity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#get_sparsity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.get_sparsity" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the sparsity of the given quantum state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state to analyze.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of nonzero components in the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.pretty_print_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">pretty_print_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#pretty_print_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.pretty_print_state" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a string representation of the quantum state with coefficients and basis states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>State</em>) – The quantum state to represent.</p></li>
+<li><p><strong>fermion</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses the fermionic representation. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The pretty-printed representation of the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.compare_states">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">compare_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#compare_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.compare_states" title="Link to this definition">¶</a></dt>
+<dd><p>Compares two quantum states and returns a description of their differences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_1</strong> (<em>State</em>) – The first quantum state.</p></li>
+<li><p><strong>state_2</strong> (<em>State</em>) – The second quantum state.</p></li>
+<li><p><strong>str_len</strong> (<em>int</em><em>, </em><em>optional</em>) – String length limit for individual differences. Defaults to 40.</p></li>
+<li><p><strong>atol</strong> (<em>float</em><em>, </em><em>optional</em>) – Absolute tolerance for comparison. Defaults to EQ_TOLERANCE.</p></li>
+<li><p><strong>fermion</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses the fermionic representation. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string describing the differences between the states.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.to_dense">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">to_dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#to_dense"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.to_dense" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a quantum state to its dense representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The dense representation of the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DenseState</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported or cannot be converted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.to_scipy_sparse">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">to_scipy_sparse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#to_scipy_sparse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.to_scipy_sparse" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a quantum state to a Scipy sparse representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Scipy sparse representation of the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ScipySparse</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported or cannot be converted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.to_sparse_dict">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">to_sparse_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#to_sparse_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.to_sparse_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a quantum state into a sparse dictionary format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>State</em>) – The quantum state to convert.</p></li>
+<li><p><strong>atol</strong> (<em>float</em><em>, </em><em>optional</em>) – Absolute tolerance for nonzero values. Defaults to EQ_TOLERANCE.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sparse dictionary representation of the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SparseStateDict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported or cannot be converted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.state_type_transform">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">state_type_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#state_type_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.state_type_transform" title="Link to this definition">¶</a></dt>
+<dd><p>Transforms the quantum state into a specified representation type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>State</em>) – The quantum state to transform.</p></li>
+<li><p><strong>target_type</strong> (<em>str</em>) – The target representation type (‘dense’, ‘sparse_dict’, ‘scipy_sparse’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed quantum state in the specified format.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>State</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the target type is unknown.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.fock_vector_to_dense_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">fock_vector_to_dense_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#fock_vector_to_dense_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.fock_vector_to_dense_state" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a binary Fock vector into a dense quantum state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fock</strong> (<a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.BinaryFockVector"><em>BinaryFockVector</em></a>) – The Fock vector to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The dense quantum state corresponding to the Fock vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DenseState</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.fock_vector_to_scipy_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">fock_vector_to_scipy_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#fock_vector_to_scipy_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.fock_vector_to_scipy_state" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a binary Fock vector into a Scipy sparse quantum state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fock</strong> (<a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.BinaryFockVector"><em>BinaryFockVector</em></a>) – The Fock vector to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Scipy sparse state corresponding to the Fock vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ScipySparse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.compress_sparse">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">compress_sparse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#compress_sparse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.compress_sparse" title="Link to this definition">¶</a></dt>
+<dd><p>Compresses a sparse quantum state by removing elements below a tolerance and optionally normalizing it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>Union</em><em>[</em><em>SparseStateDict</em><em>, </em><em>ScipySparse</em><em>]</em>) – The sparse quantum state.</p></li>
+<li><p><strong>atol</strong> (<em>float</em><em>, </em><em>optional</em>) – Absolute tolerance for nonzero values. Defaults to EQ_TOLERANCE.</p></li>
+<li><p><strong>out_normalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, normalizes the resulting state. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The compressed (and optionally normalized) sparse state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[SparseStateDict, ScipySparse]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.state_allclose">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">state_allclose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#state_allclose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.state_allclose" title="Link to this definition">¶</a></dt>
+<dd><p>Checks if two quantum states are approximately equal within a tolerance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_1</strong> (<em>State</em>) – The first quantum state.</p></li>
+<li><p><strong>state_2</strong> (<em>State</em>) – The second quantum state.</p></li>
+<li><p><strong>atol</strong> (<em>float</em><em>, </em><em>optional</em>) – Absolute tolerance for comparison. Defaults to EQ_TOLERANCE.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the states are approximately equal, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.norm">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.norm" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the L2 norm of the quantum state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state to compute the norm for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The L2 norm of the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.normalize">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.normalize" title="Link to this definition">¶</a></dt>
+<dd><p>Normalizes the quantum state to have unit norm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>State</em>) – The quantum state to normalize.</p></li>
+<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, modifies the state in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normalized quantum state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>State</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the state is a zero state.</p></li>
+<li><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state type is unsupported.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.is_zero">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">is_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#is_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.is_zero" title="Link to this definition">¶</a></dt>
+<dd><p>Checks if the quantum state is effectively a zero state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the state is a zero state, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ofex.state.chem_ref_state">
+<span id="ofex-state-chem-ref-state"></span><h2>ofex.state.chem_ref_state<a class="headerlink" href="#module-ofex.state.chem_ref_state" title="Link to this heading">¶</a></h2>
+<p>Module containing functions and utilities for manipulating quantum chemical states.</p>
+<p>This module provides methods to compute Hartree Fock ground states, configuration interaction (CISD)
+wavefunctions, and generate configuration state functions (CSFs) for quantum chemistry. It integrates
+tools for handling fermionic and qubit states, as well as utilities for processing molecular data.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.chem_ref_state.hf_ground">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.chem_ref_state.</span></span><span class="sig-name descname"><span class="pre">hf_ground</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MolecularData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fermion_to_qubit_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/state/chem_ref_state.html#hf_ground"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.chem_ref_state.hf_ground" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the Hartree-Fock ground state as a sparse state dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> – An instance of MolecularData which contains molecule information.</p></li>
+<li><p><strong>active_idx</strong> – List of indices specifying the active orbitals. If None, all orbitals are active.</p></li>
+<li><p><strong>fermion_to_qubit_map</strong> – Optional string specifying the mapping from fermions to qubits.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments for fermion to qubit mapping.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary representing the Hartree-Fock ground state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SparseStateDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.chem_ref_state.cisd_ground">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.chem_ref_state.</span></span><span class="sig-name descname"><span class="pre">cisd_ground</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MolecularData</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/state/chem_ref_state.html#cisd_ground"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.chem_ref_state.cisd_ground" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the CISD (Configuration Interaction with Single and Double excitations)
+ground state as a sparse state dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> – An instance of MolecularData with molecule information.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary representing the CISD ground state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SparseStateDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.chem_ref_state.csf_states">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.chem_ref_state.</span></span><span class="sig-name descname"><span class="pre">csf_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_orbital</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_electrons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplicity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projected_spin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_open</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cs_excitation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">os_excitation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/state/chem_ref_state.html#csf_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.chem_ref_state.csf_states" title="Link to this definition">¶</a></dt>
+<dd><p>Generate Configuration State Functions (CSFs) based on specified spin and electron constraints.
+Refer to Helgaker, T., et al. (2000). Spin in Second Quantization. In Molecular Electronic-Structure Theory.
+<a class="reference external" href="https://doi.org/10.1002/9781119019572.ch2">https://doi.org/10.1002/9781119019572.ch2</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_orbital</strong> – Number of spatial orbitals.</p></li>
+<li><p><strong>n_electrons</strong> – Total number of electrons in the system.</p></li>
+<li><p><strong>multiplicity</strong> – Spin multiplicity of the states (e.g., 1 for singlet, 3 for triplet).</p></li>
+<li><p><strong>projected_spin</strong> – Projected value of the total spin (M_s), in half-integer steps.</p></li>
+<li><p><strong>n_open</strong> – Number of open shells. If None, defaults to multiplicity - 1.</p></li>
+<li><p><strong>cs_excitation</strong> – Number of excited closed shell electrons.</p></li>
+<li><p><strong>os_excitation</strong> – Number of excited open shell electrons.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of sparse state dictionaries representing the CSFs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[SparseStateDict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ofex.state.types">
+<span id="ofex-state-types"></span><h2>ofex.state.types<a class="headerlink" href="#module-ofex.state.types" title="Link to this heading">¶</a></h2>
+<p>This module defines custom types and utility functions to classify and identify
+different quantum state representations used in physics simulations.</p>
+<p>It supports three state representations:
+1. Dense states (NumPy 1-dimensional arrays).
+2. Sparse dictionary-based states (mapping BinaryFockVector to numerical values).
+3. SciPy sparse matrix-based states.</p>
+<p>Functions are provided for type checking and classification of these state types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ofex.state.types.DenseState">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.types.</span></span><span class="sig-name descname"><span class="pre">DenseState</span></span><a class="headerlink" href="#ofex.state.types.DenseState" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ofex.state.types.ScipySparse">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.types.</span></span><span class="sig-name descname"><span class="pre">ScipySparse</span></span><a class="headerlink" href="#ofex.state.types.ScipySparse" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">lil_matrix</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.types.is_dense_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.types.</span></span><span class="sig-name descname"><span class="pre">is_dense_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/ofex/state/types.html#is_dense_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.types.is_dense_state" title="Link to this definition">¶</a></dt>
+<dd><p>Checks if a given state is a dense state (1-dimensional NumPy array).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>Any</em>) – The state to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the state is a 1-dimensional NumPy array, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.types.is_sparse_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.types.</span></span><span class="sig-name descname"><span class="pre">is_sparse_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/ofex/state/types.html#is_sparse_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.types.is_sparse_state" title="Link to this definition">¶</a></dt>
+<dd><p>Checks if a given state is a sparse state represented as a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>Any</em>) – The state to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the state is a dictionary with keys as BinaryFockVector
+instances and values as Numbers, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.types.is_scipy_sparse_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.types.</span></span><span class="sig-name descname"><span class="pre">is_scipy_sparse_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/ofex/state/types.html#is_scipy_sparse_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.types.is_scipy_sparse_state" title="Link to this definition">¶</a></dt>
+<dd><p>Checks if a given state is a sparse state represented as a SciPy sparse matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>Any</em>) – The state to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the state is a 1-row SciPy sparse matrix, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.types.type_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.types.</span></span><span class="sig-name descname"><span class="pre">type_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/ofex/state/types.html#type_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.types.type_state" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the type of a given state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>Any</em>) – The state to identify.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The type of the state, one of “dense”, “sparse_dict”, or “scipy_sparse”.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="ofex.html#ofex.exceptions.OfexTypeError" title="ofex.exceptions.OfexTypeError"><strong>OfexTypeError</strong></a> – If the state does not match any recognized type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ofex.transforms.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">ofex.transforms</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="ofex.sampling_simulation.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">ofex.sampling_simulation</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Gwonhak Lee
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ofex.state</a><ul>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector</span></code></a><ul>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector.num_qubits"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector.num_qubits</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector.num_spin_orbitals"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector.num_spin_orbitals</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector.num_spatial_orbitals"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector.num_spatial_orbitals</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector.to_int"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector.to_int()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector.marginal_check"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector.marginal_check()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector.apply_pauli"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector.apply_pauli()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.BinaryFockVector.pretty_string"><code class="docutils literal notranslate"><span class="pre">BinaryFockVector.pretty_string()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ofex.state.int_to_fock"><code class="docutils literal notranslate"><span class="pre">int_to_fock()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.fock_to_int"><code class="docutils literal notranslate"><span class="pre">fock_to_int()</span></code></a></li>
+<li><a class="reference internal" href="#module-ofex.state.state_tools">ofex.state.state_tools</a><ul>
+<li><a class="reference internal" href="#ofex.state.state_tools.get_num_qubits"><code class="docutils literal notranslate"><span class="pre">get_num_qubits()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.get_state_dim"><code class="docutils literal notranslate"><span class="pre">get_state_dim()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.get_sparsity"><code class="docutils literal notranslate"><span class="pre">get_sparsity()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.pretty_print_state"><code class="docutils literal notranslate"><span class="pre">pretty_print_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.compare_states"><code class="docutils literal notranslate"><span class="pre">compare_states()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.to_dense"><code class="docutils literal notranslate"><span class="pre">to_dense()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.to_scipy_sparse"><code class="docutils literal notranslate"><span class="pre">to_scipy_sparse()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.to_sparse_dict"><code class="docutils literal notranslate"><span class="pre">to_sparse_dict()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.state_type_transform"><code class="docutils literal notranslate"><span class="pre">state_type_transform()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.fock_vector_to_dense_state"><code class="docutils literal notranslate"><span class="pre">fock_vector_to_dense_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.fock_vector_to_scipy_state"><code class="docutils literal notranslate"><span class="pre">fock_vector_to_scipy_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.compress_sparse"><code class="docutils literal notranslate"><span class="pre">compress_sparse()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.state_allclose"><code class="docutils literal notranslate"><span class="pre">state_allclose()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.norm"><code class="docutils literal notranslate"><span class="pre">norm()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.is_zero"><code class="docutils literal notranslate"><span class="pre">is_zero()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-ofex.state.chem_ref_state">ofex.state.chem_ref_state</a><ul>
+<li><a class="reference internal" href="#ofex.state.chem_ref_state.hf_ground"><code class="docutils literal notranslate"><span class="pre">hf_ground()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.chem_ref_state.cisd_ground"><code class="docutils literal notranslate"><span class="pre">cisd_ground()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.chem_ref_state.csf_states"><code class="docutils literal notranslate"><span class="pre">csf_states()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-ofex.state.types">ofex.state.types</a><ul>
+<li><a class="reference internal" href="#ofex.state.types.DenseState"><code class="docutils literal notranslate"><span class="pre">DenseState</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.types.ScipySparse"><code class="docutils literal notranslate"><span class="pre">ScipySparse</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.types.is_dense_state"><code class="docutils literal notranslate"><span class="pre">is_dense_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.types.is_sparse_state"><code class="docutils literal notranslate"><span class="pre">is_sparse_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.types.is_scipy_sparse_state"><code class="docutils literal notranslate"><span class="pre">is_scipy_sparse_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.types.type_state"><code class="docutils literal notranslate"><span class="pre">type_state()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

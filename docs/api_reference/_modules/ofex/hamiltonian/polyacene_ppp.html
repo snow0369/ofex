@@ -1,0 +1,802 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>ofex.hamiltonian.polyacene_ppp - ofex 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">ofex 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">ofex 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../modules.html">ofex</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ofex</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../ofex.html">ofex package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ofex package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.clifford.html">ofex.clifford</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.hamiltonian.html">ofex.hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.linalg.html">ofex.linalg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.measurement.html">ofex.measurement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.operators.html">ofex.operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.propagator.html">ofex.propagator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.sampling_simulation.html">ofex.sampling_simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.state.html">ofex.state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.transforms.html">ofex.transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.utils.html">ofex.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for ofex.hamiltonian.polyacene_ppp</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">openfermion</span> <span class="kn">import</span> <span class="n">FermionOperator</span>
+
+<span class="kn">from</span> <span class="nn">ofex.constant</span> <span class="kn">import</span> <span class="n">EV_TO_HARTREE</span><span class="p">,</span> <span class="n">DEG_TO_RADIAN</span>
+<span class="kn">from</span> <span class="nn">ofex.operators.fermion_operator_tools</span> <span class="kn">import</span> <span class="n">one_body_excitation</span><span class="p">,</span> <span class="n">one_body_number</span>
+<span class="kn">from</span> <span class="nn">ofex.state</span> <span class="kn">import</span> <span class="n">BinaryFockVector</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PolyacenePPP&quot;</span><span class="p">]</span>
+
+<span class="n">SPIN_DOWN</span><span class="p">,</span> <span class="n">SPIN_UP</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="PolyacenePPP">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP">[docs]</a>
+<span class="k">class</span> <span class="nc">PolyacenePPP</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The PolyacenePPP class represents a linear polyacene molecule described using the Pariser-Parr-Pople (PPP) model</span>
+<span class="sd">    for quantum chemistry calculations. It provides methods for computing molecular Hamiltonians, electron-electron</span>
+<span class="sd">    repulsion, hopping terms, and other properties based on the PPP approximation.</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">        Chakraborty, H., &amp; Shukla, A. (2013). Pariser–Parr–Pople Model Based Investigation of Ground and Low-Lying</span>
+<span class="sd">        Excited States of Long Acenes. The Journal of Physical Chemistry A, 117(51), 14220–14229.</span>
+<span class="sd">        doi:10.1021/jp408535u</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        n_ring (int): The number of aromatic rings in the polyacene molecule.</span>
+<span class="sd">        t0 (float): Hopping strength value for horizontal bonds.</span>
+<span class="sd">        t_ (float): Hopping strength value for vertical bonds.</span>
+<span class="sd">        bond_length (float): The bond length between adjacent carbon atoms (in Angstroms).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Unit = Angstrom, Hartree</span>
+    <span class="c1"># n_ring: int = 3</span>
+
+    <span class="c1"># t0: float = 2.4 * EV_TO_HARTREE</span>
+    <span class="c1"># t_: float = 2.4 * EV_TO_HARTREE</span>
+
+    <span class="c1"># bond_length: float = 1.4</span>
+    <span class="n">_bond_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">120</span> <span class="o">*</span> <span class="n">DEG_TO_RADIAN</span>
+
+    <span class="c1"># param_type: str = &quot;standard&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atom_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[str]: A list of atom names in the polyacene molecule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coord_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_spin_orbitals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The total number of spin-orbitals in the polyacene molecule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_spin_orbitals</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_qubits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_spin_orbitals</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_ring</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">param_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span><span class="p">,</span>
+                 <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.4</span> <span class="o">*</span> <span class="n">EV_TO_HARTREE</span><span class="p">,</span>
+                 <span class="n">t_</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.4</span> <span class="o">*</span> <span class="n">EV_TO_HARTREE</span><span class="p">,</span>
+                 <span class="n">bond_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.4</span><span class="p">,</span> <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the PolyacenePPP object and sets up molecular parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_ring (int): The number of aromatic rings in the polyacene molecule.</span>
+<span class="sd">            param_type (str): Type of parameters to use (&quot;standard&quot; or &quot;screened&quot;).</span>
+<span class="sd">            t0 (float): Hopping strength value for horizontal bonds.</span>
+<span class="sd">            t_ (float): Hopping strength value for vertical bonds.</span>
+<span class="sd">            bond_length (float): The bond length between adjacent carbon atoms (in Angstroms).</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            coord_dict (Dict[str, Tuple[float, float]]): A dictionary containing the coordinates of each atom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span> <span class="o">=</span> <span class="n">n_ring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span> <span class="o">=</span> <span class="n">param_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_</span> <span class="o">=</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bond_length</span> <span class="o">=</span> <span class="n">bond_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coord_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polyacene_carbon_geometry</span><span class="p">()</span>
+
+    <span class="c1"># &lt;editor-fold desc=&quot;PPP Parameters&quot;&gt;</span>
+<div class="viewcode-block" id="PolyacenePPP.kappa">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.kappa">[docs]</a>
+    <span class="k">def</span> <span class="nf">kappa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the screening parameter based on the parameter type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            i (str): Label for the first atom.</span>
+<span class="sd">            j (str): Label for the second atom.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The screening parameter value.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the parameter type is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span> <span class="o">==</span> <span class="s2">&quot;standard&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span> <span class="o">==</span> <span class="s2">&quot;screened&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="k">else</span> <span class="mf">2.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.u">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.u">[docs]</a>
+    <span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the on-site repulsion term based on the parameter type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The on-site electron-electron repulsion in Hartree.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the parameter type is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span> <span class="o">==</span> <span class="s2">&quot;standard&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">11.13</span> <span class="o">*</span> <span class="n">EV_TO_HARTREE</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span> <span class="o">==</span> <span class="s2">&quot;screened&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">8.0</span> <span class="o">*</span> <span class="n">EV_TO_HARTREE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.v">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.v">[docs]</a>
+    <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the Coulomb interaction between two atomic sites.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            i (str): Label for the first atom.</span>
+<span class="sd">            j (str): Label for the second atom.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The Coulomb interaction value in Hartree, accounting for</span>
+<span class="sd">            screening and distance-dependent effects between the atoms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_dist</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kappa</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.6117</span> <span class="o">*</span> <span class="p">(</span><span class="n">rij</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_hopping_horizontal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FermionOperator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the hopping operator for horizontal bonds in the specified part.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            part (str): The part of the molecule, either &#39;L&#39; (lower) or &#39;U&#39; (upper).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FermionOperator: The horizontal hopping operator for the specified part of the molecule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">half_num_carbons</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span>
+        <span class="n">hopping</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">one_body_excitation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">part</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_DOWN</span><span class="p">),</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">part</span><span class="si">}{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_DOWN</span><span class="p">),</span>
+                                 <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hermitian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">half_num_carbons</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="n">hopping</span> <span class="o">+=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">one_body_excitation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">part</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_UP</span><span class="p">),</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">part</span><span class="si">}{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_UP</span><span class="p">),</span>
+                                 <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hermitian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">half_num_carbons</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">hopping</span>
+
+<div class="viewcode-block" id="PolyacenePPP.hopping_lower">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.hopping_lower">[docs]</a>
+    <span class="k">def</span> <span class="nf">hopping_lower</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FermionOperator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the hopping operator for horizontal bonds in the lower part of the molecule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FermionOperator: The lower horizontal hopping operator scaled by -t0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hopping_horizontal</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.hopping_upper">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.hopping_upper">[docs]</a>
+    <span class="k">def</span> <span class="nf">hopping_upper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FermionOperator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the hopping operator for horizontal bonds in the upper part of the molecule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FermionOperator: The upper horizontal hopping operator scaled by -t0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hopping_horizontal</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.hopping_bridge">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.hopping_bridge">[docs]</a>
+    <span class="k">def</span> <span class="nf">hopping_bridge</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FermionOperator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the hopping operator for vertical bonds between the upper and lower parts of the molecule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FermionOperator: The bridge hopping operator scaled by `-self.t_`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">half_num_carbons</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span>
+        <span class="n">hopping</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">one_body_excitation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;U</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_DOWN</span><span class="p">),</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_DOWN</span><span class="p">),</span>
+                                 <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hermitian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">half_num_carbons</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="n">hopping</span> <span class="o">+=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">one_body_excitation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;U</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_UP</span><span class="p">),</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">SPIN_UP</span><span class="p">),</span>
+                                 <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hermitian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">half_num_carbons</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">hopping</span> <span class="o">*</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">t_</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.ee_repulsion">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.ee_repulsion">[docs]</a>
+    <span class="k">def</span> <span class="nf">ee_repulsion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FermionOperator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the electron-electron repulsion operator, including on-site and Ohno interaction terms.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FermionOperator: The total electron-electron repulsion operator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_carbons</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span>
+        <span class="n">on_site</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">one_body_number</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">SPIN_DOWN</span><span class="p">,</span> <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span>
+             <span class="n">one_body_number</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">SPIN_UP</span><span class="p">,</span> <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_carbons</span><span class="p">)])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">()</span>
+        <span class="n">ohno_interaction</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_carbons</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_carbons</span><span class="p">):</span>
+                <span class="n">i_str</span><span class="p">,</span> <span class="n">j_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inv_spatial_idx</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">inv_spatial_idx</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">(</span><span class="n">one_body_number</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="n">SPIN_DOWN</span><span class="p">,</span> <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span>
+                       <span class="n">one_body_number</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="n">SPIN_UP</span><span class="p">,</span> <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> \
+                      <span class="p">(</span><span class="n">one_body_number</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">j</span> <span class="o">+</span> <span class="n">SPIN_DOWN</span><span class="p">,</span> <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span>
+                       <span class="n">one_body_number</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">j</span> <span class="o">+</span> <span class="n">SPIN_UP</span><span class="p">,</span> <span class="n">spin_idx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">ohno_interaction</span> <span class="o">+=</span> <span class="n">tmp</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">(</span><span class="n">i_str</span><span class="p">,</span> <span class="n">j_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">on_site</span> <span class="o">+</span> <span class="n">ohno_interaction</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.fermion_hamiltonian">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.fermion_hamiltonian">[docs]</a>
+    <span class="k">def</span> <span class="nf">fermion_hamiltonian</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FermionOperator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the full fermionic Hamiltonian of the molecule, which includes</span>
+<span class="sd">        contributions from horizontal hopping, vertical bridge hopping, and</span>
+<span class="sd">        electron-electron repulsion.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FermionOperator: The full fermionic Hamiltonian of the molecule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hopping_lower</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hopping_upper</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hopping_bridge</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_repulsion</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.get_molecular_hamiltonian">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.get_molecular_hamiltonian">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_molecular_hamiltonian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves the molecular Hamiltonian for the polyacene molecule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            FermionOperator: The fermionic Hamiltonian of the molecule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fermion_hamiltonian</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_hf_fock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a Hartree-Fock state based on the parity of orbitals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parity (bool): Determines whether the alternating occupation starts with the 0th orbital or the 1st orbital.</span>
+<span class="sd">                           If True, the occupation starts from the 1st orbital; if False, the occupation starts from the</span>
+<span class="sd">                           0th orbital.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: A list representing the Hartree-Fock state occupation numbers for each orbital.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fock</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_spin_orbitals</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">an</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">parity</span><span class="p">)</span> <span class="ow">and</span> <span class="n">an</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;L&quot;</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">an</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> \
+                    <span class="n">an</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;U&quot;</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">an</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">fock</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">an</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">fock</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">an</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">parity</span> <span class="ow">and</span> <span class="n">an</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;L&quot;</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">an</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> \
+                    <span class="n">an</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;U&quot;</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">an</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">fock</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">an</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">fock</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">an</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">fock</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_electrons</span>
+        <span class="k">return</span> <span class="n">fock</span>
+
+<div class="viewcode-block" id="PolyacenePPP.hf_state">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.hf_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">hf_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a Hartree-Fock (HF) state for the molecule based on a given parity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parity (bool): Determines whether the alternating occupation starts with the 0th orbital or the 1st orbital.</span>
+<span class="sd">                           If True, the occupation starts from the 1st orbital; if False, the occupation starts from the</span>
+<span class="sd">                           0th orbital.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[BinaryFockVector, float]: The Hartree-Fock state as a dictionary where the key is the</span>
+<span class="sd">                                           BinaryFockVector representing the state and the value is its coefficient.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hf_fock</span><span class="p">(</span><span class="n">parity</span><span class="o">=</span><span class="n">parity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">BinaryFockVector</span><span class="p">(</span><span class="n">fock</span><span class="p">):</span> <span class="mf">1.0</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.ref_state">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.ref_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">ref_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs the reference (singlet) state as a superposition of Hartree-Fock</span>
+<span class="sd">        states with even and odd parities.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[BinaryFockVector, float]: The reference state as a dictionary of BinaryFockVector</span>
+<span class="sd">                                           to their respective coefficients.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fock_even</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hf_state</span><span class="p">(</span><span class="n">parity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">fock_odd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hf_state</span><span class="p">(</span><span class="n">parity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">BinaryFockVector</span><span class="p">(</span><span class="n">fock_odd</span><span class="p">):</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+                <span class="n">BinaryFockVector</span><span class="p">(</span><span class="n">fock_even</span><span class="p">):</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)}</span></div>
+
+
+    <span class="c1"># &lt;/editor-fold&gt;</span>
+
+<div class="viewcode-block" id="PolyacenePPP.fermion_symmetries">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.fermion_symmetries">[docs]</a>
+    <span class="k">def</span> <span class="nf">fermion_symmetries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates symmetry transformations for the fermionic orbitals</span>
+<span class="sd">        in the system based on spatial symmetry operations.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[List[Tuple[int, int]]]: A list of symmetry transformations,</span>
+<span class="sd">                                         where each transformation is represented</span>
+<span class="sd">                                         as a list of tuples. Each tuple defines a</span>
+<span class="sd">                                         permutation of two orbitals (given by their indices).</span>
+<span class="sd">                                         The transformations included are:</span>
+<span class="sd">                                         - σ(x): Reflection across the x-axis.</span>
+<span class="sd">                                         - σ(y): Reflection across the y-axis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_name</span>
+        <span class="n">u_atoms</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atoms</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;U&quot;</span><span class="p">)])</span>
+        <span class="n">l_atoms</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atoms</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">)])</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_atoms</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">l_atoms</span><span class="p">)</span>
+        <span class="n">perm_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1"># σ(x)</span>
+        <span class="n">sigma_x_swaps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ua</span><span class="p">,</span> <span class="n">la</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">u_atoms</span><span class="p">,</span> <span class="n">l_atoms</span><span class="p">):</span>
+            <span class="n">sigma_x_swaps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">ua</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">la</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">)))</span>
+            <span class="n">sigma_x_swaps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">ua</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">la</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">)))</span>
+        <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma_x_swaps</span><span class="p">)</span>
+
+        <span class="c1"># σ(y)</span>
+        <span class="n">sigma_y_swaps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">half_atom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_atoms</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">ula</span><span class="p">,</span> <span class="n">ura</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">u_atoms</span><span class="p">[:</span><span class="n">half_atom</span><span class="p">],</span> <span class="n">u_atoms</span><span class="p">[:</span><span class="n">half_atom</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">sigma_y_swaps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">ula</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">ura</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">)))</span>
+            <span class="n">sigma_y_swaps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">ula</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">ura</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">lla</span><span class="p">,</span> <span class="n">lra</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">l_atoms</span><span class="p">[:</span><span class="n">half_atom</span><span class="p">],</span> <span class="n">l_atoms</span><span class="p">[:</span><span class="n">half_atom</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">sigma_y_swaps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">lla</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">lra</span><span class="p">,</span> <span class="n">SPIN_DOWN</span><span class="p">)))</span>
+            <span class="n">sigma_y_swaps</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">lla</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">spin_idx</span><span class="p">(</span><span class="n">lra</span><span class="p">,</span> <span class="n">SPIN_UP</span><span class="p">)))</span>
+        <span class="n">perm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma_y_swaps</span><span class="p">)</span>
+
+        <span class="c1"># The i-operation is combination of σ(x) and σ(y)</span>
+        <span class="c1"># i_swaps = list()</span>
+        <span class="c1"># for ua, la in zip(u_atoms, l_atoms[::-1]):</span>
+        <span class="c1">#     i_swaps.append((self.spin_idx(ua, SPIN_DOWN), self.spin_idx(la, SPIN_DOWN)))</span>
+        <span class="c1">#     i_swaps.append((self.spin_idx(ua, SPIN_UP), self.spin_idx(la, SPIN_UP)))</span>
+        <span class="c1"># perm_list.append(i_swaps)</span>
+
+        <span class="k">return</span> <span class="n">perm_list</span></div>
+
+
+    <span class="c1"># &lt;editor-fold desc=&quot;Utilities&quot;&gt;</span>
+<div class="viewcode-block" id="PolyacenePPP.spin_idx">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.spin_idx">[docs]</a>
+    <span class="k">def</span> <span class="nf">spin_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">spin</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the index of the spin orbital associated with a given atom and spin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            atom (str): The label of the atom, where &quot;U&quot; represents an upper atom</span>
+<span class="sd">                        and &quot;L&quot; represents a lower atom, followed by a numerical index.</span>
+<span class="sd">                        Example: &quot;U0&quot;, &quot;L1&quot;.</span>
+<span class="sd">            spin (Union[bool, int]): The spin designation for the orbital. Acceptable</span>
+<span class="sd">                                     values are either:</span>
+<span class="sd">                                     - 0 or False for SPIN_DOWN</span>
+<span class="sd">                                     - 1 or True for SPIN_UP</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The index of the spin orbital corresponding to the specified atom</span>
+<span class="sd">                 and spin.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the atom label does not start with &quot;L&quot; or &quot;U&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spin</span> <span class="o">=</span> <span class="n">SPIN_UP</span> <span class="k">if</span> <span class="n">spin</span> <span class="k">else</span> <span class="n">SPIN_DOWN</span>
+        <span class="k">if</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;L&quot;</span><span class="p">:</span>
+            <span class="n">half_num_carbons</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span>
+            <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">half_num_carbons</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">atom</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span> <span class="o">+</span> <span class="n">spin</span>
+        <span class="k">elif</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;U&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">atom</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="n">spin</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.inv_spatial_idx">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.inv_spatial_idx">[docs]</a>
+    <span class="k">def</span> <span class="nf">inv_spatial_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts a given spin-orbital index into its corresponding spatial atom label.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            i (int): The index of the spin-orbital.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The atom label corresponding to the provided spin-orbital index.</span>
+<span class="sd">                 This is in the form &quot;U&lt;num&gt;&quot; for upper atoms or &quot;L&lt;num&gt;&quot; for lower atoms,</span>
+<span class="sd">                 where &lt;num&gt; is the atom number.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">half_num_carbons</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">half_num_carbons</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;U</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;L</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">half_num_carbons</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="PolyacenePPP.atom_dist">
+<a class="viewcode-back" href="../../../ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.atom_dist">[docs]</a>
+    <span class="k">def</span> <span class="nf">atom_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the Euclidean distance between two atoms based on their coordinates.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            i (str): The label of the first atom (e.g., &quot;U0&quot; or &quot;L1&quot;).</span>
+<span class="sd">            j (str): The label of the second atom (e.g., &quot;U1&quot; or &quot;L0&quot;).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The Euclidean distance between the two atoms in Angstroms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">pj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_dict</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="n">pj</span><span class="p">)])</span> <span class="o">**</span> <span class="mf">0.5</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_polyacene_carbon_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the spatial coordinates for all carbon atoms in the polyacene molecule</span>
+<span class="sd">        based on the number of aromatic rings and geometric parameters.</span>
+
+<span class="sd">        The geometry alternates between &quot;upper&quot; (U) and &quot;lower&quot; (L) layers of carbon atoms,</span>
+<span class="sd">        with positions determined by the bond length and bond angle.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[str, Tuple[float, float]]: A dictionary mapping atom labels to their</span>
+<span class="sd">                2D coordinates. The keys are strings in the format &quot;Xn&quot; where X is &quot;U&quot; (upper)</span>
+<span class="sd">                or &quot;L&quot; (lower) and n is an integer. The values are tuples representing the</span>
+<span class="sd">                (x, y) coordinates of each atom in Angstroms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="c1"># upper_carbons = [(0.0, bond_length) ]</span>
+        <span class="c1"># lower_carbons = [(0.0, 0.0)]</span>
+        <span class="n">ret_coord</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">ret_coord</span><span class="p">[</span><span class="s2">&quot;L0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">ret_coord</span><span class="p">[</span><span class="s2">&quot;U0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bond_length</span><span class="p">)</span>
+        <span class="n">bond_angle_sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bond_angle</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">top_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bond_length</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">bond_angle_sub</span><span class="p">))</span>
+        <span class="n">bot_y</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bond_length</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">bond_angle_sub</span><span class="p">)</span>
+        <span class="n">inc_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bond_length</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">bond_angle_sub</span><span class="p">)</span>
+        <span class="n">i_l</span><span class="p">,</span> <span class="n">i_u</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ring</span><span class="p">):</span>
+            <span class="n">left_x</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">inc_x</span>
+            <span class="n">center_x</span> <span class="o">=</span> <span class="n">left_x</span> <span class="o">+</span> <span class="n">inc_x</span>
+            <span class="n">right_x</span> <span class="o">=</span> <span class="n">left_x</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">inc_x</span>
+
+            <span class="c1"># upper_carbons += [</span>
+            <span class="n">ret_coord</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;U</span><span class="si">{</span><span class="n">i_u</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">center_x</span><span class="p">,</span> <span class="n">top_y</span><span class="p">)</span>
+            <span class="n">ret_coord</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;U</span><span class="si">{</span><span class="n">i_u</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">right_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bond_length</span><span class="p">)</span>
+            <span class="c1"># ]</span>
+            <span class="c1"># lower_carbons += [</span>
+            <span class="n">ret_coord</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;L</span><span class="si">{</span><span class="n">i_l</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">center_x</span><span class="p">,</span> <span class="n">bot_y</span><span class="p">)</span>
+            <span class="n">ret_coord</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;L</span><span class="si">{</span><span class="n">i_l</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">right_x</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="c1"># ]</span>
+            <span class="n">i_u</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="n">i_l</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">ret_coord</span></div>
+
+    <span class="c1"># &lt;/editor-fold&gt;</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Gwonhak Lee
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

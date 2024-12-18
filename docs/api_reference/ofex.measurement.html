@@ -1,0 +1,826 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="ofex.operators" href="ofex.operators.html" /><link rel="prev" title="ofex.linalg" href="ofex.linalg.html" />
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>ofex.measurement - ofex 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">ofex 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">ofex 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">ofex</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ofex</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="ofex.html">ofex package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ofex package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ofex.clifford.html">ofex.clifford</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.hamiltonian.html">ofex.hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.linalg.html">ofex.linalg</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">ofex.measurement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.operators.html">ofex.operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.propagator.html">ofex.propagator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.sampling_simulation.html">ofex.sampling_simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.state.html">ofex.state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.transforms.html">ofex.transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.utils.html">ofex.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/ofex.measurement.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-ofex.measurement">
+<span id="ofex-measurement"></span><h1>ofex.measurement<a class="headerlink" href="#module-ofex.measurement" title="Link to this heading">¶</a></h1>
+<p>This module provides various techniques for optimal quantum measurements.</p>
+<p>It includes functionality for managing measurement variance, grouping Pauli operators,
+and other related tools for efficient quantum computations. Specific techniques,
+such as the iterative coefficient splitting and various grouping algorithms, are
+also provided.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.killer_shift_opt_fermion_hf">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">killer_shift_opt_fermion_hf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FermionOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2q_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">FermionOperator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">QubitOperator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/killer_shift.html#killer_shift_opt_fermion_hf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.killer_shift_opt_fermion_hf" title="Link to this definition">¶</a></dt>
+<dd><p>Perform the killer shift optimization for a given fermionic Hamiltonian
+and Hartree-Fock (HF) vector.</p>
+<p>This method applies the killer shift algorithm to reduce the measurement cost
+in the transitional amplitude &lt;φ0|H|φ1&gt;, where φ0 corresponds to a single
+Slater determinant. The algorithm identifies a Hermitian operator T such that
+T|φ0&gt; = t|φ0&gt;, where t is a real constant, minimizing the norm of H - T. It
+supports varying levels of optimization and is based on the methodologies
+described in the paper [Arxiv:2409.02504](https://arxiv.org/abs/2409.02504).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fham</strong> (<em>FermionOperator</em>) – The input fermionic Hamiltonian to which the
+killer shift optimization is applied.</p></li>
+<li><p><strong>hf_vector</strong> (<a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.BinaryFockVector"><em>BinaryFockVector</em></a>) – The Hartree-Fock state represented as a
+binary vector, serving as the reference state for the killer shift.</p></li>
+<li><p><strong>transform</strong> (<em>str</em>) – Specifies the transformation method for mapping fermionic
+operators to qubit operators (e.g., ‘Jordan-Wigner’ or ‘Bravyi-Kitaev’),
+supported in the function <cite>ofex.transform.fermion_to_qubit_operator</cite>.</p></li>
+<li><p><strong>optimization_level</strong> (<em>int</em><em>, </em><em>optional</em>) – The optimization level used in the killer
+shift procedure. Available options (default: 1):
+- 0: Use the number operator only.
+- 1: Include contributions from one-body operators.
+- 2: Include contributions from both one- and two-body operators.</p></li>
+<li><p><strong>repeat_opt</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of optimization iterations to
+perform for refining the solution (default: 1).</p></li>
+<li><p><strong>f2q_kwargs</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Additional keyword arguments
+passed to the fermion-to-qubit transformation functions (default: None).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing:</dt><dd><ul class="simple">
+<li><p>FermionOperator: The optimized fermionic Hamiltonian with reduced
+norm after applying the killer shift.</p></li>
+<li><p>QubitOperator: The corresponding qubit Hamiltonian obtained after
+the fermion-to-qubit mapping and applying the killer shift.</p></li>
+<li><p>float: The energy constant resulting from the killer shift
+transformation.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[FermionOperator, QubitOperator, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.fragment_variance">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">fragment_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp_ham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_cov_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/ofex/measurement/measurement_variance.html#fragment_variance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.fragment_variance" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the variance of Hamiltonian fragments based on reference states, grouped Hamiltonian terms,
+and measurement shot counts.</p>
+<p>For the j-th fragment <code class="docutils literal notranslate"><span class="pre">H_j</span></code> in <code class="docutils literal notranslate"><span class="pre">grp_ham</span></code>, the total variance is computed as:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/f7150d17d3f1fc535ff63473e6e64e96e10e8825.png" alt="V_{tot} = \sum_j \left( \frac{V_{R,j}}{m_{R,j}} + \frac{V_{I,j}}{m_{I,j}} \right)"/></p>
+</div></div>
+<p>where:</p>
+<ul class="simple">
+<li><p><img class="math" src="_images/math/1cff584193c719b59d7a06684442394dd9c17b78.png" alt="V_{R,j} = 0.5 \left( \langle \phi_1 | H_j^2 | \phi_1 \rangle + \langle \phi_2 | H_j^2 | \phi_2 \rangle \right)
+- \text{Re} \left[ \langle \phi_1 | H_j | \phi_2 \rangle \right]^2"/>.</p></li>
+<li><p><img class="math" src="_images/math/a801272c42b59048f2333eb9fdeeacb075a07c6e.png" alt="V_{I,j} = 0.5 \left( \langle \phi_1 | H_j^2 | \phi_1 \rangle + \langle \phi_2 | H_j^2 | \phi_2 \rangle \right)
+- \text{Im} \left[ \langle \phi_1 | H_j | \phi_2 \rangle \right]^2"/>.</p></li>
+</ul>
+<p>Here, <img class="math" src="_images/math/5d7e6877043f33cded6dc2ef41c40aa215adf594.png" alt="m_{R,j}"/> (shots_real) and <img class="math" src="_images/math/13ced2d68af34bb3620e5fa343577e81b9012829.png" alt="m_{I,j}"/> (shots_imag) represent the real and imaginary shot counts
+for <code class="docutils literal notranslate"><span class="pre">H_j</span></code>.</p>
+<p><strong>Case Explanation</strong>:</p>
+<ul>
+<li><p><strong>Single-state variance calculations</strong> (<code class="docutils literal notranslate"><span class="pre">state2=None</span></code> and <code class="docutils literal notranslate"><span class="pre">shots.ndim==1</span></code>):</p>
+<blockquote>
+<div><div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/de262c2604ffd8b9d6228dd326d2ce07abdeab01.png" alt="V_{tot} = \sum_j \frac{V_{R,j}}{m_{R,j}}."/></p>
+</div></div>
+</div></blockquote>
+</li>
+<li><p><strong>Transition-state variance calculations</strong> (<code class="docutils literal notranslate"><span class="pre">state2</span></code> provided and <code class="docutils literal notranslate"><span class="pre">shots.ndim==2</span></code>):</p>
+<blockquote>
+<div><p>Both real and imaginary contributions are included in the computation.</p>
+</div></blockquote>
+</li>
+</ul>
+<p>For further details, see <a class="reference external" href="https://arxiv.org/abs/2409.02504">ArXiv:2409.02504</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grp_ham</strong> (<em>List</em><em>[</em><em>QubitOperator</em><em>]</em>) – A list of Hamiltonian fragments represented by QubitOperators.</p></li>
+<li><p><strong>state1</strong> (<em>Optional</em><em>[</em><em>State</em><em>]</em>) – The first reference state (required for computation).</p></li>
+<li><p><strong>state2</strong> (<em>Optional</em><em>[</em><em>State</em><em>]</em>) – The second reference state (optional; needed for transition-state variance).</p></li>
+<li><p><strong>shots</strong> (<em>np.ndarray</em>) – <p>Array defining measurement shot counts:</p>
+<ul>
+<li><p>If 1D (shape <code class="docutils literal notranslate"><span class="pre">[n]</span></code>): Represents real shot counts <code class="docutils literal notranslate"><span class="pre">m_{R,j}</span></code>; applicable for single-state variance.</p></li>
+<li><p>If 2D (shape <code class="docutils literal notranslate"><span class="pre">[n,</span> <span class="pre">2]</span></code>): Represents real <code class="docutils literal notranslate"><span class="pre">m_{R,j}</span></code> and imaginary <code class="docutils literal notranslate"><span class="pre">m_{I,j}</span></code> shot counts; used for
+transition-state variance.</p></li>
+</ul>
+</p></li>
+<li><p><strong>true_cov_dict</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>PauliCovDict</em><em>, </em><em>TransitionPauliCovDict</em><em>]</em><em>]</em>) – An optional precomputed dictionary storing covariances of Pauli operators.</p></li>
+<li><p><strong>anticommute</strong> (<em>bool</em>) – If True, applies anticommutation rules during the computation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Total computed variance, calculated as a sum of contributions from all Pauli operator groups.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.pauli_covariance">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">pauli_covariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pauli_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grp_pauli_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_buf_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/measurement_variance.html#pauli_covariance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.pauli_covariance" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the Pauli covariance matrix for a given set of Pauli operators and states.</p>
+<p>This function supports parallel computation and optionally saves covariance results to files.
+The covariance formulas depend on whether a single reference state (<cite>state2=None</cite>) or transition
+states (<cite>state2</cite> provided) are used.</p>
+<p>Covariance cases (∀P,Q ∈ pauli_list[grp_pauli_list[grp_idx]] ∀grp_idx):</p>
+<blockquote>
+<div><p>1. Single-state (<cite>state2=None</cite>; operators commute):
+Cov[P,Q] = &lt;φ1|PQ|φ1&gt; - &lt;φ1|P|φ1&gt;&lt;φ1|Q|φ1&gt;</p>
+<p>2. Transition states (<cite>state2</cite> provided):
+Cov[P,Q]_R = 1/2 (&lt;φ1|{P, Q}|φ1&gt; + &lt;φ2|{P, Q}|φ2&gt;) - Re[&lt;φ1|P|φ2&gt;] * Re[&lt;φ1|Q|φ2&gt;]
+Cov[P,Q]_I = 1/2 (&lt;φ1|{P, Q}|φ1&gt; + &lt;φ2|{P, Q}|φ2&gt;) - Im[&lt;φ1|P|φ2&gt;] * Im[&lt;φ1|Q|φ2&gt;].
+For transitional states, note that anticommute=True, the first term is ignored.</p>
+</div></blockquote>
+<p>If phase_list is given, Cov[P,Q] * exp(-1j * ph) for ph in phase_list is calculated, which is implemented to
+avoid duplicated computation for different phase values.</p>
+<p>For further details, see [ArXiv:2409.02504](https://arxiv.org/abs/2409.02504).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pauli_list</strong> (<em>List</em><em>[</em><em>QubitOperator</em><em>]</em>) – A list of Pauli operators for which covariances are calculated.</p></li>
+<li><p><strong>grp_pauli_list</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em>) – A list of groups, where each group is a list of indices referring to subsets
+of <cite>pauli_list</cite>. Each subset indicates Pauli operator groups over which covariance calculation
+should be carried out. This grouping allows efficient parallel computation or targeted subset evaluations.</p></li>
+<li><p><strong>state1</strong> (<em>State</em>) – The first reference state, provided as input.</p></li>
+<li><p><strong>state2</strong> (<em>Optional</em><em>[</em><em>State</em><em>]</em>) – The second reference state, required for calculating transition covariances.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em>) – Number of parallel workers to distribute computation.</p></li>
+<li><p><strong>anticommute</strong> (<em>bool</em>) – Enforces anticommutation rules if True.</p></li>
+<li><p><strong>cov_buf_dir</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Directory path to save intermediate covariance results as pickle files.</p></li>
+<li><p><strong>phase_list</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – List of phase values for covariance calculations.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, prints debugging information during execution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where keys are Pauli operator pairs and values are covariance coefficients.
+- PauliCovDict: For single-state covariance calculations.
+- TransitionPauliCovDict: For transition-state covariance calculations without phase shift.
+- PhasedTransitionalPauliCovDict: For phased transition-state covariance calculations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[PauliCovDict, TransitionPauliCovDict, PhasedTransitionalPauliCovDict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.empirical_pauli_covariance">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">empirical_pauli_covariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ov_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pauli_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_diag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ofex/measurement/measurement_variance.html#empirical_pauli_covariance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.empirical_pauli_covariance" title="Link to this definition">¶</a></dt>
+<dd><p>Computes empirical covariance of Pauli operators using a provided overlap dictionary.</p>
+<p>This function uses overlap dictionaries to compute diagonal and off-diagonal covariance
+terms for the specified group of Pauli operators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em>) – Numerical index identifying the operator group being processed.</p></li>
+<li><p><strong>ov_dict</strong> (<em>dict</em>) – Dictionary containing precomputed overlap values for Pauli operators.</p></li>
+<li><p><strong>cov_dict</strong> (<em>dict</em>) – Output dictionary to store the resulting covariance values.</p></li>
+<li><p><strong>grp</strong> (<em>List</em><em>[</em><em>int</em><em>]</em>) – List of indices indicating the subset of operators being processed.</p></li>
+<li><p><strong>pauli_list</strong> (<em>List</em><em>[</em><em>QubitOperator</em><em>]</em>) – List of available Pauli operators used in the computation.</p></li>
+<li><p><strong>calc_diag</strong> (<em>bool</em>) – When True, computes diagonal terms in addition to off-diagonal covariance terms.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, enables detailed logging for debugging the function’s execution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.sorted_insertion">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">sorted_insertion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/pauli_grouping.html#sorted_insertion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.sorted_insertion" title="Link to this definition">¶</a></dt>
+<dd><p>Groups terms in the given QubitOperator into measurement-compatible sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> (<em>QubitOperator</em>) – The input operator to be grouped.</p></li>
+<li><p><strong>anticommute</strong> (<em>bool</em>) – If True, grouping is done for anticommuting terms;
+otherwise, for commuting terms (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of grouped operators for efficient measurement,
+where each group corresponds to a QubitOperator.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[QubitOperator]</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/1908.06942">https://arxiv.org/abs/1908.06942</a></p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2409.02504">https://arxiv.org/abs/2409.02504</a></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.iterative_sorted_insertion">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">iterative_sorted_insertion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/pauli_grouping.html#iterative_sorted_insertion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.iterative_sorted_insertion" title="Link to this definition">¶</a></dt>
+<dd><p>Iteratively groups terms in the given QubitOperator into commuting and anticommuting sets.</p>
+<p>WARNING: This method is not recommended for use due to its ineffectiveness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>op</strong> (<em>QubitOperator</em>) – The input operator to be grouped.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing two lists:
+- The first list contains QubitOperator groups with commuting terms.
+- The second list contains QubitOperator groups with anticommuting terms.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[QubitOperator], List[QubitOperator]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.optimal_sorted_insertion">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">optimal_sorted_insertion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'even'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/pauli_grouping.html#optimal_sorted_insertion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.optimal_sorted_insertion" title="Link to this definition">¶</a></dt>
+<dd><p>Groups terms in the input QubitOperator into measurement-compatible sets
+by optimizing the norm using an iterative splitting method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> (<em>QubitOperator</em>) – The input operator to be grouped.</p></li>
+<li><p><strong>anticommute</strong> (<em>bool</em>) – If True, performs grouping based on anticommuting compatibility;
+otherwise, based on commuting compatibility.</p></li>
+<li><p><strong>init_method</strong> (<em>str</em>) – Initialization method for splitting terms into groups.
+Possible values:
+- “even”: Performs even splitting of terms into groups,
+- “si”: Uses sorted insertion for initialization.
+Default is “even”.</p></li>
+<li><p><strong>norm_atol</strong> (<em>float</em>) – The convergence tolerance for the norm difference (default: 1e-5).</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, logs debug information about the grouping process (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of grouped operators for efficient measurement,
+where each group corresponds to a QubitOperator with optimal norm distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[QubitOperator]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.pauli_split_group">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">pauli_split_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'even'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ofex/measurement/pauli_grouping.html#pauli_split_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.pauli_split_group" title="Link to this definition">¶</a></dt>
+<dd><p>Splits the given Hamiltonian into groups of Pauli operators based on
+(anti)commutation compatibility, using the specified initialization method.
+Unlike the <cite>sorted_insertion</cite> methods, this method allows a single Pauli
+operator to be partitioned across multiple groups, depending on (anti)commutation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ham</strong> (<em>QubitOperator</em>) – The input Hamiltonian to be split into Pauli operator groups.</p></li>
+<li><p><strong>anticommute</strong> (<em>bool</em>) – Specifies the grouping criterion. If True, groups Pauli
+operators based on anticommutation; if False, groups them
+based on commutation (default: False).</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The initialization method for distributing terms among groups:
+- “even”: Distributes terms evenly across different groups.
+- “si”: Initializes groups using a sorted insertion method.
+The default value is “even.”</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, prints detailed debug information about the execution
+process (default: False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>The first element is a list of the grouped Hamiltonian fragments.</p></li>
+<li><p>The second element is a tuple containing:
+- pauli_list: List of all Pauli operators from the Hamiltonian.
+- grp_pauli_list: List of Pauli operators in each group.
+- pauli_grp_list: List mapping Pauli operators to their respective group indices.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[QubitOperator], Tuple[List[QubitOperator], List[List[int]], List[List[int]]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="module-ofex.measurement.iterative_coefficient_splitting">
+<span id="ofex-measurement-iterative-coefficient-splitting"></span><h2>ofex.measurement.iterative_coefficient_splitting<a class="headerlink" href="#module-ofex.measurement.iterative_coefficient_splitting" title="Link to this heading">¶</a></h2>
+<p>This module provides the main interface for initializing and running ICS (Iterative Coefficient Splitting) processes.</p>
+<p>The module includes:
+- Initialization processes for both standard and efficient ICS implementations.
+- Functions to run standard and efficient ICS.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.iterative_coefficient_splitting.init_ics">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.iterative_coefficient_splitting.</span></span><span class="sig-name descname"><span class="pre">init_ics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'even'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_buf_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ofex/measurement/iterative_coefficient_splitting/ics_prepare.html#init_ics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.iterative_coefficient_splitting.init_ics" title="Link to this definition">¶</a></dt>
+<dd><p>Produce initial coefficient splitting and covariance matrices for Iterative Coefficient Splitting (ICS).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ham</strong> (<em>QubitOperator</em>) – The Hamiltonian operator with zero constant term.</p></li>
+<li><p><strong>ref1</strong> (<em>State</em>) – The reference quantum state for covariance computation.</p></li>
+<li><p><strong>ref2</strong> (<em>Optional</em><em>[</em><em>State</em><em>]</em>) – An optional second reference state for covariance computation.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of worker processes for parallel computation. Defaults to 1.</p></li>
+<li><p><strong>anticommute</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, enables anti-commutation partitioning. Defaults to False.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Method for initial coefficient assignment. Options are “even” or “si”. Defaults to “even”.</p></li>
+<li><p><strong>cov_buf_dir</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Directory to store or load pre-computed covariance matrices. Defaults to None.</p></li>
+<li><p><strong>phase_list</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – List of phase factors for the states. Defaults to None.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, enables debug information during execution. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>initial_grp (tuple): Initial grouping of the Hamiltonian into compatible groups:</dt><dd><ul>
+<li><p>pauli_list: List of all Pauli operators from the Hamiltonian.</p></li>
+<li><p>grp_pauli_list: List of Pauli operators in each group.</p></li>
+<li><p>pauli_grp_list: List mapping Pauli operators to their respective group indices.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>cov_dict (dict): Covariance matrix data for Pauli operators.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the Hamiltonian operator has a non-zero constant term or if the checksum validation fails.</p></li>
+<li><p><strong>AssertionError</strong> – If cov_buf_dir is not valid.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.iterative_coefficient_splitting.run_ics">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.iterative_coefficient_splitting.</span></span><span class="sig-name descname"><span class="pre">run_ics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_grp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep_reim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv_atol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv_rtol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lstsq_rcond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/iterative_coefficient_splitting/ics.html#run_ics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.iterative_coefficient_splitting.run_ics" title="Link to this definition">¶</a></dt>
+<dd><p>Runs the Iterative Coefficient Splitting (ICS) optimization algorithm for Hamiltonian decomposition.</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/2201.01471">https://arxiv.org/abs/2201.01471</a></p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2409.02504">https://arxiv.org/abs/2409.02504</a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ham</strong> (<em>QubitOperator</em>) – Initial Hamiltonian that needs to be decomposed.</p></li>
+<li><p><strong>initial_grp</strong> (<em>Tuple</em><em>[</em><em>List</em><em>[</em><em>QubitOperator</em><em>]</em><em>, </em><em>List</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>, </em><em>List</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em>) – Initial grouping of the Hamiltonian into compatible groups:
+- pauli_list: List of all Pauli operators from the Hamiltonian.
+- grp_pauli_list: List of Pauli operators in each group.
+- pauli_grp_list: List mapping Pauli operators to their respective group indices.
+Those are the output of ofex.measurement.iterative_coefficient_splitting.init_ics</p></li>
+<li><p><strong>cov_dict</strong> (<em>Union</em><em>[</em><em>PauliCovDict</em><em>, </em><em>TransitionPauliCovDict</em><em>]</em>) – A dictionary of covariances. The keys are tuples of Pauli strings, and the values are either real parts
+or a combination of real and imaginary parts (for <cite>transition=True</cite>).</p></li>
+<li><p><strong>transition</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, calculates transition amplitudes (applies when <cite>ref1</cite> and
+<cite>ref2</cite> are different states).</p></li>
+<li><p><strong>sep_reim</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, separates the real and imaginary covariance elements. Valid only with
+<cite>transition=True</cite>.</p></li>
+<li><p><strong>conv_atol</strong> (<em>float</em><em>, </em><em>optional</em>) – Absolute tolerance for convergence. Default is 1e-6.</p></li>
+<li><p><strong>conv_rtol</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Relative tolerance for convergence (default: 1e-4). If None, only absolute
+tolerance will be used.</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of iterations allowed for the ICS optimization loop. Default is 10,000.</p></li>
+<li><p><strong>lstsq_rcond</strong> (<em>float</em><em>, </em><em>optional</em>) – Cut-off value for singular values in least-squares optimization. Default: 1e-6.</p></li>
+<li><p><strong>initial_c</strong> (<em>Optional</em><em>[</em><em>np.ndarray</em><em>]</em><em>, </em><em>optional</em>) – Initial coefficients for optimization. If None, automatically populated.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, prints debugging information to the console.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>List[QubitOperator]: Grouped Hamiltonians obtained from the optimization process.</p></li>
+<li><p>np.ndarray: If <cite>transition</cite> is <cite>True</cite>, a 2D array with shape <cite>(2, n_frag)</cite> containing shot allocations
+for the real and imaginary parts. If <cite>transition</cite> is <cite>False</cite>, a 1D array with shot allocations for
+the real part only.</p></li>
+<li><p>float: Final optimal measurement variance achieved.</p></li>
+<li><p>Optional[np.ndarray]: Optimized coefficients for the group Hamiltonians.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.iterative_coefficient_splitting.init_efficient_ics">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.iterative_coefficient_splitting.</span></span><span class="sig-name descname"><span class="pre">init_efficient_ics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'even'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ofex/measurement/iterative_coefficient_splitting/ics_prepare.html#init_efficient_ics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.iterative_coefficient_splitting.init_efficient_ics" title="Link to this definition">¶</a></dt>
+<dd><p>Produce initial coefficient splitting for efficient_ics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ham</strong> (<em>QubitOperator</em>) – The Hamiltonian operator to partition.</p></li>
+<li><p><strong>anticommute</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, utilizes anti-commutation partitioning. Defaults to False.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Method used for initial coefficient assignment. Options include “even”. Defaults to “even”.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, enables debug information during execution. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of groups containing Pauli operators in each group.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>grp_pauli_list (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.iterative_coefficient_splitting.run_efficient_ics">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.iterative_coefficient_splitting.</span></span><span class="sig-name descname"><span class="pre">run_efficient_ics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_grp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv_th</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checksum_atol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/iterative_coefficient_splitting/efficient_ics.html#run_efficient_ics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.iterative_coefficient_splitting.run_efficient_ics" title="Link to this definition">¶</a></dt>
+<dd><p>Compute an efficient Iterative Coefficient Splitting (ICS) by optimizing the norm.</p>
+<p>This function partitions Pauli operators into compatible groups while optimizing the two-norm
+of resulting group operators. It performs iterative coefficient reallocation to minimize the
+discrepancy between the input Hamiltonian and the resulting grouped operators. Unlike the
+standard ICS method, which relies on the covariance of Pauli operators with assumed states,
+this method skips covariance computation entirely, making it faster but not necessarily more
+accurate than the standard ICS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ham</strong> (<em>QubitOperator</em>) – The input Hamiltonian represented as a QubitOperator.
+A constant term in the Hamiltonian is not allowed.</p></li>
+<li><p><strong>initial_grp</strong> (<em>Tuple</em><em>[</em><em>List</em><em>[</em><em>QubitOperator</em><em>]</em><em>, </em><em>List</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>, </em><em>List</em><em>[</em><em>List</em><em>[</em><em>int</em><em>]</em><em>]</em><em>]</em>) – Initial grouping of the Hamiltonian into compatible groups:
+- pauli_list: List of all Pauli operators from the Hamiltonian.
+- grp_pauli_list: List of Pauli operators in each group.
+- pauli_grp_list: List mapping Pauli operators to their respective group indices.
+Those are the output of ofex.measurement.iterative_coefficient_splitting.init_efficient_ics</p></li>
+<li><p><strong>conv_th</strong> (<em>float</em>) – Convergence threshold for coefficient optimization. Default is 1e-6.</p></li>
+<li><p><strong>checksum_atol</strong> (<em>float</em>) – Tolerance for checksum verifications. Default is 1e-6.</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em>) – Maximum number of iterations for convergence. Default is 10000.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>A list of grouped QubitOperators (operators with reallocated coefficients).</p></li>
+<li><p>The total two-norm of the grouped operators.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[QubitOperator], float]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the Hamiltonian contains a non-zero constant term.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ofex.measurement.types">
+<span id="ofex-measurement-types"></span><h2>ofex.measurement.types<a class="headerlink" href="#module-ofex.measurement.types" title="Link to this heading">¶</a></h2>
+<p>This module defines type aliases for various dictionaries related to Pauli operators covariance calculations.
+For detailed information about these types and their usage, please refer to <cite>ofex.measurement.pauli_covariance</cite> method.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ofex.operators.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">ofex.operators</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="ofex.linalg.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">ofex.linalg</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Gwonhak Lee
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ofex.measurement</a><ul>
+<li><a class="reference internal" href="#ofex.measurement.killer_shift_opt_fermion_hf"><code class="docutils literal notranslate"><span class="pre">killer_shift_opt_fermion_hf()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.fragment_variance"><code class="docutils literal notranslate"><span class="pre">fragment_variance()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.pauli_covariance"><code class="docutils literal notranslate"><span class="pre">pauli_covariance()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.empirical_pauli_covariance"><code class="docutils literal notranslate"><span class="pre">empirical_pauli_covariance()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.sorted_insertion"><code class="docutils literal notranslate"><span class="pre">sorted_insertion()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.iterative_sorted_insertion"><code class="docutils literal notranslate"><span class="pre">iterative_sorted_insertion()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.optimal_sorted_insertion"><code class="docutils literal notranslate"><span class="pre">optimal_sorted_insertion()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.pauli_split_group"><code class="docutils literal notranslate"><span class="pre">pauli_split_group()</span></code></a></li>
+<li><a class="reference internal" href="#module-ofex.measurement.iterative_coefficient_splitting">ofex.measurement.iterative_coefficient_splitting</a><ul>
+<li><a class="reference internal" href="#ofex.measurement.iterative_coefficient_splitting.init_ics"><code class="docutils literal notranslate"><span class="pre">init_ics()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.iterative_coefficient_splitting.run_ics"><code class="docutils literal notranslate"><span class="pre">run_ics()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.iterative_coefficient_splitting.init_efficient_ics"><code class="docutils literal notranslate"><span class="pre">init_efficient_ics()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.iterative_coefficient_splitting.run_efficient_ics"><code class="docutils literal notranslate"><span class="pre">run_efficient_ics()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-ofex.measurement.types">ofex.measurement.types</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

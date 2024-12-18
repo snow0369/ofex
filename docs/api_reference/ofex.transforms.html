@@ -1,0 +1,929 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="ofex.utils" href="ofex.utils.html" /><link rel="prev" title="ofex.state" href="ofex.state.html" />
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>ofex.transforms - ofex 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">ofex 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">ofex 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">ofex</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ofex</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="ofex.html">ofex package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ofex package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ofex.clifford.html">ofex.clifford</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.hamiltonian.html">ofex.hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.linalg.html">ofex.linalg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.measurement.html">ofex.measurement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.operators.html">ofex.operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.propagator.html">ofex.propagator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.sampling_simulation.html">ofex.sampling_simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.state.html">ofex.state</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">ofex.transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.utils.html">ofex.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/ofex.transforms.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-ofex.transforms">
+<span id="ofex-transforms"></span><h1>ofex.transforms<a class="headerlink" href="#module-ofex.transforms" title="Link to this heading">¶</a></h1>
+<p>This module provides functions and utilities for transforming and working
+with fermions and qubits.</p>
+<p>It includes:</p>
+<ul class="simple">
+<li><p>Conversions between fermion and qubit states/operators.</p></li>
+<li><p>Majorana to fermion conversion.</p></li>
+<li><p>Fermion rotation operations.</p></li>
+<li><p>Factorization-related tools for fermions.</p></li>
+</ul>
+<p>Modules:</p>
+<ul class="simple">
+<li><p><strong>fermion_qubit</strong>: Functions for fermion ↔ qubit state/operator conversions.</p></li>
+<li><p><strong>fermion_rotation</strong>: Functions for handling fermion rotations.</p></li>
+<li><p><strong>majorana_fermion</strong>: Tools for converting Majorana fermions to regular fermions.</p></li>
+<li><p><strong>fermion_factorization</strong>: Additional utilities related to fermion factorization.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_to_qubit_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">fermion_to_qubit_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fermion_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_qubit.html#fermion_to_qubit_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_to_qubit_state" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a fermionic state to a qubit state using a specified transformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fermion_state</strong> (<em>State</em>) – The input state in the fermionic basis to be transformed.</p></li>
+<li><p><strong>transform</strong> (<em>str</em>) – The transformation method to be applied. Supported options:
+“jordan_wigner”, “bravyi_kitaev”, “bravyi_kitaev_tree”,
+“symmetry_conserving_bravyi_kitaev”.</p></li>
+<li><p><strong>kwargs</strong> – Additional arguments required for specific transformations, such as:
+- “active_orbitals” (int): For symmetry-conserving transformations. If not provided, the number
+of full orbitals is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed state in the qubit representation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>State</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_to_qubit_operator">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">fermion_to_qubit_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fermion_op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FermionOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QubitOperator</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_qubit.html#fermion_to_qubit_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_to_qubit_operator" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a FermionOperator to a QubitOperator using a specified transformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fermion_op</strong> (<em>FermionOperator</em>) – The input operator in the fermionic basis to be transformed.</p></li>
+<li><p><strong>transform</strong> (<em>str</em>) – The transformation method to be applied. Supported options:
+“jordan_wigner”, “bravyi_kitaev”, “bravyi_kitaev_tree”,
+“binary_code_transform”, “symmetry_conserving_bravyi_kitaev”.</p></li>
+<li><p><strong>kwargs</strong> – <p>Additional arguments required for some transformations, such as:</p>
+<ul>
+<li><p>”n_qubits” (int): Number of qubits for transformations “bravyi_kitaev” and “bravyi_kitaev_tree”.</p></li>
+<li><p>”code” (BinaryCode): The binary code for “binary_code_transform”.</p></li>
+<li><p>”active_fermions” (int) and “active_orbitals” (int): For “symmetry_conserving_bravyi_kitaev”.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed operator in the qubit representation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>QubitOperator</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided transform method is not supported.
+    If required arguments in kwargs are missing for certain transformations.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_to_qubit_state_general">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">fermion_to_qubit_state_general</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_qubit.html#fermion_to_qubit_state_general"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_to_qubit_state_general" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a general fermionic state to a qubit state using the specified transformation.
+Because this function transforms the creation operator to qubit form and multiplies it by the state,
+it is computationally expensive.
+This function is not recommended for large systems; and used for debugging and other transform
+not specified in the fermion_to_qubit_state function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>SparseStateDict</em>) – The input state in the fermionic basis to be transformed.</p></li>
+<li><p><strong>transform</strong> (<em>str</em>) – The transformation to apply. Supported options include
+“jordan_wigner”, “bravyi_kitaev”, “bravyi_kitaev_tree”,
+and others. The “symmetry_conserving_bravyi_kitaev”
+transformation is not implemented.</p></li>
+<li><p><strong>kwargs</strong> – Additional arguments required for some transformations, such as:
+- “n_qubits” (int): Number of qubits for transformations “bravyi_kitaev” and “bravyi_kitaev_tree”.
+- “code” (BinaryCode): The binary code for “binary_code_transform”.
+- “active_fermions” (int) and “active_orbitals” (int): For “symmetry_conserving_bravyi_kitaev”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed state in the qubit basis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SparseStateDict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – If the “symmetry_conserving_bravyi_kitaev” transformation is requested.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.qubit_to_fermion_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">qubit_to_fermion_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_qubit.html#qubit_to_fermion_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.qubit_to_fermion_state" title="Link to this definition">¶</a></dt>
+<dd><p>Convert a qubit state to a fermionic state using a specified transformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubit_state</strong> (<em>State</em>) – Input state in the qubit basis to be transformed.</p></li>
+<li><p><strong>transform</strong> (<em>str</em>) – The transformation method to apply. Supported options:
+“jordan_wigner”, “bravyi_kitaev”, “bravyi_kitaev_tree”,
+“symmetry_conserving_bravyi_kitaev”.</p></li>
+<li><p><strong>kwargs</strong> – <p>Additional arguments required for some transformations, such as:</p>
+<ul>
+<li><p>”active_fermions” (int): Number of active fermions for the symmetry-conserving transformation.</p></li>
+<li><dl class="simple">
+<dt>”active_orbitals” (int): For symmetry-conserving transformations. If not provided, the number</dt><dd><p>of full orbitals is used.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformed fermionic state in sparse or dense form.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[DenseState, SparseStateDict]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If required arguments for specific transformations are missing.</p></li>
+<li><p><strong>NotImplementedError</strong> – For unspecified transformation methods.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_rotation_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">fermion_rotation_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_rotation.html#fermion_rotation_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_rotation_state" title="Link to this definition">¶</a></dt>
+<dd><p>Transforms a Fermionic state represented in the Fock basis using
+an orbital mixing matrix.</p>
+<p>This function applies a rotation on the input state according to the
+orbital mixing matrix <cite>v_mat</cite>. If <cite>spatial_v</cite> is set to True, the mixing
+matrix is expanded to include spin-orbital interactions.</p>
+<p>The function maintains type consistency by converting the final state back
+to its original representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>State</em>) – The input quantum state in Fock representation.</p></li>
+<li><p><strong>v_mat</strong> (<em>np.ndarray</em>) – The orbital mixing matrix. Each element represents the transformation
+coefficients between orbitals.</p></li>
+<li><p><strong>spatial_v</strong> (<em>bool</em>) – Whether v_mat is in spatial orbital. If True, considers spin-orbital
+mixing by applying the Kronecker product of v_mat with the identity matrix for spin
+states. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rotated quantum state in its original representation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>State</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_rotation_operator">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">fermion_rotation_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FermionOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FermionOperator</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_rotation.html#fermion_rotation_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_rotation_operator" title="Link to this definition">¶</a></dt>
+<dd><p>Transforms the FermionOperator using an orbital mixing matrix.</p>
+<p>This function takes a FermionOperator and applies a transformation based on the provided
+orbital mixing matrix (v_mat). The matrix may optionally account for spin-orbital mixing
+when spatial_v is set to True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fop</strong> (<em>FermionOperator</em>) – The original FermionOperator.</p></li>
+<li><p><strong>v_mat</strong> (<em>np.ndarray</em>) – The orbital mixing matrix. Each element represents the transformation
+coefficients between orbitals.</p></li>
+<li><p><strong>spatial_v</strong> (<em>bool</em>) – Whether v_mat is in spatial orbital. If True, considers spin-orbital
+mixing by applying the Kronecker product of v_mat with the identity matrix for spin
+states. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new FermionOperator representing the transformed Hamiltonian after
+applying the orbital mixing defined by v_mat.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FermionOperator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="module-ofex.transforms.fermion_factorization">
+<span id="ofex-transforms-fermion-factorization"></span><h2>ofex.transforms.fermion_factorization<a class="headerlink" href="#module-ofex.transforms.fermion_factorization" title="Link to this heading">¶</a></h2>
+<p>This module provides functions and tools for manipulating and factorizing fermionic Hamiltonians.</p>
+<p>The module contains utilities to convert fermion Hamiltonians into various representations,
+perform double factorization of electron integrals, and handle reflection or number operator
+transformations. It also includes helper functions for one-body and two-body terms, eigenvalue
+decomposition of tensors, and verification of results.</p>
+<p>Core functionalities include:
+1. Hamiltonian conversion to/from electron integral tensors in spatial and spin orbital formats.
+2. Double factorization of electron integrals with optional reflection operators.
+3. Construction of Hamiltonians from factorized forms.
+4. Calculation of norms for reflection-based factorizations.</p>
+<p>Common operations performed by the module involve manipulating electron integrals, normal-ordering
+fermion operators, and expressing Hamiltonians in highly factorized forms.</p>
+<p>Available functions:
+- ham_to_ei_spatial, ei_to_ham_spatial
+- ham_to_ei_spin, ei_to_ham_spin
+- double_factorization
+- number_factorization_to_reflection
+- double_factorization_to_hamiltonian
+- calculate_reflect_norm</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.ham_to_ei_spatial">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">ham_to_ei_spatial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FermionOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_spinorb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#ham_to_ei_spatial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.ham_to_ei_spatial" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a Fermion Hamiltonian into spatial one-body and two-body electron integral tensors.</p>
+<p>This function processes the input Fermion Hamiltonian into spatial orbital tensors, separating the one-body
+and two-body electronic integrals as well as the constant energy contribution. It ensures normal ordering
+of the Hamiltonian terms and constructs the corresponding tensors for spatial orbitals.</p>
+<dl>
+<dt>Notation:</dt><dd><p>E_{pq} = a†_{p↑}a_{q↑} + a†_{p↓}a_{q↓}</p>
+<dl class="simple">
+<dt>H = ∑_{pq} oei[p,q] E_{pq}</dt><dd><ul class="simple">
+<li><p>(1/2) ∑_{pqrs} tei[p,q,r,s] E_{pq} * E_{rs}</p></li>
+<li><p>const</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fham</strong> (<em>FermionOperator</em>) – The input Fermion Hamiltonian.</p></li>
+<li><p><strong>n_spinorb</strong> (<em>int</em>) – The total number of spin orbitals (must be an even number).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>spatial_oei (ndarray): A 2D tensor with one-body electron integrals for spatial orbitals.</p></li>
+<li><p>spatial_tei (ndarray): A 4D tensor with two-body electron integrals for spatial orbitals.</p></li>
+<li><p>const (float): The constant term in the Hamiltonian.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[np.ndarray, np.ndarray, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.ei_to_ham_spatial">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">ei_to_ham_spatial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spatial_oei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_tei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FermionOperator</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#ei_to_ham_spatial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.ei_to_ham_spatial" title="Link to this definition">¶</a></dt>
+<dd><p>Constructs a Fermion Hamiltonian from the spatial one-body and two-body electron integral tensors.
+(Inverse function of ham_to_ei_spatial)</p>
+<p>This method uses the provided one-body and two-body integral tensors, as well as a constant term, to
+construct a normalized Fermion Hamiltonian.</p>
+<dl>
+<dt>Notation:</dt><dd><p>E_{pq} = a†_{p↑}a_{q↑} + a†_{p↓}a_{q↓}</p>
+<dl class="simple">
+<dt>H = ∑_{p,q} oei[p, q] E_{pq}</dt><dd><ul class="simple">
+<li><p>1/2 ∑_{pqrs} tei[p, q, r, s] E_{pq} * E_{rs}</p></li>
+<li><p>const</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spatial_oei</strong> (<em>np.ndarray</em>) – A 2D array containing the spatial one-body electron integrals.</p></li>
+<li><p><strong>spatial_tei</strong> (<em>np.ndarray</em>) – A 4D array containing the spatial two-body electron integrals.</p></li>
+<li><p><strong>const</strong> (<em>float</em>) – A constant energy term to include in the Hamiltonian.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting Fermion Hamiltonian.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FermionOperator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.ham_to_ei_spin">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">ham_to_ei_spin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FermionOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_spinorb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#ham_to_ei_spin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.ham_to_ei_spin" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a Fermion Hamiltonian into spin one-body and two-body electron integral tensors.</p>
+<p>This function separates the provided Fermion Hamiltonian into spin orbital tensors, which include
+one-body and two-body electron integrals as well as a constant energy term. The method ensures
+normal ordering of the Hamiltonian terms and calculates the appropriate tensors for spin orbitals.</p>
+<dl>
+<dt>Mathematical Notation:</dt><dd><p>E_{pq} = a†_{p}a_{q}</p>
+<dl class="simple">
+<dt>H = ∑_{p,q} oei[p, q] * E_{pq}</dt><dd><ul class="simple">
+<li><p>(1/2) ∑_{p,q,r,s} tei[p, q, r, s] * E_{pq} * E_{rs}</p></li>
+<li><p>const</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fham</strong> (<em>FermionOperator</em>) – The input Fermion Hamiltonian in normal order.</p></li>
+<li><p><strong>n_spinorb</strong> (<em>int</em>) – The total number of spin orbitals.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing:</dt><dd><ul class="simple">
+<li><p>spin_oei (np.ndarray): A 2D array (n_spinorb x n_spinorb) representing spin one-body electron integrals.</p></li>
+<li><dl class="simple">
+<dt>spin_tei (np.ndarray): A 4D array (n_spinorb x n_spinorb x n_spinorb x n_spinorb)</dt><dd><p>representing spin two-body electron integrals.</p>
+</dd>
+</dl>
+</li>
+<li><p>const (float): The constant energy term in the Hamiltonian.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[np.ndarray, np.ndarray, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.ei_to_ham_spin">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">ei_to_ham_spin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin_oei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_tei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FermionOperator</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#ei_to_ham_spin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.ei_to_ham_spin" title="Link to this definition">¶</a></dt>
+<dd><p>Constructs a Fermion Hamiltonian from the spin one-body and two-body electron integral tensors.
+(Inverse function of ham_to_ei_spin)</p>
+<p>This function takes one-body and two-body spin integral tensors, along with a constant term, and converts
+them back into a FermionOperator representation of the Hamiltonian. The result includes creation and
+annihilation operators for spin orbitals.</p>
+<dl>
+<dt>Notation:</dt><dd><p>E_{pq} = a†_{p}a_{q}</p>
+<dl class="simple">
+<dt>H = ∑_{p,q} oei[p, q] E_{pq}</dt><dd><ul class="simple">
+<li><p>(1/2) ∑_{p,q,r,s} tei[p, q, r, s] * E_{pq} * E_{rs}</p></li>
+<li><p>const</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spin_oei</strong> (<em>np.ndarray</em>) – A 2D array (n_spinorb x n_spinorb) representing spin one-body electron integrals.</p></li>
+<li><p><strong>spin_tei</strong> (<em>np.ndarray</em>) – A 4D array (n_spinorb x n_spinorb x n_spinorb x n_spinorb)
+representing spin two-body electron integrals.</p></li>
+<li><p><strong>const</strong> (<em>float</em>) – The constant energy term in the Hamiltonian.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The resulting Fermion Hamiltonian.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FermionOperator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.double_factorization">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">double_factorization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tei</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reflection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#double_factorization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.double_factorization" title="Link to this definition">¶</a></dt>
+<dd><p>Perform double factorization of a Fermionic Hamiltonian using one-body and two-body spatial/spin electron
+integral tensors.</p>
+<p>This method factorizes a Fermionic Hamiltonian, represented by the one-body (oei) and two-body (tei)
+electron integrals, into a sequence of matrices (h_list) and unitary operators (u_list). The factorization
+can be performed with either number operators or reflection operators, based on the optional argument
+<cite>reflection</cite>.</p>
+<dl>
+<dt>Notation:</dt><dd><ul class="simple">
+<li><p>n_p = n_{p↑} + n_{p↓} (number operator)</p></li>
+<li><p>r_{p↑} = 2n_{p↑} - 1, r_{p↓} = 2n_{p↓} - 1 (reflection operators)</p></li>
+<li><p>r_p = r_{p↑} + r_{p↓}</p></li>
+</ul>
+</dd>
+<dt>Double-Factorized Hamiltonian (H):</dt><dd><ol class="arabic simple">
+<li><dl class="simple">
+<dt>If reflection=False:</dt><dd><dl class="simple">
+<dt>H = u0 (∑_{p} h[0][p] n_p) u0†</dt><dd><ul class="simple">
+<li><p>1/2 ∑_{m &gt;= 1} um (∑_{pq} h[m][p,q] n_p n_q) um†</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>If reflection=True:</dt><dd><dl class="simple">
+<dt>H = u0 (∑_{p} h[0][p] r_p) u0†</dt><dd><ul class="simple">
+<li><p>1/2 ∑_{m &gt;= 1} um (∑_{pq} h[m][p,q] r_p r_q) um† + const</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ol>
+<p>Here, um represents a unitary rotation operator corresponding to spatial/spin orbital transformations.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>oei</strong> (<em>np.ndarray</em>) – 2D tensor of one-body electron integrals (dimension: n_orb x n_orb) in spin or spatial
+orbitals.</p></li>
+<li><p><strong>tei</strong> (<em>np.ndarray</em>) – 4D tensor of two-body electron integrals (dimension: n_orb x n_orb x n_orb x n_orb) in
+spin or spatial orbitals.</p></li>
+<li><p><strong>reflection</strong> (<em>bool</em>) – If True, factorizes in terms of reflection operators; defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>h_list: List of coefficient matrices; h_list[0] is a 1D array (one-body coefficients),
+while h_list[m &gt; 0] are 2D arrays (two-body coefficients).</p></li>
+<li><p>u_list: List of unitary rotation matrices corresponding to orbital rotations.</p></li>
+<li><p>const: Scalar constant representing the remaining contribution, which is zero if reflection=False.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[np.ndarray], List[np.ndarray], float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.number_factorization_to_reflection">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">number_factorization_to_reflection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_spin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#number_factorization_to_reflection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.number_factorization_to_reflection" title="Link to this definition">¶</a></dt>
+<dd><p>Transforms the factorization with number operators into that of reflection operators.</p>
+<dl>
+<dt>Notation:</dt><dd><ul class="simple">
+<li><p>n_p = n_{p↑} + n_{p↓} (number operator for spatial orbitals)</p></li>
+<li><p>r_{p↑} = 2n_{p↑} - 1, r_{p↓} = 2n_{p↓} - 1 (reflection operators for spin orbitals)</p></li>
+<li><p>r_p = r_{p↑} + r_{p↓} (reflection operator for spatial orbitals)</p></li>
+</ul>
+</dd>
+<dt>Transformation:</dt><dd><p>Given a factorization with number operators:
+H = u0 (∑_{p} h[0][p] n_p) u0† + ∑_{m≥1} um (∑_{pq} h[m][p,q] n_p n_q) um†,</p>
+<p>this function transforms h and u such that the resulting Hamiltonian uses
+reflection operators:
+H = u0 (∑_{p} h’[0][p] r_p) u0† + ∑_{m≥1} u’m (∑_{pq} h’[m][p,q] r_p r_q) u’m† + const.</p>
+</dd>
+</dl>
+<p>Similar transformations apply when the inputs are specified in terms of spin orbital operators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h_list</strong> (<em>List</em><em>[</em><em>np.ndarray</em><em>]</em>) – A list of coefficient matrices for the input Hamiltonian in
+the number operator form. The first element is a 1D array
+representing the one-body coefficients, and subsequent elements
+are 2D arrays representing two-body coefficients.</p></li>
+<li><p><strong>u_list</strong> (<em>List</em><em>[</em><em>np.ndarray</em><em>]</em>) – A list of unitary rotation matrices corresponding to orbital
+transformations, where each matrix has dimensions n_orb x n_orb.</p></li>
+<li><p><strong>is_spin</strong> (<em>bool</em>) – Indicates if the inputs (h_list, u_list) correspond to spin orbital operators.
+- True: Spin orbital operators.
+- False: Spatial orbital operators.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><dl class="simple">
+<dt>ref_h_list (List[np.ndarray]): The transformed coefficient matrices for the Hamiltonian</dt><dd><p>in the reflection operator form.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ref_u_list (List[np.ndarray]): The list of rotation unitary matrices corresponding to</dt><dd><p>the reflection operator representation.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>const (float): The constant energy term arising during the transformation, equivalent</dt><dd><p>to the trace of the original one-body coefficient matrix. This term
+ensures energy conservation.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[np.ndarray], List[np.ndarray], float]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the resulting constant term is not a real number.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.double_factorization_to_hamiltonian">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">double_factorization_to_hamiltonian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_spin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_reflection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FermionOperator</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#double_factorization_to_hamiltonian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.double_factorization_to_hamiltonian" title="Link to this definition">¶</a></dt>
+<dd><p>Transform lists of coefficient matrices (h_list) and unitary operators (u_list) into a single
+FermionOperator Hamiltonian.</p>
+<p>This method reconstructs a Hamiltonian from its factorized representation, using the provided
+coefficient matrices and orbital rotation matrices. Depending on the input parameters, it supports
+both spin and spatial orbital representations, as well as reflection-based operators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h_list</strong> (<em>List</em><em>[</em><em>np.ndarray</em><em>]</em>) – A list of coefficient matrices for the factorized Hamiltonian.
+- h_list[0] is a 1D array for one-body coefficients.
+- h_list[m &gt; 0] are 2D arrays for two-body coefficients.</p></li>
+<li><p><strong>u_list</strong> (<em>List</em><em>[</em><em>np.ndarray</em><em>]</em>) – A list of unitary matrices corresponding to orbital rotations.
+Each matrix should have dimensions n_orb x n_orb.</p></li>
+<li><p><strong>is_spin</strong> (<em>bool</em>) – Indicates whether the coefficient matrices and unitaries are in terms of spin orbitals.
+- True: Spin orbital representation.
+- False: Spatial orbital representation.</p></li>
+<li><p><strong>is_reflection</strong> (<em>bool</em>) – Specifies whether the coefficient matrices correspond to reflection operators.
+- True: Use reflection operators.
+- False: Use number operators.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A FermionOperator representing the reconstructed Hamiltonian.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FermionOperator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.fermion_factorization.calculate_reflect_norm">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.fermion_factorization.</span></span><span class="sig-name descname"><span class="pre">calculate_reflect_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_h_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frag_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/ofex/transforms/fermion_factorization.html#calculate_reflect_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.fermion_factorization.calculate_reflect_norm" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the norm of a factorized Hamiltonian represented in the reflection operator form.</p>
+<p>This method computes the norm for a Hamiltonian decomposed into reflection operators, based on the
+specified fragment type (“LCU” or “FH”). The norm is calculated based on either the L1 or L2 norm,
+depending on the fragment type because the terms are individually counted in LCU while they are grouped
+in FH type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_h_list</strong> (<em>List</em><em>[</em><em>np.ndarray</em><em>]</em>) – A list of coefficient matrices for the factorized Hamiltonian in
+reflection operator form. The first element corresponds to the
+one-body coefficients, while subsequent elements are two-body
+coefficient matrices.</p></li>
+<li><p><strong>frag_type</strong> (<em>str</em>) – The type of fragment used in the factorization.
+- “LCU”: Use the L1 norm for the norm calculation.
+- “FH”: Use the L2 norm for the norm calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed norm of the Hamiltonian based on the given fragment type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided <cite>frag_type</cite> is not “LCU” or “FH”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ofex.utils.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">ofex.utils</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="ofex.state.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">ofex.state</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Gwonhak Lee
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ofex.transforms</a><ul>
+<li><a class="reference internal" href="#ofex.transforms.fermion_to_qubit_state"><code class="docutils literal notranslate"><span class="pre">fermion_to_qubit_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_to_qubit_operator"><code class="docutils literal notranslate"><span class="pre">fermion_to_qubit_operator()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_to_qubit_state_general"><code class="docutils literal notranslate"><span class="pre">fermion_to_qubit_state_general()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.qubit_to_fermion_state"><code class="docutils literal notranslate"><span class="pre">qubit_to_fermion_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_rotation_state"><code class="docutils literal notranslate"><span class="pre">fermion_rotation_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_rotation_operator"><code class="docutils literal notranslate"><span class="pre">fermion_rotation_operator()</span></code></a></li>
+<li><a class="reference internal" href="#module-ofex.transforms.fermion_factorization">ofex.transforms.fermion_factorization</a><ul>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.ham_to_ei_spatial"><code class="docutils literal notranslate"><span class="pre">ham_to_ei_spatial()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.ei_to_ham_spatial"><code class="docutils literal notranslate"><span class="pre">ei_to_ham_spatial()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.ham_to_ei_spin"><code class="docutils literal notranslate"><span class="pre">ham_to_ei_spin()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.ei_to_ham_spin"><code class="docutils literal notranslate"><span class="pre">ei_to_ham_spin()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.double_factorization"><code class="docutils literal notranslate"><span class="pre">double_factorization()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.number_factorization_to_reflection"><code class="docutils literal notranslate"><span class="pre">number_factorization_to_reflection()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.double_factorization_to_hamiltonian"><code class="docutils literal notranslate"><span class="pre">double_factorization_to_hamiltonian()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.fermion_factorization.calculate_reflect_norm"><code class="docutils literal notranslate"><span class="pre">calculate_reflect_norm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

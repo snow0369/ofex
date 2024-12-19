@@ -74,7 +74,7 @@ def fragment_variance(grp_ham: List[QubitOperator],
             Array defining measurement shot counts:
 
             - If 1D (shape ``[n]``): Represents real shot counts ``m_{R,j}``; applicable for single-state variance.
-            - If 2D (shape ``[n, 2]``): Represents real ``m_{R,j}`` and imaginary ``m_{I,j}`` shot counts; used for
+            - If 2D (shape ``[2, n]``): Represents real ``m_{R,j}`` and imaginary ``m_{I,j}`` shot counts; used for
               transition-state variance.
 
         true_cov_dict (Optional[Union[PauliCovDict, TransitionPauliCovDict]]):
@@ -88,8 +88,8 @@ def fragment_variance(grp_ham: List[QubitOperator],
             Total computed variance, calculated as a sum of contributions from all Pauli operator groups.
     """
     if shots.ndim == 2:
-        shots_real = shots[:, 0]
-        shots_imag = shots[:, 1]
+        shots_real = shots[0, :]
+        shots_imag = shots[1, :]
         transition = True
     elif shots.ndim == 1:
         shots_real = shots[:, ]

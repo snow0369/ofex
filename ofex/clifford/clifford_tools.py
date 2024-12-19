@@ -56,24 +56,24 @@ def single_pauli_to_tableau(pauli: SinglePauli,
 def pauli_to_tableau(pauli_list: Union[List[QubitOperator], QubitOperator],
                      num_qubits: int) \
         -> Tuple[FieldArray, np.ndarray]:
-    """
+    r"""
     Converts a Pauli operator or list of Pauli operators into tableau form.
 
     Args:
-        pauli_list: A QubitOperator or a list of QubitOperators to be converted. 
-                    Each QubitOperator consists of Pauli terms and their coefficients.
-        num_qubits: The total number of qubits being represented.
+        pauli_list (int): A `QubitOperator` with multiple terms or a list of `QubitOperators` with single term
+            to be converted.
+        num_qubits (int): The total number of qubits being represented.
 
     Returns:
         Tuple[FieldArray, np.ndarray]:
 
-        - G: A 2N x r integer matrix in tableau form, where
-            - N is the number of qubits,
-            - r is the number of terms in the Pauli list,
-            - The first N rows represent G_x (X components of Pauli terms),
-            - The next N rows represent G_z (Z components of Pauli terms).
+        - G: A :math:`2N \times r` integer matrix in tableau form, where
+            - :math:`N` is the number of qubits,
+            - :math:`r` is the number of terms in the Pauli list,
+            - The first :math:`N` rows represent :math:`G_x` (X components of Pauli terms),
+            - The next :math:`N` rows represent :math:`G_z` (Z components of Pauli terms).
 
-        - coeff: A 1D array of length r corresponding to the coefficients of the Pauli terms.
+        - coeff: A 1D array of length :math:`r` corresponding to the coefficients of the Pauli terms.
     """
     if isinstance(pauli_list, QubitOperator):
         pauli_list = list(pauli_list.terms.items())
@@ -98,21 +98,23 @@ def tableau_to_pauli(mat: FieldArray,
                      coeffs: Optional[np.ndarray] = None,
                      ph: Optional[FieldArray] = None)\
         -> List[QubitOperator]:
-    """
-    Converts a tableau representation of Pauli operators back into QubitOperator objects.
+    r"""
+    Converts a tableau representation of Pauli operators back into `QubitOperator` objects.
 
     Args:
-        mat: A 2N x r FieldArray matrix representing the tableau form of the Pauli operators,
-             where N is the number of qubits and r is the number of operators.
-             The first N rows represent G_x (X components of the Pauli terms),
-             and the next N rows represent G_z (Z components of the Pauli terms).
-        coeffs: A 1D NumPy array of coefficients of length r for the operators. If not specified,
-               default coefficients of +/-1.0 will be assigned depending on the phase (ph) array.
-        ph: A 1D FieldArray of length r encoding the phase of each Pauli operator (with values 0 or 1).
+        mat (FieldArray): A :math:`2N \times r` `FieldArray` matrix representing the tableau form of the Pauli operators,
+             where :math:`N` is the number of qubits and :math:`r` is the number of operators.
+             The first :math:`N` rows represent :math:`G_x` (X components of the Pauli terms),
+             and the next :math:`N` rows represent :math:`G_z` (Z components of the Pauli terms).
+        coeffs (ndarray, optional): A 1D NumPy array of coefficients of length :math:`r` for the operators. If not specified,
+               default coefficients of :math:`\pm 1.0` will be assigned depending on the phase (`ph`) array.
+        ph (FieldArray, optional): A 1D `FieldArray` of length :math:`r` encoding the phase of each Pauli operator (with values 0 or 1).
             If not provided, all values are assumed to be 0.
 
     Returns:
-        A list of QubitOperator objects representing the corresponding Pauli operators described
+        List[QubitOperator]:
+
+        A list of `QubitOperator` objects representing the corresponding Pauli operators described
         by the tableau, each with its associated coefficient.
     """
     
@@ -143,7 +145,7 @@ def tableau_to_pauli(mat: FieldArray,
 
 
 def dot_tableau(a: FieldArray, b: FieldArray) -> int:
-    """
+    r"""
     Compute the relationship between two vectors `a` and `b` as described in
     Section VIII of Arxiv:1701.08213. This function determines whether the
     vectors commute or anti-commute based on their dot product, following
@@ -166,15 +168,15 @@ def dot_tableau(a: FieldArray, b: FieldArray) -> int:
 
 def str_tableau(mat: FieldArray, ph: Optional[FieldArray])\
         -> str:
-    """
+    r"""
     Generates a string representation of the tableau form of Pauli operators.
 
     Args:
-        mat: A 2N x r FieldArray matrix representing the tableau of Pauli operators, 
-             where N is the number of qubits and r is the number of operators.
-             The first N rows correspond to the X components (G_x),
-             and the next N rows to the Z components (G_z) of the tableau.
-        ph: An optional FieldArray of length r representing the phase of each operator. 
+        mat (FieldArray): A :math:`2N \times r` `FieldArray` matrix representing the tableau of Pauli operators,
+             where :math:`N` is the number of qubits and :math:`r` is the number of operators.
+             The first :math:`N` rows correspond to the X components (:math:`G_x`),
+             and the next :math:`N` rows to the Z components (:math:`G_z`) of the tableau.
+        ph (FieldArray, optional): An optional `FieldArray` of length :math:`r` representing the phase of each operator.
             If provided, it is included in the returned string after the tableau rows;
             otherwise, no phase information will be included.
 
@@ -199,15 +201,15 @@ def str_tableau(mat: FieldArray, ph: Optional[FieldArray])\
 def str_tableau_side_by_side(mat1: FieldArray, ph1: Optional[FieldArray],
                              mat2: FieldArray, ph2: Optional[FieldArray])\
         -> str:
-    """
+    r"""
     Generates a side-by-side string representation of two tableau matrices and their phases.
 
     Args:
-        mat1 (FieldArray): The first 2N x r tableau matrix where N is the number of qubits 
-                           and r is the number of operators.
+        mat1 (FieldArray): The first :math:`2N \times r` tableau matrix where :math:`N` is the number of qubits
+                           and :math:`r` is the number of operators.
         ph1 (Optional[FieldArray]): The optional phase information for the first tableau matrix.
-        mat2 (FieldArray): The second 2N x r tableau matrix where N is the number of qubits 
-                           and r is the number of operators.
+        mat2 (FieldArray): The second :math:`2N \times r` tableau matrix where :math:`N` is the number of qubits
+                           and :math:`r` is the number of operators.
         ph2 (Optional[FieldArray]): The optional phase information for the second tableau matrix.
 
     Returns:
@@ -232,19 +234,19 @@ def str_tableau_side_by_side(mat1: FieldArray, ph1: Optional[FieldArray],
 
 def xor_mat(s_t_pair: List[Tuple[int, int]],
             num_entries: int):
-    """
-    Constructs a matrix `X` over GF(2) such that for an input vector `v`, the 
-    resulting vector `w` is defined as:
-    - w[j] = v[i] + v[j], if (i, j) is in `s_t_pair`
-    - w[j] = v[j],        otherwise.
+    r"""
+    Constructs a matrix :math:`X` over :math:`GF(2)` such that for an input vector :math:`v`, the
+    resulting vector :math:`w` is defined as:
+    - :math:`w[j] = v[i] + v[j],` if (i, j) is in `s_t_pair`
+    - :math:`w[j] = v[j],`        otherwise.
 
     Args:
-        s_t_pair (List[Tuple[int, int]]): A list of pairs of indices `(i, j)` specifying 
+        s_t_pair (List[Tuple[int, int]]): A list of pairs of indices :math:`(i, j)` specifying
                                           where the XOR operations should occur.
-        num_entries (int): The size of the resulting square matrix `X`.
+        num_entries (int): The size of the resulting square matrix :math:`X`.
 
     Returns:
-        FieldArray: A square matrix `X` of size `num_entries x num_entries` over GF(2), 
+        FieldArray: A square matrix :math:`X` of size `num_entries` over :math:`GF(2)`,
                     encoding the XOR transformations as specified by `s_t_pair`.
 
     Raises:

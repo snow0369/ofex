@@ -260,13 +260,16 @@
 <span id="ofex-clifford"></span><h1>ofex.clifford<a class="headerlink" href="#module-ofex.clifford" title="Link to this heading">¶</a></h1>
 <p>This module provides tools and utilities for working with Clifford operators and Pauli operators
 in the context of quantum computation.</p>
-<p>The module includes:
-- Conversion utilities between Pauli operators and tableau form (<cite>pauli_to_tableau</cite>, <cite>tableau_to_pauli</cite>).
-- Functions for performing and visualizing tableau arithmetic (<cite>dot_tableau</cite>, <cite>str_tableau</cite>, <cite>str_tableau_side_by_side</cite>).
-- Methods for working with finite fields (<cite>is_zero_gf</cite>, <cite>is_equal_gf</cite>).
-- Algorithms for diagonalizing sets of mutually-commuting Pauli operators (<cite>diagonalizing_clifford</cite>).
-- Simulation and unitary matrix application for Clifford operators (<cite>clifford_apply</cite>, <cite>clifford_qiskit</cite>,
-<cite>clifford_simulation</cite>, <cite>clifford_unitary_mat</cite>).</p>
+<p>The module includes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Conversion utilities between Pauli operators and tableau form (<cite>pauli_to_tableau</cite>, <cite>tableau_to_pauli</cite>).</p></li>
+<li><p>Functions for performing and visualizing tableau arithmetic (<cite>dot_tableau</cite>, <cite>str_tableau</cite>, <cite>str_tableau_side_by_side</cite>).</p></li>
+<li><p>Methods for working with finite fields (<cite>is_zero_gf</cite>, <cite>is_equal_gf</cite>).</p></li>
+<li><p>Algorithms for diagonalizing sets of mutually-commuting Pauli operators (<cite>diagonalizing_clifford</cite>).</p></li>
+<li><p>Simulation and unitary matrix application for Clifford operators (<cite>clifford_apply</cite>, <cite>clifford_qiskit</cite>, <cite>clifford_simulation</cite>, <cite>clifford_unitary_mat</cite>).</p></li>
+</ul>
+</div></blockquote>
 <dl class="py function">
 <dt class="sig sig-object py" id="ofex.clifford.pauli_to_tableau">
 <span class="sig-prename descclassname"><span class="pre">ofex.clifford.</span></span><span class="sig-name descname"><span class="pre">pauli_to_tableau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pauli_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">FieldArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/clifford/clifford_tools.html#pauli_to_tableau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.clifford.pauli_to_tableau" title="Link to this definition">¶</a></dt>
@@ -274,24 +277,24 @@ in the context of quantum computation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pauli_list</strong> – A QubitOperator or a list of QubitOperators to be converted.
-Each QubitOperator consists of Pauli terms and their coefficients.</p></li>
-<li><p><strong>num_qubits</strong> – The total number of qubits being represented.</p></li>
+<li><p><strong>pauli_list</strong> (<em>int</em>) – A <cite>QubitOperator</cite> with multiple terms or a list of <cite>QubitOperators</cite> with single term
+to be converted.</p></li>
+<li><p><strong>num_qubits</strong> (<em>int</em>) – The total number of qubits being represented.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><dl class="simple">
-<dt>G: A 2N x r integer matrix in tableau form, where</dt><dd><ul>
-<li><p>N is the number of qubits,</p></li>
-<li><p>r is the number of terms in the Pauli list,</p></li>
-<li><p>The first N rows represent G_x (X components of Pauli terms),</p></li>
-<li><p>The next N rows represent G_z (Z components of Pauli terms).</p></li>
+<dt>G: A <img class="math" src="_images/math/de5712b736b6f2a4a411ebad882718b78df9c1ab.png" alt="2N \times r"/> integer matrix in tableau form, where</dt><dd><ul>
+<li><p><img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> is the number of qubits,</p></li>
+<li><p><img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> is the number of terms in the Pauli list,</p></li>
+<li><p>The first <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> rows represent <img class="math" src="_images/math/967c115344c8b807a10c2e2baad04b2d02036e4a.png" alt="G_x"/> (X components of Pauli terms),</p></li>
+<li><p>The next <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> rows represent <img class="math" src="_images/math/e131ad8b22e1703474e88a37e8917d1099ad2b5b.png" alt="G_z"/> (Z components of Pauli terms).</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p>coeff: A 1D array of length r corresponding to the coefficients of the Pauli terms.</p></li>
+<li><p>coeff: A 1D array of length <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> corresponding to the coefficients of the Pauli terms.</p></li>
 </ul>
 </p>
 </dd>
@@ -304,23 +307,26 @@ Each QubitOperator consists of Pauli terms and their coefficients.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="ofex.clifford.tableau_to_pauli">
 <span class="sig-prename descclassname"><span class="pre">ofex.clifford.</span></span><span class="sig-name descname"><span class="pre">tableau_to_pauli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FieldArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FieldArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/clifford/clifford_tools.html#tableau_to_pauli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.clifford.tableau_to_pauli" title="Link to this definition">¶</a></dt>
-<dd><p>Converts a tableau representation of Pauli operators back into QubitOperator objects.</p>
+<dd><p>Converts a tableau representation of Pauli operators back into <cite>QubitOperator</cite> objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mat</strong> – A 2N x r FieldArray matrix representing the tableau form of the Pauli operators,
-where N is the number of qubits and r is the number of operators.
-The first N rows represent G_x (X components of the Pauli terms),
-and the next N rows represent G_z (Z components of the Pauli terms).</p></li>
-<li><p><strong>coeffs</strong> – A 1D NumPy array of coefficients of length r for the operators. If not specified,
-default coefficients of +/-1.0 will be assigned depending on the phase (ph) array.</p></li>
-<li><p><strong>ph</strong> – A 1D FieldArray of length r encoding the phase of each Pauli operator (with values 0 or 1).
+<li><p><strong>mat</strong> (<em>FieldArray</em>) – A <img class="math" src="_images/math/de5712b736b6f2a4a411ebad882718b78df9c1ab.png" alt="2N \times r"/> <cite>FieldArray</cite> matrix representing the tableau form of the Pauli operators,
+where <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> is the number of qubits and <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> is the number of operators.
+The first <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> rows represent <img class="math" src="_images/math/967c115344c8b807a10c2e2baad04b2d02036e4a.png" alt="G_x"/> (X components of the Pauli terms),
+and the next <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> rows represent <img class="math" src="_images/math/e131ad8b22e1703474e88a37e8917d1099ad2b5b.png" alt="G_z"/> (Z components of the Pauli terms).</p></li>
+<li><p><strong>coeffs</strong> (<em>ndarray</em><em>, </em><em>optional</em>) – A 1D NumPy array of coefficients of length <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> for the operators. If not specified,
+default coefficients of <img class="math" src="_images/math/a294b4c941b0c1f7221569a7a120e8b725982b56.png" alt="\pm 1.0"/> will be assigned depending on the phase (<cite>ph</cite>) array.</p></li>
+<li><p><strong>ph</strong> (<em>FieldArray</em><em>, </em><em>optional</em>) – A 1D <cite>FieldArray</cite> of length <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> encoding the phase of each Pauli operator (with values 0 or 1).
 If not provided, all values are assumed to be 0.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of QubitOperator objects representing the corresponding Pauli operators described
+<dd class="field-even"><p>A list of <cite>QubitOperator</cite> objects representing the corresponding Pauli operators described
 by the tableau, each with its associated coefficient.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[QubitOperator]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -355,11 +361,11 @@ the conventions provided in the referenced document.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mat</strong> – A 2N x r FieldArray matrix representing the tableau of Pauli operators,
-where N is the number of qubits and r is the number of operators.
-The first N rows correspond to the X components (G_x),
-and the next N rows to the Z components (G_z) of the tableau.</p></li>
-<li><p><strong>ph</strong> – An optional FieldArray of length r representing the phase of each operator.
+<li><p><strong>mat</strong> (<em>FieldArray</em>) – A <img class="math" src="_images/math/de5712b736b6f2a4a411ebad882718b78df9c1ab.png" alt="2N \times r"/> <cite>FieldArray</cite> matrix representing the tableau of Pauli operators,
+where <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> is the number of qubits and <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> is the number of operators.
+The first <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> rows correspond to the X components (<img class="math" src="_images/math/967c115344c8b807a10c2e2baad04b2d02036e4a.png" alt="G_x"/>),
+and the next <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> rows to the Z components (<img class="math" src="_images/math/e131ad8b22e1703474e88a37e8917d1099ad2b5b.png" alt="G_z"/>) of the tableau.</p></li>
+<li><p><strong>ph</strong> (<em>FieldArray</em><em>, </em><em>optional</em>) – An optional <cite>FieldArray</cite> of length <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> representing the phase of each operator.
 If provided, it is included in the returned string after the tableau rows;
 otherwise, no phase information will be included.</p></li>
 </ul>
@@ -382,11 +388,11 @@ The separation helps visually distinguish between components and phase.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mat1</strong> (<em>FieldArray</em>) – The first 2N x r tableau matrix where N is the number of qubits
-and r is the number of operators.</p></li>
+<li><p><strong>mat1</strong> (<em>FieldArray</em>) – The first <img class="math" src="_images/math/de5712b736b6f2a4a411ebad882718b78df9c1ab.png" alt="2N \times r"/> tableau matrix where <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> is the number of qubits
+and <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> is the number of operators.</p></li>
 <li><p><strong>ph1</strong> (<em>Optional</em><em>[</em><em>FieldArray</em><em>]</em>) – The optional phase information for the first tableau matrix.</p></li>
-<li><p><strong>mat2</strong> (<em>FieldArray</em>) – The second 2N x r tableau matrix where N is the number of qubits
-and r is the number of operators.</p></li>
+<li><p><strong>mat2</strong> (<em>FieldArray</em>) – The second <img class="math" src="_images/math/de5712b736b6f2a4a411ebad882718b78df9c1ab.png" alt="2N \times r"/> tableau matrix where <img class="math" src="_images/math/8a204e0b6b74cac17640654526020fa0fde2c799.png" alt="N"/> is the number of qubits
+and <img class="math" src="_images/math/d54e90c9a7b57c3151eeef300318f3ad4153968a.png" alt="r"/> is the number of operators.</p></li>
 <li><p><strong>ph2</strong> (<em>Optional</em><em>[</em><em>FieldArray</em><em>]</em>) – The optional phase information for the second tableau matrix.</p></li>
 </ul>
 </dd>

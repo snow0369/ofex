@@ -105,7 +105,7 @@ print(expectation(z1, state_1_sparse))  # -1.0
 
 ## **API Overview**
 
-[Full API Documentation](https://html-preview.github.io/?url=https%3A%2F%2Fgithub.com%2Fsnow0369%2Fofex%2Fblob%2Fadd_codebase%2Fdocs%2Findex.html)
+[Full API Documentation](https://snow0369.github.io/ofex/html/index.html)
 
 | Module                          | Description                                                                                 |
 |---------------------------------|---------------------------------------------------------------------------------------------|

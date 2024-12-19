@@ -14,8 +14,8 @@ from ofex.state.state_tools import compress_sparse
 from ofex.transforms import fermion_to_qubit_operator, fermion_to_qubit_state
 from ofex.transforms.fermion_factorization import ham_to_ei_spin
 
-
 __all__ = ["killer_shift_opt_fermion_hf"]
+
 
 def killer_shift_opt_fermion_hf(fham: FermionOperator,
                                 hf_vector: BinaryFockVector,

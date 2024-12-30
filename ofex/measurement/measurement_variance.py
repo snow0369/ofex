@@ -110,10 +110,10 @@ def fragment_variance(grp_ham: List[QubitOperator],
                 assert np.isclose(coeff_p.imag, 0.0)
                 assert np.isclose(coeff_q.imag, 0.0)
                 if not transition:
-                    tot_var += 0.5 * coeff_p.real * coeff_q.real * true_cov_dict[cov_key] / shots_real[idx]
+                    tot_var += coeff_p.real * coeff_q.real * true_cov_dict[cov_key] / shots_real[idx]
                 else:
                     re, im = true_cov_dict[cov_key]
-                    tot_var += 0.5 * coeff_p.real * coeff_q.real * (re / shots_real[idx] + im / shots_imag[idx])
+                    tot_var += coeff_p.real * coeff_q.real * (re / shots_real[idx] + im / shots_imag[idx])
     else:
         if state1 is None:
             raise ValueError(f"Input state(s) should be given unless true_cov_dict is provided.")
@@ -122,6 +122,7 @@ def fragment_variance(grp_ham: List[QubitOperator],
                              "must be None otherwise.")
         n_qubits = get_num_qubits(state1)
         for idx, grp in enumerate(grp_ham):
+            #TODO: Parallelize here
             op_grp = LinearQubitOperator(grp, n_qubits=n_qubits)
             if state2 is None:
                 if anticommute:
@@ -145,7 +146,7 @@ def fragment_variance(grp_ham: List[QubitOperator],
                 mr, mi = shots_real[idx], shots_imag[idx]
                 assert np.isclose(ov2.imag, 0.0)
                 ov2 = ov2.real
-                tot_var += 0.5 * ((ov2 - ov.real ** 2) / mr + (ov2 - ov.imag ** 2) / mi)
+                tot_var += ((ov2 - ov.real ** 2) / mr + (ov2 - ov.imag ** 2) / mi)
     return tot_var
 
 
@@ -217,7 +218,11 @@ def pauli_covariance(pauli_list: List[QubitOperator],
         for p, fname in fname_list.items():
             if os.path.isfile(fname):
                 with open(fname, 'rb') as f:
-                    loaded_cov_dict = pickle.load(f)
+                    try:
+                        loaded_cov_dict = pickle.load(f)
+                    except EOFError as e:
+                        print(fname)
+                        raise e
                 cov_dict_list[p].update(loaded_cov_dict)
                 if debug:
                     print(f"cov_dict Loaded from {fname}")

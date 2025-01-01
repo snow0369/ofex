@@ -8,15 +8,16 @@ Functions:
 - bravyi_kitaev_tree_state: Converts Fermionic states to the Bravyi-Kitaev tree representation.
 - inv_bravyi_kitaev_tree_state: Converts Bravyi-Kitaev tree states back to Fermionic states.
 """
-import numpy as np
+import galois
 from openfermion import FenwickTree
 
-from ofex.clifford.clifford_tools import gf
 from ofex.state import BinaryFockVector
 from ofex.state.state_tools import get_num_qubits
 from ofex.state.types import SparseStateDict
 
 __all__ = []
+
+gf = galois.GF(2)
 
 def _depth_first_search(node_now, visited, func, args):
     """
@@ -55,7 +56,7 @@ def _update_children_mat(node, mat):
 def _bk_tree_state_transform(state: SparseStateDict, func) -> SparseStateDict:
     num_qubits = get_num_qubits(state)
     fenwick_tree = FenwickTree(num_qubits)
-    mat = gf(np.zeros((num_qubits, num_qubits), dtype=int))
+    mat = gf.Zeros((num_qubits, num_qubits))
     # By visiting the nodes, in the dfs manner, update the conversion matrix.
     _depth_first_search(fenwick_tree.root, list(), func, mat)
     new_state = dict()

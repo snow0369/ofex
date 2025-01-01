@@ -10,8 +10,8 @@ from ofex.clifford.standard_operators import hadamard, s_gate, cx, cz
 from ofex.state.state_tools import get_num_qubits, to_dense
 from ofex.state.types import State
 
-
 __all__ = ["clifford_apply", "clifford_qiskit", "clifford_simulation", "clifford_unitary_mat"]
+
 
 def clifford_apply(mat: FieldArray,
                    ph: Optional[FieldArray],
@@ -38,7 +38,7 @@ def clifford_apply(mat: FieldArray,
     """
     
     if ph is None:
-        ph = gf(np.zeros(mat.shape[1], dtype=int))
+        ph = gf.Zeros(mat.shape[1])
     num_qubits = mat.shape[0] // 2
     q_lbl: List[int] = list(range(num_qubits))
     for op in clifford_hist:

@@ -4,13 +4,14 @@ import numpy as np
 from galois import FieldArray
 from openfermion import QubitOperator
 
-from ofex.clifford.clifford_tools import pauli_to_tableau, gf, is_zero_gf, str_tableau_side_by_side, is_equal_gf, \
-    str_tableau
+from ofex.clifford.clifford_tools import pauli_to_tableau, gf, str_tableau_side_by_side, str_tableau
 from ofex.clifford.simulation import clifford_apply
 from ofex.clifford.standard_operators import hadamard, clifford_op_str, cx, cz, s_gate
 
-
 __all__ = ["diagonalizing_clifford"]
+
+from ofex.utils.binary_matrix import gf_is_zero, gf_is_equal
+
 
 def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator],
                            num_qubits: int,
@@ -55,7 +56,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
     # Commute Check
     xmat = a_mat[:num_qubits, :]
     zmat = a_mat[num_qubits:, :]
-    if not is_zero_gf(xmat.T @ zmat + zmat.T @ xmat):
+    if not gf_is_zero(xmat.T @ zmat + zmat.T @ xmat):
         raise ValueError("Non-commuting set!")
 
     if debug:
@@ -64,10 +65,10 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
 
     # 1. FIRST GAUSSIAN
     b_mat = a_mat.T.row_reduce().T
-    tmp_mat = gf(np.zeros(b_mat.shape, dtype=b_mat.dtype))
+    tmp_mat = gf.Zeros(b_mat.shape)
     num_ind_paulis = 0
     for i in range(b_mat.shape[1]):
-        if not is_zero_gf(b_mat[:, i]):
+        if not gf_is_zero(b_mat[:, i]):
             tmp_mat[:, i] = b_mat[:, i]
             num_ind_paulis += 1
     b_mat = gf(tmp_mat[:, :num_ind_paulis])
@@ -130,7 +131,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
     # Check diagonal
     for i in range(min(d1_mat.shape[0] // 2, d1_mat.shape[1])):
         if d1_mat[i, i] == 0:
-            if is_zero_gf(d1_mat[i, :]):
+            if gf_is_zero(d1_mat[i, :]):
                 for j in range(num_qubits):
                     if d1_mat[j, i] == 1:
                         d1_mat[[i, j], :] = d1_mat[[j, i], :]
@@ -149,7 +150,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
                 d1_ph[j] = d1_ph[j] + d1_ph[i]
     if d1_mat.shape[0] // 2 > d1_mat.shape[1]:
         for i in range(d1_mat.shape[1], d1_mat.shape[0] // 2):
-            if not is_zero_gf(d1_mat[i, :]):
+            if not gf_is_zero(d1_mat[i, :]):
                 for j in range(d1_mat.shape[1]):
                     if d1_mat[i, j] == 1:
                         d1_mat, d1_ph = cx(d1_mat, d1_ph, j, i)
@@ -182,10 +183,10 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
     # 6. TURNING PAULI X TO Z
     f_mat, f_ph = gf(e_mat), gf(e_ph)
     for i in range(num_qubits):
-        if np.any(f_mat[i, :]) and is_zero_gf(f_mat[i + num_qubits, :]):
+        if np.any(f_mat[i, :]) and gf_is_zero(f_mat[i + num_qubits, :]):
             f_mat, f_ph = hadamard(f_mat, f_ph, i)
             clifford_list.append(clifford_op_str("H", i))
-        elif np.any(f_mat[i, :]) and is_equal_gf(f_mat[i, :], f_mat[i + num_qubits, :]):
+        elif np.any(f_mat[i, :]) and gf_is_equal(f_mat[i, :], f_mat[i + num_qubits, :]):
             f_mat, f_ph = s_gate(f_mat, f_ph, i)
             clifford_list.append(clifford_op_str("S", i))
             f_mat, f_ph = hadamard(f_mat, f_ph, i)
@@ -199,7 +200,7 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
     # clifford_mat = clifford_compiler(clifford_list, num_qubits)
     # Final check
     a_mat, a_ph = clifford_apply(a_mat, None, clifford_list)
-    if not is_zero_gf(a_mat[:num_qubits, :]):
+    if not gf_is_zero(a_mat[:num_qubits, :]):
         raise ValueError(pauli_list)
     a_coeff = a_coeff * np.array([-1.0 if p else 1.0 for p in a_ph])
     return a_mat, a_coeff, clifford_list

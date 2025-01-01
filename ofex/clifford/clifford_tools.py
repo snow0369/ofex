@@ -13,8 +13,10 @@ from ofex.operators.types import SinglePauli
 
 __all__ = [
     "pauli_to_tableau", "tableau_to_pauli", "dot_tableau", "str_tableau", "str_tableau_side_by_side",
-    "is_zero_gf", "is_equal_gf"
+    "locality"
 ]
+
+from ofex.utils.binary_matrix import gf_eye
 
 gf = galois.GF(2)
 
@@ -126,7 +128,7 @@ def tableau_to_pauli(mat: FieldArray,
         if ph.shape[0] != num_op:
             raise ValueError
     else:
-        ph = gf(np.zeros(num_op, dtype=int))
+        ph = gf.Zeros(num_op)
     if coeffs is not None:
         if coeffs.shape[0] != num_op:
             raise ValueError
@@ -144,7 +146,7 @@ def tableau_to_pauli(mat: FieldArray,
     return ret
 
 
-def dot_tableau(a: FieldArray, b: FieldArray) -> int:
+def dot_tableau(a: FieldArray, b: FieldArray) -> FieldArray:
     r"""
     Compute the relationship between two vectors `a` and `b` as described in
     Section VIII of Arxiv:1701.08213. This function determines whether the
@@ -152,18 +154,18 @@ def dot_tableau(a: FieldArray, b: FieldArray) -> int:
     the conventions provided in the referenced document.
 
     Args:
-        a (FieldArray): The first input vector.
-        b (FieldArray): The second input vector.
+        a (FieldArray): The first input vector or matrix (:math: `2N \times r`).
+        b (FieldArray): The second input vector or matrix (:math: `2N \times r`).
 
     Returns:
-        int: Returns 0 if the vectors commute, or 1 if the vectors anti-commute.
+        FieldArray: Returns 0 if the vectors commute, or 1 if the vectors anti-commute.
     """
     if not a.shape == b.shape:
         raise ValueError
     num_qubits = a.shape[0] // 2
     ax, az = a[:num_qubits], a[num_qubits:]
     bx, bz = b[:num_qubits], b[num_qubits:]
-    return int(np.dot(ax, bz) + np.dot(az, bx))
+    return (ax.T @ bz) + (az.T @ bx)
 
 
 def str_tableau(mat: FieldArray, ph: Optional[FieldArray])\
@@ -264,36 +266,13 @@ def xor_mat(s_t_pair: List[Tuple[int, int]],
         if si == tj or ti == sj:
             raise ValueError("Non-Commuting XOR")
 
-    ret_mat = gf(np.eye(num_entries, dtype=int))
+    ret_mat = gf_eye(num_entries)
     for s, t in s_t_pair:
         ret_mat[s, t] = 1
     return ret_mat
 
 
-def is_zero_gf(a: FieldArray):
-    """
-    Checks if all elements of a given FieldArray are zero.
-
-    Args:
-        a (FieldArray): An input FieldArray to check.
-
-    Returns:
-        bool: True if all elements in the FieldArray are zero, otherwise False.
-    """
-    return np.allclose(np.array(a), 0)
-
-
-def is_equal_gf(a: FieldArray, b: FieldArray):
-    """
-    Checks if two FieldArray objects are equal in GF(2).
-
-    Args:
-        a (FieldArray): The first input FieldArray.
-        b (FieldArray): The second input FieldArray.
-
-    Returns:
-        bool: True if the two FieldArrays are equal, otherwise False.
-    """
-    if not isinstance(a, FieldArray) or not isinstance(b, FieldArray):
-        raise TypeError("Both inputs must be of type FieldArray")
-    return np.allclose(np.array(a + b), 0)
+def locality(mat: FieldArray) -> np.ndarray:
+    n_qubits = mat.shape[0] // 2
+    return np.bitwise_or(np.array(mat[:n_qubits], dtype=int),
+                         np.array(mat[n_qubits:], dtype=int))

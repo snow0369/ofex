@@ -5,7 +5,8 @@ from openfermion import get_fermion_operator, normal_ordered, QubitOperator, get
     get_sparse_operator
 
 from ofex.clifford import pauli_to_tableau, tableau_to_pauli, diagonalizing_clifford, clifford_simulation, dot_tableau, \
-    is_zero_gf, is_equal_gf, clifford_unitary_mat
+    clifford_unitary_mat
+from ofex.utils.binary_matrix_deprecated import is_zero_gf, is_equal_gf
 from ofex.measurement.pauli_grouping import sorted_insertion
 from ofex.operators.symbolic_operator_tools import clean_imaginary, compare_operators
 from ofex.state.state_tools import pretty_print_state, get_num_qubits
@@ -46,6 +47,7 @@ def test_pauli_tableau(pham: QubitOperator, num_qubits):
     (gf([1, 1, 1, 0]), gf([0, 1, 0, 0]), 0),
 ])
 def test_dot_tableau(tab1, tab2, expected_result):
+    #TODO: Add 2D case dot
     result = dot_tableau(tab1, tab2)  # Replace with actual function logic
     assert result == expected_result, f"Expected {expected_result}, but got {result}"
 

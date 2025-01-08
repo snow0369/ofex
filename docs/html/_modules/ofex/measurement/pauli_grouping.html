@@ -262,8 +262,9 @@
 <span class="kn">from</span> <span class="nn">ofex.operators.qubit_operator_tools</span> <span class="kn">import</span> <span class="n">single_pauli_commute_chk</span>
 <span class="kn">from</span> <span class="nn">ofex.operators.symbolic_operator_tools</span> <span class="kn">import</span> <span class="n">single_term</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">coeff</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sorted_insertion&quot;</span><span class="p">,</span> <span class="s2">&quot;iterative_sorted_insertion&quot;</span><span class="p">,</span> <span class="s2">&quot;optimal_sorted_insertion&quot;</span><span class="p">,</span> <span class="s2">&quot;pauli_split_group&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;pauli_idx_from_group&quot;</span><span class="p">,</span> <span class="s2">&quot;shot_alloc_by_norm&quot;</span><span class="p">]</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sorted_insertion&quot;</span><span class="p">,</span> <span class="s2">&quot;iterative_sorted_insertion&quot;</span><span class="p">,</span> <span class="s2">&quot;optimal_sorted_insertion&quot;</span><span class="p">,</span> <span class="s2">&quot;pauli_split_group&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="sorted_insertion">
 <a class="viewcode-back" href="../../../ofex.measurement.html#ofex.measurement.sorted_insertion">[docs]</a>
@@ -396,7 +397,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pauli operators in </span><span class="si">{</span><span class="n">idx_grp</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
             <span class="n">op_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">op_idx</span> <span class="ow">in</span> <span class="n">p_list</span><span class="p">:</span>
-                <span class="n">op_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">[</span><span class="n">op_idx</span><span class="p">])]))</span>
+                <span class="n">op_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">[</span><span class="n">op_idx</span><span class="p">])]))</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="n">op_names</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">n_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grp_pauli_list</span><span class="p">)</span>
     <span class="n">prev_ham_frag</span> <span class="o">=</span> <span class="n">ham_frags</span>
@@ -418,6 +419,55 @@
 
     <span class="k">assert</span> <span class="n">op</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">QubitOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">prev_ham_frag</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">prev_ham_frag</span></div>
+
+
+
+<div class="viewcode-block" id="pauli_idx_from_group">
+<a class="viewcode-back" href="../../../ofex.measurement.html#ofex.measurement.pauli_idx_from_group">[docs]</a>
+<span class="k">def</span> <span class="nf">pauli_idx_from_group</span><span class="p">(</span><span class="n">ham_frag</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">])</span> \
+        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines the index mappings of Pauli operators to groups from the given Hamiltonian fragments.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ham_frag (List[QubitOperator]): A list of QubitOperator fragments, </span>
+<span class="sd">                                        where each fragment represents a grouping of terms.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple:</span>
+<span class="sd">            - List[QubitOperator]: A list of Pauli operators sorted in descending order of their coefficients.</span>
+<span class="sd">            - List[List[int]]: A list where each sublist contains the indices of Pauli operators present in the </span>
+<span class="sd">                               corresponding group of `ham_frag`.</span>
+<span class="sd">            - List[List[int]]: A list where each sublist contains the indices of groups that a specific Pauli </span>
+<span class="sd">                               operator belongs to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ham</span> <span class="o">=</span> <span class="n">QubitOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">ham_frag</span><span class="p">)</span>
+    <span class="n">pauli_list</span> <span class="o">=</span> <span class="n">order_abs_coeff</span><span class="p">(</span><span class="n">ham</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">EQ_TOLERANCE</span><span class="p">:</span>
+            <span class="n">pauli_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">QubitOperator</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+
+    <span class="n">grp_pauli_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ham_frag</span><span class="p">))]</span>
+    <span class="c1"># Contains pauli idx list for each group</span>
+    <span class="n">pauli_grp_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">))]</span>
+    <span class="c1"># Contains group idx list for each pauli</span>
+    <span class="k">for</span> <span class="n">idx_p</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">idx_grp</span><span class="p">,</span> <span class="n">grp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ham_frag</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">grp</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">q</span><span class="p">:</span>
+                    <span class="n">grp_pauli_list</span><span class="p">[</span><span class="n">idx_grp</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx_p</span><span class="p">)</span>
+                    <span class="n">pauli_grp_list</span><span class="p">[</span><span class="n">idx_p</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx_grp</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Not found</span>
+                <span class="k">continue</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;p = </span><span class="si">{</span><span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">operator</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span>
+
+    <span class="k">return</span> <span class="n">pauli_list</span><span class="p">,</span> <span class="n">grp_pauli_list</span><span class="p">,</span> <span class="n">pauli_grp_list</span></div>
 
 
 
@@ -453,32 +503,11 @@
 <span class="sd">          - grp_pauli_list: List of Pauli operators in each group.</span>
 <span class="sd">          - pauli_grp_list: List mapping Pauli operators to their respective group indices.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">pauli_list</span> <span class="o">=</span> <span class="n">order_abs_coeff</span><span class="p">(</span><span class="n">ham</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">EQ_TOLERANCE</span><span class="p">:</span>
-            <span class="n">pauli_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">QubitOperator</span><span class="p">(</span><span class="n">operator</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
 
     <span class="n">init_pauli_grp</span> <span class="o">=</span> <span class="n">sorted_insertion</span><span class="p">(</span><span class="n">ham</span><span class="p">,</span> <span class="n">anticommute</span><span class="p">)</span>
-    <span class="n">grp_pauli_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">init_pauli_grp</span><span class="p">))]</span>
-    <span class="c1"># Contains pauli idx list for each group</span>
-    <span class="n">pauli_grp_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">))]</span>
-    <span class="c1"># Contains group idx list for each pauli</span>
-    <span class="k">for</span> <span class="n">idx_p</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">idx_grp</span><span class="p">,</span> <span class="n">grp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">init_pauli_grp</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">grp</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">q</span><span class="p">:</span>
-                    <span class="n">grp_pauli_list</span><span class="p">[</span><span class="n">idx_grp</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx_p</span><span class="p">)</span>
-                    <span class="n">pauli_grp_list</span><span class="p">[</span><span class="n">idx_p</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx_grp</span><span class="p">)</span>
-                    <span class="k">break</span>
-            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Not found</span>
-                <span class="k">continue</span>
-            <span class="k">break</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;p = </span><span class="si">{</span><span class="n">coeff</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">operator</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">AssertionError</span>
+    <span class="n">pauli_list</span><span class="p">,</span> <span class="n">grp_pauli_list</span><span class="p">,</span> <span class="n">pauli_grp_list</span> <span class="o">=</span> <span class="n">pauli_idx_from_group</span><span class="p">(</span><span class="n">init_pauli_grp</span><span class="p">)</span>
 
+    <span class="c1"># Further connect the compatible operators</span>
     <span class="k">for</span> <span class="n">idx_p</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">idx_grp</span><span class="p">,</span> <span class="n">grp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grp_pauli_list</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">idx_p</span> <span class="ow">in</span> <span class="n">grp</span><span class="p">:</span>
@@ -514,6 +543,33 @@
     <span class="n">ham_frags</span> <span class="o">=</span> <span class="n">synthesize_group</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">c_vec</span><span class="p">,</span> <span class="n">pauli_list</span><span class="p">,</span> <span class="n">grp_pauli_list</span><span class="p">,</span> <span class="n">size_grp</span><span class="p">,</span> <span class="n">ham</span><span class="p">,</span> <span class="n">debug</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">initial_grp</span> <span class="o">=</span> <span class="n">pauli_list</span><span class="p">,</span> <span class="n">grp_pauli_list</span><span class="p">,</span> <span class="n">pauli_grp_list</span>
     <span class="k">return</span> <span class="n">ham_frags</span><span class="p">,</span> <span class="n">initial_grp</span></div>
+
+
+
+<div class="viewcode-block" id="shot_alloc_by_norm">
+<a class="viewcode-back" href="../../../ofex.measurement.html#ofex.measurement.shot_alloc_by_norm">[docs]</a>
+<span class="k">def</span> <span class="nf">shot_alloc_by_norm</span><span class="p">(</span><span class="n">ham_frags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">],</span>
+                       <span class="n">tot_shots</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                       <span class="n">transition</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allocates the total number of shots among Hamiltonian fragments proportionally </span>
+<span class="sd">    based on their induced norms.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ham_frags (List[QubitOperator]): A list of Hamiltonian fragments (QubitOperators) </span>
+<span class="sd">                                         whose norms determine the shot allocation.</span>
+<span class="sd">        tot_shots (float): The total number of measurement shots to be distributed </span>
+<span class="sd">                           across the Hamiltonian fragments.</span>
+<span class="sd">        transition (bool): If True, calculates shot allocation proportionally to the</span>
+<span class="sd">                           product of induced norms. Default is False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: An array containing the allocated number of shots for each fragment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">frag</span><span class="o">.</span><span class="n">induced_norm</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">frag</span> <span class="ow">in</span> <span class="n">ham_frags</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">transition</span><span class="p">:</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">norm</span><span class="p">,</span> <span class="n">norm</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">tot_shots</span> <span class="o">*</span> <span class="n">norm</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

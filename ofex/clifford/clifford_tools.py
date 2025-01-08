@@ -166,7 +166,7 @@ def dot_tableau(a: FieldArray, b: FieldArray) -> int:
     return int(np.dot(ax, bz) + np.dot(az, bx))
 
 
-def str_tableau(mat: FieldArray, ph: Optional[FieldArray])\
+def str_tableau(mat: FieldArray, ph: Optional[FieldArray]=None)\
         -> str:
     r"""
     Generates a string representation of the tableau form of Pauli operators.

@@ -276,7 +276,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_num_qubits&quot;</span><span class="p">,</span> <span class="s2">&quot;get_state_dim&quot;</span><span class="p">,</span> <span class="s2">&quot;get_sparsity&quot;</span><span class="p">,</span> <span class="s2">&quot;pretty_print_state&quot;</span><span class="p">,</span> <span class="s2">&quot;compare_states&quot;</span><span class="p">,</span>
            <span class="s2">&quot;to_dense&quot;</span><span class="p">,</span> <span class="s2">&quot;to_scipy_sparse&quot;</span><span class="p">,</span> <span class="s2">&quot;to_sparse_dict&quot;</span><span class="p">,</span> <span class="s2">&quot;state_type_transform&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;fock_vector_to_dense_state&quot;</span><span class="p">,</span> <span class="s2">&quot;fock_vector_to_scipy_state&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;fock_vector_to_dense_state&quot;</span><span class="p">,</span> <span class="s2">&quot;fock_vector_to_scipy_state&quot;</span><span class="p">,</span> <span class="s2">&quot;state_to_fock_vector&quot;</span><span class="p">,</span>
            <span class="s2">&quot;compress_sparse&quot;</span><span class="p">,</span> <span class="s2">&quot;state_allclose&quot;</span><span class="p">,</span> <span class="s2">&quot;norm&quot;</span><span class="p">,</span> <span class="s2">&quot;normalize&quot;</span><span class="p">,</span> <span class="s2">&quot;is_zero&quot;</span><span class="p">]</span>
 
 
@@ -626,6 +626,27 @@
     <span class="n">state</span><span class="p">[</span><span class="n">fock</span><span class="o">.</span><span class="n">to_int</span><span class="p">()]</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="k">return</span> <span class="n">state</span></div>
 
+
+<div class="viewcode-block" id="state_to_fock_vector">
+<a class="viewcode-back" href="../../../ofex.state.html#ofex.state.state_tools.state_to_fock_vector">[docs]</a>
+<span class="k">def</span> <span class="nf">state_to_fock_vector</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryFockVector</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a quantum state to a binary Fock vector.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        state (State): The quantum state to convert. The state must represent </span>
+<span class="sd">            exactly one Fock vector in sparse dictionary format.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BinaryFockVector: The binary Fock vector representation of the state.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the state does not represent a single Fock vector.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">to_sparse_dict</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;state is not a single fock vector&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="compare_states">

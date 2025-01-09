@@ -638,6 +638,27 @@ Fock vector conversions and pretty-printed representations of quantum states.</p
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="ofex.state.state_tools.state_to_fock_vector">
+<span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">state_to_fock_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#state_to_fock_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.state_to_fock_vector" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a quantum state to a binary Fock vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>State</em>) – The quantum state to convert. The state must represent
+exactly one Fock vector in sparse dictionary format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The binary Fock vector representation of the state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.BinaryFockVector">BinaryFockVector</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the state does not represent a single Fock vector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="ofex.state.state_tools.compress_sparse">
 <span class="sig-prename descclassname"><span class="pre">ofex.state.state_tools.</span></span><span class="sig-name descname"><span class="pre">compress_sparse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></span><a class="reference internal" href="_modules/ofex/state/state_tools.html#compress_sparse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.state.state_tools.compress_sparse" title="Link to this definition">¶</a></dt>
 <dd><p>Compresses a sparse quantum state by removing elements below a tolerance and optionally normalizing it.</p>
@@ -996,6 +1017,7 @@ instances and values as Numbers, False otherwise.</p>
 <li><a class="reference internal" href="#ofex.state.state_tools.state_type_transform"><code class="docutils literal notranslate"><span class="pre">state_type_transform()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.state.state_tools.fock_vector_to_dense_state"><code class="docutils literal notranslate"><span class="pre">fock_vector_to_dense_state()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.state.state_tools.fock_vector_to_scipy_state"><code class="docutils literal notranslate"><span class="pre">fock_vector_to_scipy_state()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.state.state_tools.state_to_fock_vector"><code class="docutils literal notranslate"><span class="pre">state_to_fock_vector()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.state.state_tools.compress_sparse"><code class="docutils literal notranslate"><span class="pre">compress_sparse()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.state.state_tools.state_allclose"><code class="docutils literal notranslate"><span class="pre">state_allclose()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.state.state_tools.norm"><code class="docutils literal notranslate"><span class="pre">norm()</span></code></a></li>

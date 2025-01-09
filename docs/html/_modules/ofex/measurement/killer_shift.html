@@ -266,8 +266,8 @@
 <span class="kn">from</span> <span class="nn">ofex.transforms</span> <span class="kn">import</span> <span class="n">fermion_to_qubit_operator</span><span class="p">,</span> <span class="n">fermion_to_qubit_state</span>
 <span class="kn">from</span> <span class="nn">ofex.transforms.fermion_factorization</span> <span class="kn">import</span> <span class="n">ham_to_ei_spin</span>
 
-
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;killer_shift_opt_fermion_hf&quot;</span><span class="p">]</span>
+
 
 <div class="viewcode-block" id="killer_shift_opt_fermion_hf">
 <a class="viewcode-back" href="../../../ofex.measurement.html#ofex.measurement.killer_shift_opt_fermion_hf">[docs]</a>
@@ -300,8 +300,8 @@
 <span class="sd">        optimization_level (int, optional): The optimization level used in the killer </span>
 <span class="sd">            shift procedure. Available options (default: 1):</span>
 <span class="sd">            - 0: Use the number operator only.</span>
-<span class="sd">            - 1: Include contributions from one-body operators.</span>
-<span class="sd">            - 2: Include contributions from both one- and two-body operators.</span>
+<span class="sd">            - 1: Include contributions from both one- and two-body operators with efficient optimization.</span>
+<span class="sd">            - 2: Include contributions from both one- and two-body operators with numerical optimization.</span>
 <span class="sd">        repeat_opt (int, optional): The number of optimization iterations to </span>
 <span class="sd">            perform for refining the solution (default: 1).</span>
 <span class="sd">        f2q_kwargs (Optional[Dict[str, Any]], optional): Additional keyword arguments </span>

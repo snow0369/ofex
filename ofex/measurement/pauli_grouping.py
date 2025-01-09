@@ -10,8 +10,9 @@ from ofex.operators.ordering import order_abs_coeff
 from ofex.operators.qubit_operator_tools import single_pauli_commute_chk
 from ofex.operators.symbolic_operator_tools import single_term, operator, coeff
 
+__all__ = ["sorted_insertion", "iterative_sorted_insertion", "optimal_sorted_insertion", "pauli_split_group",
+           "pauli_idx_from_group", "shot_alloc_by_norm"]
 
-__all__ = ["sorted_insertion", "iterative_sorted_insertion", "optimal_sorted_insertion", "pauli_split_group"]
 
 def sorted_insertion(op: QubitOperator, anticommute=False) -> List[QubitOperator]:
     """
@@ -136,7 +137,7 @@ def optimal_sorted_insertion(op: QubitOperator,
             print(f"Pauli operators in {idx_grp}:")
             op_names = list()
             for op_idx in p_list:
-                op_names.append(' '.join([str(o)+str(idx) for idx, o in operator(pauli_list[op_idx])]))
+                op_names.append(' '.join([str(o) + str(idx) for idx, o in operator(pauli_list[op_idx])]))
             print(f"\t{op_names}")
     n_groups = len(grp_pauli_list)
     prev_ham_frag = ham_frags
@@ -158,6 +159,52 @@ def optimal_sorted_insertion(op: QubitOperator,
 
     assert op.isclose(QubitOperator.accumulate(prev_ham_frag))
     return prev_ham_frag
+
+
+def pauli_idx_from_group(ham_frag: List[QubitOperator]) \
+        -> Tuple[List[QubitOperator], List[List[int]], List[List[int]]]:
+    """
+    Determines the index mappings of Pauli operators to groups from the given Hamiltonian fragments.
+
+    Args:
+        ham_frag (List[QubitOperator]): A list of QubitOperator fragments, 
+                                        where each fragment represents a grouping of terms.
+
+    Returns:
+        Tuple:
+            - List[QubitOperator]: A list of Pauli operators sorted in descending order of their coefficients.
+            - List[List[int]]: A list where each sublist contains the indices of Pauli operators present in the 
+                               corresponding group of `ham_frag`.
+            - List[List[int]]: A list where each sublist contains the indices of groups that a specific Pauli 
+                               operator belongs to.
+    """
+    ham = QubitOperator.accumulate(ham_frag)
+    pauli_list = order_abs_coeff(ham, reverse=True)
+    for i, p in enumerate(pauli_list):
+        assert np.isclose(coeff(p).imag, 0.0)
+        if abs(coeff(p)) > EQ_TOLERANCE:
+            pauli_list[i] = QubitOperator(operator(p), coeff(p).real)
+
+    grp_pauli_list: List[List[int]] = [list() for _ in range(len(ham_frag))]
+    # Contains pauli idx list for each group
+    pauli_grp_list: List[List[int]] = [list() for _ in range(len(pauli_list))]
+    # Contains group idx list for each pauli
+    for idx_p, p in enumerate(pauli_list):
+        for idx_grp, grp in enumerate(ham_frag):
+            for q in grp:
+                if p == q:
+                    grp_pauli_list[idx_grp].append(idx_p)
+                    pauli_grp_list[idx_p].append(idx_grp)
+                    break
+            else:  # Not found
+                continue
+            break
+        else:
+            print(f"p = {coeff(p)} {operator(p)} ({type(p)})")
+            print(pauli_list)
+            raise AssertionError
+
+    return pauli_list, grp_pauli_list, pauli_grp_list
 
 
 def pauli_split_group(ham,
@@ -190,32 +237,11 @@ def pauli_split_group(ham,
           - grp_pauli_list: List of Pauli operators in each group.
           - pauli_grp_list: List mapping Pauli operators to their respective group indices.
     """
-    pauli_list = order_abs_coeff(ham, reverse=True)
-    for i, p in enumerate(pauli_list):
-        assert np.isclose(coeff(p).imag, 0.0)
-        if abs(coeff(p)) > EQ_TOLERANCE:
-            pauli_list[i] = QubitOperator(operator(p), coeff(p).real)
 
     init_pauli_grp = sorted_insertion(ham, anticommute)
-    grp_pauli_list: List[List[int]] = [list() for _ in range(len(init_pauli_grp))]
-    # Contains pauli idx list for each group
-    pauli_grp_list: List[List[int]] = [list() for _ in range(len(pauli_list))]
-    # Contains group idx list for each pauli
-    for idx_p, p in enumerate(pauli_list):
-        for idx_grp, grp in enumerate(init_pauli_grp):
-            for q in grp:
-                if p == q:
-                    grp_pauli_list[idx_grp].append(idx_p)
-                    pauli_grp_list[idx_p].append(idx_grp)
-                    break
-            else:  # Not found
-                continue
-            break
-        else:
-            print(f"p = {coeff(p)} {operator(p)} ({type(p)})")
-            print(pauli_list)
-            raise AssertionError
+    pauli_list, grp_pauli_list, pauli_grp_list = pauli_idx_from_group(init_pauli_grp)
 
+    # Further connect the compatible operators
     for idx_p, p in enumerate(pauli_list):
         for idx_grp, grp in enumerate(grp_pauli_list):
             if idx_p in grp:
@@ -251,3 +277,27 @@ def pauli_split_group(ham,
     ham_frags = synthesize_group(False, c_vec, pauli_list, grp_pauli_list, size_grp, ham, debug)[0]
     initial_grp = pauli_list, grp_pauli_list, pauli_grp_list
     return ham_frags, initial_grp
+
+
+def shot_alloc_by_norm(ham_frags: List[QubitOperator],
+                       tot_shots: float,
+                       transition: bool = False) -> np.ndarray:
+    """
+    Allocates the total number of shots among Hamiltonian fragments proportionally 
+    based on their induced norms.
+
+    Args:
+        ham_frags (List[QubitOperator]): A list of Hamiltonian fragments (QubitOperators) 
+                                         whose norms determine the shot allocation.
+        tot_shots (float): The total number of measurement shots to be distributed 
+                           across the Hamiltonian fragments.
+        transition (bool): If True, calculates shot allocation proportionally to the
+                           product of induced norms. Default is False.
+
+    Returns:
+        np.ndarray: An array containing the allocated number of shots for each fragment.
+    """
+    norm = np.array([frag.induced_norm(order=2) for frag in ham_frags])
+    if transition:
+        norm = np.array([norm, norm])
+    return tot_shots * norm / np.sum(norm)

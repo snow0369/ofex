@@ -1,50 +1,61 @@
-from functools import partial
 from itertools import product
 from numbers import Number
 from typing import List, Callable, Optional, Tuple, Union, Sequence
 
 import numpy as np
 import sympy as sp
-from scipy.integrate import quad
+from sympy import chebyshevt
 
-
-def _uniform_inner_product(x_max, numerical_integ, a: sp.Expr, b: sp.Expr) -> complex:
-    prod = sp.simplify((a.conjugate() * b))
-    syms = prod.free_symbols
-    if len(syms) == 0:
-        return complex(prod)
-    elif len(syms) > 1:
-        raise ValueError(f"There are redundant symbols {prod}, {syms}")
-    x = list(syms)[0]
-    if not numerical_integ:
-        try:
-            return complex(sp.integrate(prod, (x, -x_max, x_max)).evalf() / (2 * x_max))
-        except TypeError:
-            pass
-    integrand = sp.lambdify(x, prod, "numpy")
-    integral, _ = quad(integrand, -x_max, x_max, complex_func=True)
-    return complex(integral / (2 * x_max))
-
-
-def uniform_inner_product(x_max: float,
-                          numerical_integ: bool) -> Callable[[sp.Expr, sp.Expr], complex]:
-    return partial(_uniform_inner_product, x_max, numerical_integ)
+from algorithms.funcapprox.integrals import uniform_inner_product, monomial_fourier_integral, \
+    first_chebyshev_inner_product, first_chebyshev_integral
 
 
 class FunctionBasis(object):
+    """
+    Represents a basis of functions for projection and fitting in function space.
+
+    This class facilitates calculations such as the overlap matrix, projection of 
+    functions, and function fitting based on L2-norm minimization with or without
+    regularization using a custom inner product.
+    """
+
     def __init__(self,
                  input_basis: List[sp.Expr],
                  inner_product: Optional[Callable[[sp.Expr, sp.Expr], complex]] = None, ):
+        """
+        Initializes the FunctionBasis object.
+    
+        Args:
+            input_basis (List[sp.Expr]): The list of symbolic expressions forming the basis functions.
+            inner_product (Optional[Callable[[sp.Expr, sp.Expr], complex]]): 
+                Function to compute the inner product, defaults to a uniform inner product.
+        """
         self.basis = input_basis
-        self.inner_product = inner_product
+        if inner_product is None:
+            self.inner_product = uniform_inner_product(x_max=1.0, numerical_integ=True)
+        else:
+            self.inner_product = inner_product
         self._overlap_matrix = None
 
     @property
     def n_basis(self) -> int:
+        """
+        Returns the total number of basis functions.
+    
+        Returns:
+            int: The number of basis functions.
+        """
         return len(self.basis)
 
     @property
     def overlap_matrix(self) -> np.ndarray:
+        """
+        Computes and caches the overlap matrix for the basis functions.
+    
+        Returns:
+            np.ndarray: A matrix where each element represents the inner product 
+                        of two basis functions.
+        """
         if self._overlap_matrix is None:
             self._overlap_matrix = np.zeros((self.n_basis, self.n_basis), dtype=complex)
             for (idx1, b1), (idx2, b2) in product(enumerate(self.basis), repeat=2):
@@ -52,9 +63,30 @@ class FunctionBasis(object):
         return self._overlap_matrix
 
     def projection(self, func: sp.Expr) -> np.ndarray:
+        """
+        Projects a function onto the basis.
+    
+        Args:
+            func (sp.Expr): The function to be projected.
+    
+        Returns:
+            np.ndarray: The projection coefficients as a complex array.
+        """
         return np.array([self.inner_product(b, func) for b in self.basis], dtype=complex)
 
     def l2_minimization(self, func: sp.Expr) -> Tuple[sp.Expr, np.ndarray, float]:
+        """
+        Performs L2-minimization to find an optimal linear combination of basis functions.
+    
+        Args:
+            func (sp.Expr): The target function for minimization.
+    
+        Returns:
+            Tuple[sp.Expr, np.ndarray, float]: 
+                - The optimal function approximation.
+                - Coefficients for the linear combination of basis functions.
+                - Residual error norm of the approximation.
+        """
         s = self.overlap_matrix
         mu = self.projection(func)
         c = np.linalg.solve(s, mu)
@@ -73,6 +105,21 @@ class FunctionBasis(object):
                                       max_iter: int = 1000,
                                       conv_atol: float = 1e-8) \
             -> Tuple[sp.Expr, np.ndarray, float]:
+        """
+        Performs L2-minimization with a regularization term.
+    
+        Args:
+            func (sp.Expr): The target function for minimization.
+            reg_coeff (Union[Sequence[float], float]): Regularization coefficients.
+            max_iter (int): Maximum number of iterations (default=1000).
+            conv_atol (float): Convergence absolute tolerance (default=1e-8).
+    
+        Returns:
+            Tuple[sp.Expr, np.ndarray, float]: 
+                - The optimal function approximation.
+                - Coefficients for the linear combination of basis functions.
+                - Regularized residual error norm of the approximation.
+        """
         if isinstance(reg_coeff, Number):
             reg_coeff = [reg_coeff for _ in range(self.n_basis)]
         func_norm_2 = self.inner_product(func, func)
@@ -104,51 +151,69 @@ class FunctionBasis(object):
         return opt_g, c, np.sqrt(diff.real)
 
 
-def uniform_fourier_basis(x_max: float, n_harmonics: int, deriv_order: int = 0,
-                          numerical_integ: bool = False,
-                          sym_x: Optional[sp.Symbol] = None,
-                          debug=False) \
-        -> Tuple[FunctionBasis, sp.Symbol, np.ndarray]:
-    inner_product = uniform_inner_product(x_max, numerical_integ)
-    if sym_x is None:
-        sym_x = sp.Symbol('x')
-    delta_omega = np.pi / x_max
-    omega_list = [delta_omega * k for k in range(-n_harmonics, n_harmonics + 1)]
-    basis = [sp.exp(1j * omega * sym_x) for omega in omega_list]
-    for d in range(deriv_order):
-        basis += [(sym_x ** (d + 1)) * sp.exp(1j * omega * sym_x) for omega in omega_list]
+class FourierBasis(FunctionBasis):
+    def __init__(self, n_harmonics: int, x_max: float = 1.0, deriv_order: int = 0,
+                 numerical_integ: bool = False, sym_x: Optional[sp.Symbol] = None,
+                 debug: bool = False):
+        """
+        Initializes the FourierBasis class.
 
-    w_len = len(omega_list)
-    overlap_matrix = np.zeros((len(basis), len(basis)), dtype=complex)
-    for (idx_w1, w1), (idx_w2, w2) in product(enumerate(omega_list), repeat=2):
-        for d1, d2 in product(range(deriv_order + 1), repeat=2):
-            idx_b1 = idx_w1 + d1 * w_len
-            idx_b2 = idx_w2 + d2 * w_len
+        Args:
+            n_harmonics (int): Number of harmonics for the Fourier basis.
+            x_max (float): Maximum absolute value of the interval.
+            deriv_order (int): Order of polynomial derivatives in the basis.
+            numerical_integ (bool): Whether to use numerical integration.
+            sym_x (Optional[sp.Symbol]): Symbol for the variable (defaults to 'x').
+            debug (bool): Whether to enable debug mode for consistency check.
+        """
+        inner_product = uniform_inner_product(x_max, numerical_integ)
+        if sym_x is None:
+            sym_x = sp.Symbol('x')
+        delta_omega = np.pi / x_max
+        omega_list = [delta_omega * k for k in range(-n_harmonics, n_harmonics + 1)]
+        basis = [sp.exp(1j * omega * sym_x) for omega in omega_list]
+        for d in range(deriv_order):
+            basis += [(sym_x ** (d + 1)) * sp.exp(1j * omega * sym_x) for omega in omega_list]
+
+        w_len = len(omega_list)
+        overlap_matrix = np.zeros((len(basis), len(basis)), dtype=complex)
+        for (idx_w1, w1), (idx_w2, w2) in product(enumerate(omega_list), repeat=2):
+            for d1, d2 in product(range(deriv_order + 1), repeat=2):
+                idx_b1 = idx_w1 + d1 * w_len
+                idx_b2 = idx_w2 + d2 * w_len
+                if idx_b1 > idx_b2:
+                    continue
+                overlap_matrix[idx_b1, idx_b2] = monomial_fourier_integral(w2 - w1, d1 + d2, -x_max, x_max) / (
+                            2 * x_max)
+
+        for idx_b1, idx_b2 in product(range(len(basis)), repeat=2):
             if idx_b1 > idx_b2:
-                continue
-            overlap_matrix[idx_b1, idx_b2] = _monomial_fourier_integral(w2 - w1, d1 + d2, -x_max, x_max) / (2 * x_max)
+                overlap_matrix[idx_b1, idx_b2] = overlap_matrix[idx_b2, idx_b1].conjugate()
 
-    for idx_b1, idx_b2 in product(range(len(basis)), repeat=2):
-        if idx_b1 > idx_b2:
-            overlap_matrix[idx_b1, idx_b2] = overlap_matrix[idx_b2, idx_b1].conjugate()
-
-    fb = FunctionBasis(basis, inner_product)
-    if debug:
-        assert np.allclose(fb.overlap_matrix, overlap_matrix)
-    else:
-        fb._overlap_matrix = overlap_matrix
-    return fb, sym_x, np.array(omega_list)
+        super().__init__(basis, inner_product)
+        if debug:
+            assert np.allclose(self.overlap_matrix, overlap_matrix)
+        else:
+            self._overlap_matrix = overlap_matrix
 
 
-def _monomial_fourier_integral(omega, n, a, b):
-    # integrate x^n e^{iωx} from x=-a to b.
-    if np.isclose(omega, 0):
-        return (b ** (n + 1) - a ** (n + 1)) / (n + 1)
-    elif n == 0:
-        return (np.exp(1j * omega * b) - np.exp(1j * omega * a)) / (1j * omega)
-    else:
-        res = (np.exp(1j * omega * b) * b ** n - np.exp(1j * omega * a) * a ** n) / (1j * omega)
-        return res - _monomial_fourier_integral(omega, n - 1, a, b) * (n / (1j * omega))
+class FirstChebyshevBasis(FunctionBasis):
+    def __init__(self, n_cheby: int,
+                 numerical_integ: bool = False, sym_x: Optional[sp.Symbol] = None,
+                 debug: bool = False, ):
+        inner_product = first_chebyshev_inner_product(numerical_integ)
+        if sym_x is None:
+            sym_x = sp.Symbol('x')
+        basis = [chebyshevt(n, sym_x) for n in range(n_cheby)]
+        overlap_matrix = np.zeros((n_cheby, n_cheby), dtype=complex)
+        for n, m in product(range(n_cheby), repeat=2):
+            overlap_matrix[n, m] = first_chebyshev_integral(n, m)
+
+        super().__init__(basis, inner_product)
+        if debug:
+            assert np.allclose(self.overlap_matrix, overlap_matrix)
+        else:
+            self._overlap_matrix = overlap_matrix
 
 
 if __name__ == '__main__':
@@ -156,13 +221,11 @@ if __name__ == '__main__':
 
 
     def function_basis_test():
-        f_basis_0, x, omega_list = uniform_fourier_basis(x_max=1.0, n_harmonics=4, deriv_order=0,
-                                                         numerical_integ=True,
-                                                         debug=False)
-        f_basis_1, x, omega_list = uniform_fourier_basis(x_max=1.0, n_harmonics=4, deriv_order=1,
-                                                         numerical_integ=True,
-                                                         sym_x=x,
-                                                         debug=False)
+        f_basis_0 = FourierBasis(x_max=1.0, n_harmonics=4, deriv_order=0,
+                                 numerical_integ=True, debug=False)
+        f_basis_1 = FourierBasis(x_max=1.0, n_harmonics=4, deriv_order=1,
+                                 numerical_integ=True, sym_x=f_basis_0.basis[0].free_symbols.pop(),
+                                 debug=False)
         gaussian = sp.exp(- x ** 2)
         opt_g_0, c_0, df_0 = f_basis_0.l2_minimization(gaussian)
         opt_g_1, c_1, df_1 = f_basis_1.l2_minimization(gaussian)

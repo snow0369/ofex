@@ -287,8 +287,8 @@ supported in the function <cite>ofex.transform.fermion_to_qubit_operator</cite>.
 <li><p><strong>optimization_level</strong> (<em>int</em><em>, </em><em>optional</em>) – The optimization level used in the killer
 shift procedure. Available options (default: 1):
 - 0: Use the number operator only.
-- 1: Include contributions from one-body operators.
-- 2: Include contributions from both one- and two-body operators.</p></li>
+- 1: Include contributions from both one- and two-body operators with efficient optimization.
+- 2: Include contributions from both one- and two-body operators with numerical optimization.</p></li>
 <li><p><strong>repeat_opt</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of optimization iterations to
 perform for refining the solution (default: 1).</p></li>
 <li><p><strong>f2q_kwargs</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Additional keyword arguments
@@ -360,7 +360,7 @@ for <code class="docutils literal notranslate"><span class="pre">H_j</span></cod
 <li><p><strong>shots</strong> (<em>np.ndarray</em>) – <p>Array defining measurement shot counts:</p>
 <ul>
 <li><p>If 1D (shape <code class="docutils literal notranslate"><span class="pre">[n]</span></code>): Represents real shot counts <code class="docutils literal notranslate"><span class="pre">m_{R,j}</span></code>; applicable for single-state variance.</p></li>
-<li><p>If 2D (shape <code class="docutils literal notranslate"><span class="pre">[n,</span> <span class="pre">2]</span></code>): Represents real <code class="docutils literal notranslate"><span class="pre">m_{R,j}</span></code> and imaginary <code class="docutils literal notranslate"><span class="pre">m_{I,j}</span></code> shot counts; used for
+<li><p>If 2D (shape <code class="docutils literal notranslate"><span class="pre">[2,</span> <span class="pre">n]</span></code>): Represents real <code class="docutils literal notranslate"><span class="pre">m_{R,j}</span></code> and imaginary <code class="docutils literal notranslate"><span class="pre">m_{I,j}</span></code> shot counts; used for
 transition-state variance.</p></li>
 </ul>
 </p></li>

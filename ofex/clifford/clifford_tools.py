@@ -273,6 +273,21 @@ def xor_mat(s_t_pair: List[Tuple[int, int]],
 
 
 def locality(mat: FieldArray) -> np.ndarray:
+    """
+    Computes the locality of each qubit by analyzing the tableau representation of Pauli operators.
+
+    Args:
+        mat (FieldArray): A :math:`2N \times r` `FieldArray` matrix where :math:`N` is the number of qubits 
+                          and :math:`r` is the number of operators. The first :math:`N` rows represent
+                          the X components (:math:`G_x`) of the tableau, while the next :math:`N` rows 
+                          represent the Z components (:math:`G_z`).
+
+    Returns:
+        np.ndarray: A binary matrix of size :math:`N \times r` indicating the locality of each qubit
+                    for all Pauli operators in the tableau. An entry of 1 indicates locality 
+                    (the corresponding Pauli operator acts non-trivially on the qubit), while 0 indicates 
+                    no action on the corresponding qubit.
+    """
     n_qubits = mat.shape[0] // 2
     return np.bitwise_or(np.array(mat[:n_qubits], dtype=int),
                          np.array(mat[n_qubits:], dtype=int))

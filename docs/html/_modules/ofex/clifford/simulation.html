@@ -250,20 +250,64 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for ofex.clifford.simulation</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">import</span> <span class="nn">galois</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">galois</span> <span class="kn">import</span> <span class="n">FieldArray</span>
+<span class="kn">from</span> <span class="nn">openfermion</span> <span class="kn">import</span> <span class="n">QubitOperator</span>
 <span class="kn">from</span> <span class="nn">qiskit</span> <span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
 <span class="kn">from</span> <span class="nn">qiskit_aer</span> <span class="kn">import</span> <span class="n">Aer</span>
 
-<span class="kn">from</span> <span class="nn">ofex.clifford.clifford_tools</span> <span class="kn">import</span> <span class="n">gf</span>
+<span class="kn">from</span> <span class="nn">ofex.clifford</span> <span class="kn">import</span> <span class="n">pauli_to_tableau</span>
+<span class="kn">from</span> <span class="nn">ofex.clifford.clifford_tools</span> <span class="kn">import</span> <span class="n">tableau_to_pauli</span>
 <span class="kn">from</span> <span class="nn">ofex.clifford.standard_operators</span> <span class="kn">import</span> <span class="n">hadamard</span><span class="p">,</span> <span class="n">s_gate</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span>
+<span class="kn">from</span> <span class="nn">ofex.exceptions</span> <span class="kn">import</span> <span class="n">OfexTypeError</span>
 <span class="kn">from</span> <span class="nn">ofex.state.state_tools</span> <span class="kn">import</span> <span class="n">get_num_qubits</span><span class="p">,</span> <span class="n">to_dense</span>
 <span class="kn">from</span> <span class="nn">ofex.state.types</span> <span class="kn">import</span> <span class="n">State</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;clifford_apply_pauli&quot;</span><span class="p">,</span><span class="s2">&quot;clifford_apply&quot;</span><span class="p">,</span> <span class="s2">&quot;clifford_qiskit&quot;</span><span class="p">,</span> <span class="s2">&quot;clifford_simulation&quot;</span><span class="p">,</span> <span class="s2">&quot;clifford_unitary_mat&quot;</span><span class="p">]</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;clifford_apply&quot;</span><span class="p">,</span> <span class="s2">&quot;clifford_qiskit&quot;</span><span class="p">,</span> <span class="s2">&quot;clifford_simulation&quot;</span><span class="p">,</span> <span class="s2">&quot;clifford_unitary_mat&quot;</span><span class="p">]</span>
+<span class="n">gf</span> <span class="o">=</span> <span class="n">galois</span><span class="o">.</span><span class="n">GF</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<div class="viewcode-block" id="clifford_apply_pauli">
+<a class="viewcode-back" href="../../../ofex.clifford.html#ofex.clifford.clifford_apply_pauli">[docs]</a>
+<span class="k">def</span> <span class="nf">clifford_apply_pauli</span><span class="p">(</span><span class="n">pauli</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">]],</span>
+                         <span class="n">num_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">clifford_hist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span>\
+        <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies a sequence of Clifford operations to a Pauli operator or a list of Pauli operators.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pauli (Union[QubitOperator, List[QubitOperator]]): The Pauli operator(s) to which the Clifford</span>
+<span class="sd">            operations are applied. Can be a single QubitOperator or a list of QubitOperators.</span>
+<span class="sd">        num_qubits (int): The number of qubits in the quantum system.</span>
+<span class="sd">        clifford_hist (List[str]): A list of Clifford operations to apply, specified as strings in the</span>
+<span class="sd">            following formats:</span>
+<span class="sd">            - &quot;H_&lt;index&gt;&quot;: Hadamard gate applied to qubit at &lt;index&gt;.</span>
+<span class="sd">            - &quot;S_&lt;index&gt;&quot;: S gate applied to qubit at &lt;index&gt;.</span>
+<span class="sd">            - &quot;CX_&lt;index1&gt;_&lt;index2&gt;&quot;: CNOT gate with qubit at &lt;index1&gt; as control and &lt;index2&gt; as target.</span>
+<span class="sd">            - &quot;CZ_&lt;index1&gt;_&lt;index2&gt;&quot;: CZ gate between qubits at &lt;index1&gt; and &lt;index2&gt;.</span>
+<span class="sd">            - &quot;QSW_&lt;index1&gt;_&lt;index2&gt;&quot;: Qubit label swap between qubits at &lt;index1&gt; and &lt;index2&gt;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[QubitOperator, List[QubitOperator]]: The resulting Pauli operator(s) after applying the</span>
+<span class="sd">            Clifford operations. Returns a single QubitOperator if the input `pauli` is a single</span>
+<span class="sd">            QubitOperator, or a list of QubitOperators if the input `pauli` is a list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pauli</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">QubitOperator</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">OfexTypeError</span><span class="p">(</span><span class="n">pauli</span><span class="p">)</span>
+    <span class="n">is_list</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pauli</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="n">tableau</span><span class="p">,</span> <span class="n">coeff_list</span> <span class="o">=</span> <span class="n">pauli_to_tableau</span><span class="p">(</span><span class="n">pauli</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span>
+    <span class="n">tableau</span><span class="p">,</span> <span class="n">phase</span> <span class="o">=</span> <span class="n">clifford_apply</span><span class="p">(</span><span class="n">tableau</span><span class="p">,</span> <span class="n">ph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clifford_hist</span><span class="o">=</span><span class="n">clifford_hist</span><span class="p">)</span>
+    <span class="n">pauli_list</span> <span class="o">=</span> <span class="n">tableau_to_pauli</span><span class="p">(</span><span class="n">tableau</span><span class="p">,</span> <span class="n">coeff_list</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pauli_list</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">QubitOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">)</span></div>
+
+
 
 <div class="viewcode-block" id="clifford_apply">
 <a class="viewcode-back" href="../../../ofex.clifford.html#ofex.clifford.clifford_apply">[docs]</a>
@@ -292,7 +336,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="k">if</span> <span class="n">ph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ph</span> <span class="o">=</span> <span class="n">gf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="n">ph</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">Zeros</span><span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">num_qubits</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
     <span class="n">q_lbl</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">clifford_hist</span><span class="p">:</span>

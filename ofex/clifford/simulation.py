@@ -1,16 +1,57 @@
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Union
 
+import galois
 import numpy as np
 from galois import FieldArray
+from openfermion import QubitOperator
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import Aer
 
-from ofex.clifford.clifford_tools import gf
+from ofex.clifford import pauli_to_tableau
+from ofex.clifford.clifford_tools import tableau_to_pauli
 from ofex.clifford.standard_operators import hadamard, s_gate, cx, cz
+from ofex.exceptions import OfexTypeError
 from ofex.state.state_tools import get_num_qubits, to_dense
 from ofex.state.types import State
 
-__all__ = ["clifford_apply", "clifford_qiskit", "clifford_simulation", "clifford_unitary_mat"]
+__all__ = ["clifford_apply_pauli","clifford_apply", "clifford_qiskit", "clifford_simulation", "clifford_unitary_mat"]
+
+gf = galois.GF(2)
+
+def clifford_apply_pauli(pauli: Union[QubitOperator, List[QubitOperator]],
+                         num_qubits: int,
+                         clifford_hist: List[str])\
+        -> Union[QubitOperator, List[QubitOperator]]:
+    """
+    Applies a sequence of Clifford operations to a Pauli operator or a list of Pauli operators.
+
+    Args:
+        pauli (Union[QubitOperator, List[QubitOperator]]): The Pauli operator(s) to which the Clifford
+            operations are applied. Can be a single QubitOperator or a list of QubitOperators.
+        num_qubits (int): The number of qubits in the quantum system.
+        clifford_hist (List[str]): A list of Clifford operations to apply, specified as strings in the
+            following formats:
+            - "H_<index>": Hadamard gate applied to qubit at <index>.
+            - "S_<index>": S gate applied to qubit at <index>.
+            - "CX_<index1>_<index2>": CNOT gate with qubit at <index1> as control and <index2> as target.
+            - "CZ_<index1>_<index2>": CZ gate between qubits at <index1> and <index2>.
+            - "QSW_<index1>_<index2>": Qubit label swap between qubits at <index1> and <index2>.
+
+    Returns:
+        Union[QubitOperator, List[QubitOperator]]: The resulting Pauli operator(s) after applying the
+            Clifford operations. Returns a single QubitOperator if the input `pauli` is a single
+            QubitOperator, or a list of QubitOperators if the input `pauli` is a list.
+    """
+    if not isinstance(pauli, (list, QubitOperator)):
+        raise OfexTypeError(pauli)
+    is_list = isinstance(pauli, list)
+    tableau, coeff_list = pauli_to_tableau(pauli, num_qubits)
+    tableau, phase = clifford_apply(tableau, ph=None, clifford_hist=clifford_hist)
+    pauli_list = tableau_to_pauli(tableau, coeff_list, phase)
+    if is_list:
+        return pauli_list
+    else:
+        return QubitOperator.accumulate(pauli_list)
 
 
 def clifford_apply(mat: FieldArray,

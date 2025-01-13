@@ -1,54 +1,54 @@
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Optional
 
+import galois
 import numpy as np
 from galois import FieldArray
 from openfermion import QubitOperator
 
-from ofex.clifford.clifford_tools import pauli_to_tableau, gf, str_tableau_side_by_side, str_tableau
+from ofex.clifford.clifford_tools import pauli_to_tableau, str_tableau_side_by_side, str_tableau
 from ofex.clifford.simulation import clifford_apply
 from ofex.clifford.standard_operators import hadamard, clifford_op_str, cx, cz, s_gate
-
-__all__ = ["diagonalizing_clifford"]
-
 from ofex.utils.binary_matrix import gf_is_zero, gf_is_equal
 
+__all__ = ["diagonalizing_clifford_tableau", "diagonalizing_clifford"]
+gf = galois.GF(2)
 
-def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator],
-                           num_qubits: int,
-                           debug=False) \
+def diagonalizing_clifford_tableau(mat: FieldArray,
+                                   coeff_list: Optional[np.ndarray]=None,
+                                   debug=False) \
         -> Tuple[FieldArray, np.ndarray, List[str]]:
     """
     Diagonalizes a set of mutually commuting Pauli operators using Clifford gates.
-    
-    This function computes the Clifford operations needed to transform a set of commuting 
-    Pauli operators into a diagonal form, represented by a Pauli tableau. It ensures 
-    commutation among the input operators, generates the tableau, and applies gate 
-    transformations step by step to achieve diagonalization.
-    
+
+    This function computes the Clifford operations needed to transform a set of commuting
+    Pauli operators into a diagonal form, represented by a Pauli tableau. It ensures
+    The operations ensure commutation among the input operators and apply transformations
+    step by step to achieve diagonalization. The resulting tableau contains Z-type operators
+    where the upper portion is set to zero.
+
     Parameters:
-        pauli_list (Union[List[QubitOperator], QubitOperator]): A single or list of 
-            mutually commuting Pauli operators.
-        num_qubits (int): The number of qubits involved in the operators.
-        debug (bool, optional): If True, outputs debug information for intermediate 
-            transformation steps. Defaults to False.
+        mat (FieldArray): A binary matrix (Pauli tableau) representing the Pauli operators. 
+        coeff_list (Optional[np.ndarray], optional): An array of coefficients corresponding 
+            to the operators in the Pauli tableau. If None, a default array of ones is used. 
+        debug (bool, optional): If set to True, additional debug information will be 
+            printed for each step, showing intermediate transformations. Defaults to False.
     
     Returns:
         Tuple[FieldArray, np.ndarray, List[str]]:
             - mat (FieldArray): A Pauli tableau of diagonalized operators.
                 These are Z-type operators, and the upper half is zero.
             - coeff (np.ndarray): The coefficients of the transformed Pauli operators.
-            - clifford_history (List[str]): A log of the Clifford operations (as strings) 
+            - clifford_history (List[str]): A log of the Clifford operations (as strings)
                 applied during the diagonalization process.
-    
+
     Raises:
         ValueError: If the input Pauli operators do not commute.
     """
-
+    a_mat = gf(mat)
     clifford_list: List[str] = list()
+    if coeff_list is None:
+        coeff_list = np.ones(a_mat.shape[1])
 
-    # INIT
-    a_mat, a_coeff = pauli_to_tableau(pauli_list, num_qubits)
-    a_mat = gf(a_mat)
     num_qubits, num_paulis = a_mat.shape
     assert num_qubits % 2 == 0
     num_qubits = num_qubits // 2
@@ -201,6 +201,46 @@ def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator]
     # Final check
     a_mat, a_ph = clifford_apply(a_mat, None, clifford_list)
     if not gf_is_zero(a_mat[:num_qubits, :]):
-        raise ValueError(pauli_list)
-    a_coeff = a_coeff * np.array([-1.0 if p else 1.0 for p in a_ph])
+        raise ValueError("Non-commuting set!")
+    coeff_list = coeff_list * np.array([-1.0 if p else 1.0 for p in a_ph])
+    return a_mat, coeff_list, clifford_list
+
+
+def diagonalizing_clifford(pauli_list: Union[List[QubitOperator], QubitOperator],
+                           num_qubits: int,
+                           debug=False) \
+        -> Tuple[FieldArray, np.ndarray, List[str]]:
+    """
+    Diagonalizes a set of mutually commuting Pauli operators using Clifford gates.
+    
+    This function computes the Clifford operations needed to transform a set of commuting 
+    Pauli operators into a diagonal form, represented by a Pauli tableau. It ensures 
+    commutation among the input operators, generates the tableau, and applies gate 
+    transformations step by step to achieve diagonalization.
+    
+    Parameters:
+        pauli_list (Union[List[QubitOperator], QubitOperator]): A single or list of 
+            mutually commuting Pauli operators.
+        num_qubits (int): The number of qubits involved in the operators.
+        debug (bool, optional): If True, outputs debug information for intermediate 
+            transformation steps. Defaults to False.
+    
+    Returns:
+        Tuple[FieldArray, np.ndarray, List[str]]:
+            - mat (FieldArray): A Pauli tableau of diagonalized operators.
+                These are Z-type operators, and the upper half is zero.
+            - coeff (np.ndarray): The coefficients of the transformed Pauli operators.
+            - clifford_history (List[str]): A log of the Clifford operations (as strings) 
+                applied during the diagonalization process.
+    
+    Raises:
+        ValueError: If the input Pauli operators do not commute.
+    """
+
+    # INIT
+    a_mat, a_coeff = pauli_to_tableau(pauli_list, num_qubits)
+    try:
+        a_mat, a_coeff, clifford_list = diagonalizing_clifford_tableau(a_mat, a_coeff, debug)
+    except ValueError as e:
+        raise ValueError(pauli_list) from e
     return a_mat, a_coeff, clifford_list

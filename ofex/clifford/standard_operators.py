@@ -1,11 +1,11 @@
 from typing import Tuple, Optional, List
 
 from galois import FieldArray
+import galois
 
-from ofex.clifford.clifford_tools import gf
+__all__ = ["clifford_op_str", "hadamard", "s_gate", "cx", "cz", "qsw"]
 
-
-__all__ = []
+gf = galois.GF(2)
 
 def clifford_op_str(op, *args) -> str:
     """

@@ -6,20 +6,25 @@ import galois
 import numpy as np
 from galois import FieldArray
 from openfermion import QubitOperator
-from pyscf.symm import symm_ops
+from openfermion.transforms.opconversions.remove_symmetry_qubits import remove_indices
 
 from ofex.classical_algorithms.clique import find_max_clique
 from ofex.clifford import pauli_to_tableau, dot_tableau, diagonalizing_clifford_tableau, tableau_to_pauli, \
-    clifford_apply_pauli
+    clifford_apply_pauli, clifford_simulation
 from ofex.clifford.clifford_tools import locality
 from ofex.clifford.standard_operators import hadamard
+from ofex.linalg.sparse_tools import apply_operator
 from ofex.operators.symbolic_operator_tools import single_term
+from ofex.state.state_tools import to_sparse_dict, norm, compress_sparse, normalize
+from ofex.state.types import State, SparseStateDict
+from ofex.transforms.fermion_qubit import remove_indices_state
 from ofex.utils.binary_matrix import gf_concatenate, gf_eye, gf_is_zero
 
 gf = galois.GF(2)
 
+
 def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
-                        num_qubits: int)\
+                        num_qubits: int) \
         -> Tuple[FieldArray, List[str], List[int], QubitOperator]:
     # Check types and remove constant term.
     if isinstance(pauli_list, QubitOperator) and () in pauli_list.terms:
@@ -81,6 +86,7 @@ def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
 
     return symm, symm_clifford_list, symm_qubits, symm_unitary
 
+
 def minimize_locality(mat: FieldArray):
     mat = deepcopy(mat)
     n_qubits, n_operators = mat.shape
@@ -111,6 +117,7 @@ def minimize_locality(mat: FieldArray):
             break
         loc_tot = current_loc
     return mat
+
 
 def select_symm_qubits(mat: FieldArray) -> List[int]:
     # Select qubit q_j for each symmetry operator τ_j such that
@@ -145,8 +152,9 @@ def select_symm_qubits(mat: FieldArray) -> List[int]:
         raise ValueError("Can not find p_i satisfying the criteria")
     return list(opt_idxs)
 
+
 def construct_symmetry_unitary(symm: FieldArray,
-                               symm_qubits: List[int])\
+                               symm_qubits: List[int]) \
         -> QubitOperator:
     # p_i_set = select_p_i(mat)
     n_qubits, n_operators = symm.shape
@@ -167,40 +175,83 @@ def construct_symmetry_unitary(symm: FieldArray,
         symm_unitary = p * symm_unitary
     return symm_unitary
 
+
 def qubit_reduction_operator(operator: Union[QubitOperator, List[QubitOperator]],
                              num_qubits: int,
                              symm_clifford_list: List[str],
                              symm_qubits: List[int],
-                             symm_unitary: QubitOperator)\
-    -> Dict[Tuple[Tuple[int, int], ...] : Union[QubitOperator, List[QubitOperator]]]:
+                             symm_unitary: QubitOperator) \
+        -> Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator, List[QubitOperator]]]:
     operator = clifford_apply_pauli(operator, num_qubits, symm_clifford_list)
     is_list = isinstance(operator, list)
     if is_list:
         operator = [symm_unitary * op * symm_unitary for op in operator]
-
+        operator = [edit_operator_for_symmetry(op, symm_qubits) for op in operator]
+        operator = [{k: remove_indices(op[k], symm_qubits) for k in op.keys()} for op in operator]
+        keys = list(operator[0].terms.keys())
+        ret_dict = {k: list() for k in keys}
+        for k in keys:
+            for op in operator:
+                ret_dict[k].append(op[k])
+        return ret_dict
     else:
         operator = symm_unitary * operator * symm_unitary
+        operator = edit_operator_for_symmetry(operator, symm_qubits)
+        operator = {k: remove_indices(operator[k], symm_qubits) for k in operator.terms.keys()}
+        return operator
+
+
+def qubit_reduction_state(state: State,
+                          symm_clifford_list: List[str],
+                          symm_qubits: List[int],
+                          symm_unitary: QubitOperator) \
+        -> Tuple[Dict[Tuple[Tuple[int, int], ...]: SparseStateDict], Dict[Tuple[Tuple[int, int], ...]: float]]:
+    state = clifford_simulation(state, symm_clifford_list)
+    state = apply_operator(symm_unitary, state)
+    state = to_sparse_dict(state)
+
+    decompose_keys = [tuple([(qubit, parity) for qubit, parity in zip(symm_qubits, parity_list)])
+                      for parity_list in product([-1, 1], repeat=len(symm_qubits))]
+    decompose_keys_binary = {tuple([(1-parity)//2 for qubit, parity in k]): k for k in decompose_keys}
+    dec_states = {k: dict() for k in decompose_keys}
+
+    for bin_vec, coeff in state.items():
+        k = decompose_keys_binary[bin_vec[symm_qubits]]
+        dec_states[k][bin_vec] = coeff
+
+    dec_state = {k: compress_sparse(remove_indices_state(st, symm_qubits, check_symmetry_conserved=False))
+                 for k, st in dec_states.items()}
+    norms = {k: norm(st) for k, st in dec_state.items()}
+    dec_state = {k: normalize(st) for k, st in dec_state.items()}
+    return dec_state, norms
+
 
 def edit_operator_for_symmetry(operator: QubitOperator,
-                               qubit_idx: List[int])\
-    -> Dict[Tuple[int, int] : Union[QubitOperator]]:
+                               symm_qubits: List[int]) \
+        -> Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator]]:
     # Similar but generalized version of
     # openfermion.transform.opconversion.remove_symmetry.edit_hamiltonian_for_spin().
+    if any([any([term == (q, "Y") or term == (q, "X") for term in operator.terms.keys()])
+            for q in symm_qubits]):
+        raise ValueError("Operator contains Y or X terms at symmetry qubits.")
 
-    decompose_keys = [tuple([(qubit, parity) for qubit, parity in zip(qubit_idx, parity_list)])
-                      for parity_list in product([-1, 1], repeat=len(qubit_idx))]
+    decompose_keys = [tuple([(qubit, parity) for qubit, parity in zip(symm_qubits, parity_list)])
+                      for parity_list in product([-1, 1], repeat=len(symm_qubits))]
     non_trivial_qubits = [[qubit for qubit, parity in key if parity == -1] for key in decompose_keys]
 
     new_terms = {k: dict() for k in decompose_keys}
+    new_hamiltonians = {k: QubitOperator() for k in decompose_keys}
+
     for dec_key, parity_qubits in zip(decompose_keys, non_trivial_qubits):
         for term, coeff in operator.terms.items():
             count_parity = sum([(qubit, "Z") in term for qubit in parity_qubits])
             new_coeff = coeff * (-1) ** count_parity
-            
+            new_term = tuple((q, op) for (q, op) in term if q not in symm_qubits)
+            if new_term in new_terms[dec_key]:
+                new_terms[dec_key][new_term] += new_coeff
+            else:
+                new_terms[dec_key][new_term] = new_coeff
+        new_hamiltonians[dec_key].terms = new_terms[dec_key]
+        new_hamiltonians[dec_key].compress()
 
-
-def block_diagonalize_operator_by_symmetry(operator: Union[QubitOperator, List[QubitOperator]],
-                                           num_qubits: int,
-                                           symm: FieldArray)\
-    -> Union[QubitOperator, List[QubitOperator]]:
-    pass
+    return new_hamiltonians

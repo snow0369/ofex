@@ -284,7 +284,7 @@ def reorder_state(state: SparseStateDict,
 def remove_indices_state(state: SparseStateDict, indices: Sequence[int],
                          check_symmetry_conserved=True) -> SparseStateDict:
     """
-    Removes specified mode indices from a fermionic state, projecting the state
+    Removes specified mode indices from a fermionic or qubit state, projecting the state
     while checking for symmetry conservation if required.
 
     Args:

@@ -14,13 +14,14 @@ from ofex.exceptions import OfexTypeError
 from ofex.state.state_tools import get_num_qubits, to_dense
 from ofex.state.types import State
 
-__all__ = ["clifford_apply_pauli","clifford_apply", "clifford_qiskit", "clifford_simulation", "clifford_unitary_mat"]
+__all__ = ["clifford_apply_pauli", "clifford_apply", "clifford_qiskit", "clifford_simulation", "clifford_unitary_mat"]
 
 gf = galois.GF(2)
 
+
 def clifford_apply_pauli(pauli: Union[QubitOperator, List[QubitOperator]],
                          num_qubits: int,
-                         clifford_hist: List[str])\
+                         clifford_hist: List[str]) \
         -> Union[QubitOperator, List[QubitOperator]]:
     """
     Applies a sequence of Clifford operations to a Pauli operator or a list of Pauli operators.
@@ -56,8 +57,8 @@ def clifford_apply_pauli(pauli: Union[QubitOperator, List[QubitOperator]],
 
 def clifford_apply(mat: FieldArray,
                    ph: Optional[FieldArray],
-                   clifford_hist: List[str])\
-        ->Tuple[FieldArray, FieldArray]:
+                   clifford_hist: List[str]) \
+        -> Tuple[FieldArray, FieldArray]:
     """
     Applies a sequence of Clifford operations to a stabilizer matrix and phase vector.
 
@@ -77,7 +78,7 @@ def clifford_apply(mat: FieldArray,
         Tuple[FieldArray, FieldArray]: A tuple containing the updated stabilizer matrix and phase vector after 
                                        applying the Clifford operations.
     """
-    
+
     if ph is None:
         ph = gf.Zeros(mat.shape[1])
     num_qubits = mat.shape[0] // 2
@@ -106,7 +107,7 @@ def clifford_apply(mat: FieldArray,
 def clifford_qiskit(num_qubits: int,
                     clifford_hist: List[str],
                     init_state: Optional[State],
-                    inv=False)\
+                    inv=False) \
         -> QuantumCircuit:
     """
     Constructs the Qiskit equivalent of a quantum circuit from a given sequence of Clifford operations.
@@ -159,7 +160,7 @@ def clifford_qiskit(num_qubits: int,
 
 def clifford_simulation(init_state: State,
                         clifford_history: List[str],
-                        inv=False)\
+                        inv=False) \
         -> np.ndarray:
     """
     Simulates the action of a sequence of Clifford operations on an initial quantum state.
@@ -186,7 +187,7 @@ def clifford_simulation(init_state: State,
 
 def clifford_unitary_mat(clifford_history,
                          num_qubits,
-                         inv=False)\
+                         inv=False) \
         -> np.ndarray:
     """
     Constructs and returns the unitary matrix representation of a sequence of Clifford operations.

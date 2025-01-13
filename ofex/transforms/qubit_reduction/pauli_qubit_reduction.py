@@ -20,12 +20,72 @@ from ofex.state.types import State, SparseStateDict
 from ofex.transforms.fermion_qubit import remove_indices_state
 from ofex.utils.binary_matrix import gf_concatenate, gf_eye, gf_is_zero
 
+__all__ = ["find_pauli_symmetry", "qubit_reduction_operator", "qubit_reduction_state"]
+
 gf = galois.GF(2)
 
 
 def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
                         num_qubits: int) \
         -> Tuple[FieldArray, List[str], List[int], QubitOperator]:
+    r"""
+    Identifies Pauli symmetry operators within a given (list of) QubitOperators.
+    Pauli symmetry operators(:math:`\hat{S}_k`) commute with all input pauli operators(:math:`\hat{H}`):
+
+    .. math::
+
+        \hat{H}= \sum_j \alpha_j \hat{P}_j
+
+    .. math::
+
+        [\hat{S}_k, \hat{P}_j] = 0 \quad \forall k, j \mathrm{and thus, } [\hat{S}_k, \hat{H}] = 0 \forall k.
+
+    Symmetry operators are selected with maximal mutual commutativity:
+
+    .. math::
+
+        \mathcal{S}_M=\argmax_{\mathcal{S}}|\mathcal{S}|\quad \mathrm{s.t. } \mathcal{S}\subseteq \{\hat{S}_k: \forall k\} [\hat{S}_k,
+        \hat{S}_l] = 0 \quad \forall \hat{S}_k \hat{S}_l \in \mathcal{S}.
+
+
+    Symmetry operators are diagonalized as X-type by applying the following Clifford transformations:
+
+    .. math::
+
+        \hat{S}^{(X)}_k = \hat{C} \hat{S}_k \hat{C}^{\dagger} \quad \forall \hat{S}_k \in \mathcal{S}_M.
+
+    For each symmetry operator :math:`\hat{S}^{(X)}_k`, a qubit :math:`q(k)` is selected such that:
+
+    .. math::
+        \{\hat{S}^{(X)}_k, \hat{Z}_{q(k)}\} = 0 \quad [\hat{S}^{(X)}_k, \hat{Z}_{q(l)}] = 0.
+
+    Then the following unitary operator is constructed:
+
+    .. math::
+        \hat{U} = \prod_{k=1}^M \frac{1}{\sqrt{2}}(\hat{S}^{(X)}_k + \hat{Z}_{q(k)}).
+
+    Which block diagonalizes the input Pauli operators:
+
+    .. math::
+        \hat{H}_{\mathrm{sym}} = \hat{U} \hat{C} \hat{H} \hat{C}^{\dagger} \hat{U}^{\dagger}
+
+    .. math::
+        [\hat{H}_{\mathrm{sym}}, \hat{Z}_{q(k)}] = 0 \quad \forall k.
+
+    Refer to `arXiv:1701.08213 <https://arxiv.org/abs/1701.08213>` for more details.
+
+    Args:
+        pauli_list (Union[List[QubitOperator], QubitOperator]): Input list of QubitOperators or 
+            a single QubitOperator from which the symmetry is to be found.
+        num_qubits (int): The number of qubits in the system.
+
+    Returns:
+        Tuple[FieldArray, List[str], List[int], QubitOperator]: A tuple containing:
+            - The final symmetry operators in tableau form (FieldArray).
+            - The Clifford transformations :math:`\hat{C}` as a list of string representations.
+            - The indices of qubits :math:`q(k)` involved in symmetry operations.
+            - A unitary operator :math:`\hat{U}` block diagonalizing the input Pauli operators.
+    """
     # Check types and remove constant term.
     if isinstance(pauli_list, QubitOperator) and () in pauli_list.terms:
         c = pauli_list.terms[()]
@@ -88,6 +148,22 @@ def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
 
 
 def minimize_locality(mat: FieldArray):
+    r"""
+    Minimizes the locality of input symmetry operators by iteratively combining pairs of operators
+    to reduce the overall locality cost.
+
+    Locality is defined as the number of qubits involved in a symmetry operator. This function 
+    evaluates pairwise combinations of the operators and reduces their locality while ensuring 
+    the commutation relations are preserved.
+
+    Args:
+        mat (FieldArray): A 2N × M matrix (tableau representation) describing M symmetry operators
+            over N qubits.
+
+    Returns:
+        FieldArray: A modified 2N × M matrix where the symmetry operators have been optimized 
+        to minimize their locality.
+    """
     mat = deepcopy(mat)
     n_qubits, n_operators = mat.shape
     n_qubits //= 2
@@ -120,6 +196,23 @@ def minimize_locality(mat: FieldArray):
 
 
 def select_symm_qubits(mat: FieldArray) -> List[int]:
+    r"""
+    Selects a qubit :math:`q_k` for each symmetry operator :math:`\hat{S}_k` such that 
+    the conditions for symmetry are satisfied.
+
+    Specifically, the selected qubits satisfy the following conditions for the symmetry 
+    operator matrix:
+
+    .. math::
+        \{\sigma_z(q_k), \hat{S}_k \} = 0  \quad \mathrm{and} \quad [\sigma_z(q_k), \hat{S}_j] = 0, \, j \neq k.
+
+    Args:
+        mat (FieldArray): A 2N × M matrix (tableau form) where N represents the number of 
+            qubits and M is the number of symmetry operators.
+
+    Returns:
+        List[int]: A list containing indices of the selected qubits for each symmetry operator.
+    """
     # Select qubit q_j for each symmetry operator τ_j such that
     # [σ_z(q_j), τ_i] = 0 for i≠j
     # {σ_z(q_j), τ_j} = 0
@@ -156,6 +249,25 @@ def select_symm_qubits(mat: FieldArray) -> List[int]:
 def construct_symmetry_unitary(symm: FieldArray,
                                symm_qubits: List[int]) \
         -> QubitOperator:
+    r"""
+    Constructs a unitary operator :math:`\hat{U}` that uses the identified symmetry operators 
+    to block-diagonalize the input Pauli operators.
+
+    The unitary operator is of the form:
+
+    .. math::
+        \hat{U} = \prod_{k=1}^M \frac{1}{\sqrt{2}} (\hat{S}^{(X)}_k + \hat{Z}_{q(k)}),
+
+    where :math:`\hat{S}^{(X)}_k` are the X-type transformed symmetry operators, and 
+    :math:`q(k)` are the qubits corresponding to the symmetries.
+
+    Args:
+        symm (FieldArray): A 2N × M tableau matrix representing the symmetry operators.
+        symm_qubits (List[int]): A list of qubit indices corresponding to the symmetries.
+
+    Returns:
+        QubitOperator: The unitary operator :math:`\hat{U}` constructed from the symmetry operators.
+    """
     # p_i_set = select_p_i(mat)
     n_qubits, n_operators = symm.shape
     n_qubits = n_qubits // 2
@@ -182,6 +294,26 @@ def qubit_reduction_operator(operator: Union[QubitOperator, List[QubitOperator]]
                              symm_qubits: List[int],
                              symm_unitary: QubitOperator) \
         -> Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator, List[QubitOperator]]]:
+    r"""
+    Reduces a Pauli operator or a list of Pauli operators based on identified symmetry properties.
+
+    The reduction involves applying Clifford transformations, symmetry unitaries, and qubit 
+    removal on the input operators. The reduced operators are decomposed into symmetry sectors.
+
+    Args:
+        operator (Union[QubitOperator, List[QubitOperator]]): The input Pauli operator(s) to be 
+            reduced using symmetry.
+        num_qubits (int): The total number of qubits in the system.
+        symm_clifford_list (List[str]): A list of Clifford transformations corresponding to 
+            symmetry diagonalization.
+        symm_qubits (List[int]): The indices of qubits involved in symmetry.
+        symm_unitary (QubitOperator): The unitary operator :math:`\hat{U}` representing the symmetries.
+
+    Returns:
+        Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator, List[QubitOperator]]]: 
+            A dictionary mapping symmetry sectors (defined as tuples of qubit states and parities) 
+            to the reduced operator(s).
+    """
     operator = clifford_apply_pauli(operator, num_qubits, symm_clifford_list)
     is_list = isinstance(operator, list)
     if is_list:
@@ -206,13 +338,28 @@ def qubit_reduction_state(state: State,
                           symm_qubits: List[int],
                           symm_unitary: QubitOperator) \
         -> Tuple[Dict[Tuple[Tuple[int, int], ...]: SparseStateDict], Dict[Tuple[Tuple[int, int], ...]: float]]:
+    """
+    Reduces a quantum state by decomposing it with respect to symmetry sectors.
+
+    Args:
+        state (State): The quantum state to reduce.
+        symm_clifford_list (List[str]): Clifford transformations applied during symmetry operations.
+        symm_qubits (List[int]): Indices of symmetry qubits.
+        symm_unitary (QubitOperator): The unitary operator representing the symmetries.
+
+    Returns:
+        Tuple[Dict[Tuple[Tuple[int, int], ...]: SparseStateDict], Dict[Tuple[Tuple[int, int], ...]: float]]:
+            A tuple containing:
+            - The reduced states in sparse dictionary format.
+            - The normalization factors for each reduced state.
+    """
     state = clifford_simulation(state, symm_clifford_list)
     state = apply_operator(symm_unitary, state)
     state = to_sparse_dict(state)
 
     decompose_keys = [tuple([(qubit, parity) for qubit, parity in zip(symm_qubits, parity_list)])
                       for parity_list in product([-1, 1], repeat=len(symm_qubits))]
-    decompose_keys_binary = {tuple([(1-parity)//2 for qubit, parity in k]): k for k in decompose_keys}
+    decompose_keys_binary = {tuple([(1 - parity) // 2 for qubit, parity in k]): k for k in decompose_keys}
     dec_states = {k: dict() for k in decompose_keys}
 
     for bin_vec, coeff in state.items():
@@ -229,6 +376,16 @@ def qubit_reduction_state(state: State,
 def edit_operator_for_symmetry(operator: QubitOperator,
                                symm_qubits: List[int]) \
         -> Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator]]:
+    """
+    Modifies an operator by decomposing it according to symmetry properties.
+
+    Args:
+        operator (QubitOperator): The input operator to edit.
+        symm_qubits (List[int]): Indices of symmetry qubits.
+
+    Returns:
+        Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator]]: A dictionary mapping symmetry sectors to decomposed operators.
+    """
     # Similar but generalized version of
     # openfermion.transform.opconversion.remove_symmetry.edit_hamiltonian_for_spin().
     if any([any([term == (q, "Y") or term == (q, "X") for term in operator.terms.keys()])

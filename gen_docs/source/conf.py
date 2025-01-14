@@ -70,3 +70,4 @@ imgmath_latex_preamble = r'''
 \usepackage{braket}
 '''
 
+html_extra_path = ['.nojekyll']

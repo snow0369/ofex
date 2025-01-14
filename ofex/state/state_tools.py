@@ -290,23 +290,40 @@ def compress_sparse(state: Union[SparseStateDict, ScipySparse], atol=EQ_TOLERANC
 
 def state_allclose(state_1: State,
                    state_2: State,
-                   atol=EQ_TOLERANCE) -> bool:
+                   atol=EQ_TOLERANCE,
+                   ignore_global_phase: bool = False) -> bool:
     """
     Checks if two quantum states are approximately equal within a tolerance.
 
     Args:
-        state_1 (State): The first quantum state.
-        state_2 (State): The second quantum state.
-        atol (float, optional): Absolute tolerance for comparison. Defaults to EQ_TOLERANCE.
+       state_1 (State): The first quantum state.
+       state_2 (State): The second quantum state.
+       atol (float, optional): Absolute tolerance for comparison. Defaults to EQ_TOLERANCE.
+       ignore_global_phase (bool, optional): If True, ignores the global phase of the states. Defaults to False.
 
     Returns:
-        bool: True if the states are approximately equal, False otherwise.
+       bool: True if the states are approximately equal, False otherwise.
     """
     if is_sparse_state(state_1) and is_sparse_state(state_2):
+        if ignore_global_phase:
+            # Align global phase of state_2 to match state_1
+            phase_correction = None
+            for key, value in state_1.items():
+                if key in state_2 and abs(value) > EQ_TOLERANCE and abs(state_2[key]) > EQ_TOLERANCE:
+                    phase_correction = value / state_2[key]
+                break
+            if phase_correction is not None:
+                state_2 = {k: v * phase_correction for k, v in state_2.items()}
         return dict_allclose(state_1, state_2, atol)
     else:
         state_1 = to_dense(state_1)
         state_2 = to_dense(state_2)
+        if ignore_global_phase:
+            for idx, (val1, val2) in enumerate(zip(state_1, state_2)):
+                if abs(val1) > EQ_TOLERANCE and abs(val2) > EQ_TOLERANCE:
+                    phase_correction = val1 / val2
+                    state_2 *= phase_correction
+                    break
         return np.allclose(state_1, state_2, atol)
 
 

@@ -268,8 +268,8 @@
 <span class="kn">from</span> <span class="nn">ofex.linalg.sparse_tools</span> <span class="kn">import</span> <span class="n">apply_operator</span>
 <span class="kn">from</span> <span class="nn">ofex.operators.qubit_operator_tools</span> <span class="kn">import</span> <span class="n">single_pauli_commute_chk</span>
 <span class="kn">from</span> <span class="nn">ofex.operators.symbolic_operator_tools</span> <span class="kn">import</span> <span class="n">single_term</span>
-<span class="kn">from</span> <span class="nn">ofex.state.state_tools</span> <span class="kn">import</span> <span class="n">to_sparse_dict</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">compress_sparse</span><span class="p">,</span> <span class="n">normalize</span>
-<span class="kn">from</span> <span class="nn">ofex.state.types</span> <span class="kn">import</span> <span class="n">State</span><span class="p">,</span> <span class="n">SparseStateDict</span>
+<span class="kn">from</span> <span class="nn">ofex.state.state_tools</span> <span class="kn">import</span> <span class="n">to_sparse_dict</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">compress_sparse</span><span class="p">,</span> <span class="n">normalize</span><span class="p">,</span> <span class="n">state_type_transform</span>
+<span class="kn">from</span> <span class="nn">ofex.state.types</span> <span class="kn">import</span> <span class="n">State</span><span class="p">,</span> <span class="n">SparseStateDict</span><span class="p">,</span> <span class="n">type_state</span>
 <span class="kn">from</span> <span class="nn">ofex.transforms.fermion_qubit</span> <span class="kn">import</span> <span class="n">remove_indices_state</span>
 <span class="kn">from</span> <span class="nn">ofex.utils.binary_matrix</span> <span class="kn">import</span> <span class="n">gf_concatenate</span><span class="p">,</span> <span class="n">gf_eye</span><span class="p">,</span> <span class="n">gf_is_zero</span><span class="p">,</span> <span class="n">gf_is_equal</span>
 
@@ -651,6 +651,7 @@
 <span class="sd">            - The reduced states in sparse dictionary format.</span>
 <span class="sd">            - The normalization factors for each reduced state.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_type</span> <span class="o">=</span> <span class="n">type_state</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">clifford_simulation</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">symm_clifford_list</span><span class="p">)</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">apply_operator</span><span class="p">(</span><span class="n">symm_unitary</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">to_sparse_dict</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
@@ -664,11 +665,16 @@
         <span class="n">k</span> <span class="o">=</span> <span class="n">decompose_keys_binary</span><span class="p">[</span><span class="n">bin_vec</span><span class="p">[</span><span class="n">symm_qubits</span><span class="p">]]</span>
         <span class="n">dec_states</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">bin_vec</span><span class="p">]</span> <span class="o">=</span> <span class="n">coeff</span>
 
-    <span class="n">dec_state</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">compress_sparse</span><span class="p">(</span><span class="n">remove_indices_state</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">symm_qubits</span><span class="p">,</span> <span class="n">check_symmetry_conserved</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">dec_states</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-    <span class="n">norms</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">norm</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">dec_state</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-    <span class="n">dec_state</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">normalize</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">dec_state</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-    <span class="k">return</span> <span class="n">dec_state</span><span class="p">,</span> <span class="n">norms</span></div>
+    <span class="n">norms</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">normalized_dec_states</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">dec_states</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">compress_sparse</span><span class="p">(</span><span class="n">remove_indices_state</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">symm_qubits</span><span class="p">,</span> <span class="n">check_symmetry_conserved</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">norms</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+        <span class="n">normalized_dec_states</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_type_transform</span><span class="p">(</span><span class="n">normalize</span><span class="p">(</span><span class="n">st</span><span class="p">),</span> <span class="n">input_type</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">normalized_dec_states</span><span class="p">,</span> <span class="n">norms</span></div>
 
 
 

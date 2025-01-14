@@ -16,8 +16,8 @@ from ofex.clifford.standard_operators import hadamard
 from ofex.linalg.sparse_tools import apply_operator
 from ofex.operators.qubit_operator_tools import single_pauli_commute_chk
 from ofex.operators.symbolic_operator_tools import single_term
-from ofex.state.state_tools import to_sparse_dict, norm, compress_sparse, normalize
-from ofex.state.types import State, SparseStateDict
+from ofex.state.state_tools import to_sparse_dict, norm, compress_sparse, normalize, state_type_transform
+from ofex.state.types import State, SparseStateDict, type_state
 from ofex.transforms.fermion_qubit import remove_indices_state
 from ofex.utils.binary_matrix import gf_concatenate, gf_eye, gf_is_zero, gf_is_equal
 
@@ -391,6 +391,7 @@ def qubit_reduction_state(state: State,
             - The reduced states in sparse dictionary format.
             - The normalization factors for each reduced state.
     """
+    input_type = type_state(state)
     state = clifford_simulation(state, symm_clifford_list)
     state = apply_operator(symm_unitary, state)
     state = to_sparse_dict(state)
@@ -404,11 +405,16 @@ def qubit_reduction_state(state: State,
         k = decompose_keys_binary[bin_vec[symm_qubits]]
         dec_states[k][bin_vec] = coeff
 
-    dec_state = {k: compress_sparse(remove_indices_state(st, symm_qubits, check_symmetry_conserved=False))
-                 for k, st in dec_states.items()}
-    norms = {k: norm(st) for k, st in dec_state.items()}
-    dec_state = {k: normalize(st) for k, st in dec_state.items()}
-    return dec_state, norms
+    norms = {}
+    normalized_dec_states = {}
+    for k, st in dec_states.items():
+        if len(st) == 0:
+            continue
+        st = compress_sparse(remove_indices_state(st, symm_qubits, check_symmetry_conserved=False))
+        norms[k] = norm(st)
+        normalized_dec_states[k] = state_type_transform(normalize(st), input_type)
+
+    return normalized_dec_states, norms
 
 
 def edit_operator_for_symmetry(operator: QubitOperator,

@@ -168,7 +168,7 @@ def dot_tableau(a: FieldArray, b: FieldArray) -> FieldArray:
     return (ax.T @ bz) + (az.T @ bx)
 
 
-def str_tableau(mat: FieldArray, ph: Optional[FieldArray])\
+def str_tableau(mat: FieldArray, ph: Optional[FieldArray] = None)\
         -> str:
     r"""
     Generates a string representation of the tableau form of Pauli operators.

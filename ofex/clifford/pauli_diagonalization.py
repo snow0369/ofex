@@ -13,8 +13,9 @@ from ofex.utils.binary_matrix import gf_is_zero, gf_is_equal
 __all__ = ["diagonalizing_clifford_tableau", "diagonalizing_clifford"]
 gf = galois.GF(2)
 
+
 def diagonalizing_clifford_tableau(mat: FieldArray,
-                                   coeff_list: Optional[np.ndarray]=None,
+                                   coeff_list: Optional[np.ndarray] = None,
                                    debug=False) \
         -> Tuple[FieldArray, np.ndarray, List[str]]:
     """

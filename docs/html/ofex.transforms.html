@@ -462,6 +462,139 @@ applying the orbital mixing defined by v_mat.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.find_pauli_symmetry">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">find_pauli_symmetry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pauli_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">FieldArray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/pauli_qubit_reduction.html#find_pauli_symmetry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.find_pauli_symmetry" title="Link to this definition">¶</a></dt>
+<dd><p>Identifies Pauli symmetry operators within a given (list of) QubitOperators.
+Pauli symmetry operators(<img class="math" src="_images/math/a8488193e5654ab8eb1ce3885a7fdec642c34a94.png" alt="\hat{S}_k"/>) commute with all input pauli operators(<img class="math" src="_images/math/1b2da181e9e404c349c87d9688edcf633c3f473f.png" alt="\hat{H}"/>):</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/4c60ab90a817bb053b82e276e89f69f306102fdf.png" alt="\hat{H}= \sum_j \alpha_j \hat{P}_j"/></p>
+</div></div>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/448648d126134b9400aed1c7ab646d2b3c5af32f.png" alt="[\hat{S}_k, \hat{P}_j] = 0 \quad \forall k, j \quad\mathrm{thus, }\quad [\hat{S}_k, \hat{H}] = 0 \quad\forall k."/></p>
+</div></div>
+<p>Symmetry operators are selected with maximal mutual commutativity:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/4d62ebc2526370e5982ef8522a4b77ef8d821b56.png" alt="\mathcal{S}_M=arg\,max_{\mathcal{S}}|\mathcal{S}|\quad \mathrm{s.t. }\quad
+\mathcal{S}\subseteq \{\hat{S}_k: \forall k\}, \quad [\hat{S}_k,
+\hat{S}_l] = 0 \quad \forall \hat{S}_k, \hat{S}_l \in \mathcal{S}."/></p>
+</div></div>
+<p>Symmetry operators are diagonalized as X-type by applying the following Clifford transformation:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/4a0b5c944c717a01c6709e9f202c6cfd8787148f.png" alt="\hat{S}^{(X)}_k = \hat{C} \hat{S}_k \hat{C}^{\dagger} \quad \forall \hat{S}_k \in \mathcal{S}_M."/></p>
+</div></div>
+<p>For each symmetry operator <img class="math" src="_images/math/6179b39b564c062d3130bfebd6bd8e45fe66161e.png" alt="\hat{S}^{(X)}_k"/>, a qubit <img class="math" src="_images/math/b4906e61e8b8d518a6549d61d97c1815ca2390a2.png" alt="q(k)"/> is selected such that:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/72dae27bcfe794317345a0cf9f6a2e763b6d81ca.png" alt="\{\hat{S}^{(X)}_k, \hat{Z}_{q(k)}\} = 0 \quad [\hat{S}^{(X)}_k, \hat{Z}_{q(l)}] = 0 \quad \forall k \neq l."/></p>
+</div></div>
+<p>Then the following unitary operator is constructed:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/a8f6e8d8141996c3ca59f96e48a34c827aacbcdc.png" alt="\hat{U} = \prod_{k=1}^M \frac{1}{\sqrt{2}}(\hat{S}^{(X)}_k + \hat{Z}_{q(k)})."/></p>
+</div></div>
+<p>Which block diagonalizes the input Pauli operators:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/caba2e404572e988096bd780ad8a7da1617c9303.png" alt="\hat{H}_{\mathrm{sym}} = \hat{U} \hat{C} \hat{H} \hat{C}^{\dagger} \hat{U}^{\dagger}"/></p>
+</div></div>
+<div class="math-wrapper docutils container">
+<div class="math">
+<p><img src="_images/math/8145e6aef26ab978ce1caf67642d20eb00fa2ead.png" alt="[\hat{H}_{\mathrm{sym}}, \hat{Z}_{q(k)}] = 0 \quad \forall k."/></p>
+</div></div>
+<p>Refer to <a class="reference external" href="https://arxiv.org/abs/1701.08213">arXiv:1701.08213</a> for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pauli_list</strong> (<em>Union</em><em>[</em><em>List</em><em>[</em><em>QubitOperator</em><em>]</em><em>, </em><em>QubitOperator</em><em>]</em>) – Input list of QubitOperators or
+a single QubitOperator from which the symmetry is to be found.</p></li>
+<li><p><strong>num_qubits</strong> (<em>int</em>) – The number of qubits in the system.</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – If True, validate the symmetry operators found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing:</dt><dd><ul class="simple">
+<li><p>The final symmetry operators in tableau form (FieldArray).</p></li>
+<li><p>The Clifford transformations <img class="math" src="_images/math/f6de29e01746deb5cbdec25de99d187d942d98ce.png" alt="\hat{C}"/> as a list of string representations.</p></li>
+<li><p>The indices of qubits <img class="math" src="_images/math/b4906e61e8b8d518a6549d61d97c1815ca2390a2.png" alt="q(k)"/> involved in symmetry operations.</p></li>
+<li><p>A unitary operator <img class="math" src="_images/math/64e462650796b20d8a1420e773c9f6d9f8df001c.png" alt="\hat{U}"/> block diagonalizing the input Pauli operators.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[FieldArray, List[str], List[int], QubitOperator]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.qubit_reduction_operator">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">qubit_reduction_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_clifford_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_unitary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">QubitOperator</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/pauli_qubit_reduction.html#qubit_reduction_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.qubit_reduction_operator" title="Link to this definition">¶</a></dt>
+<dd><p>Reduces a Pauli operator or a list of Pauli operators based on identified symmetry properties.</p>
+<p>The reduction involves applying Clifford transformations, symmetry unitaries, and qubit
+removal on the input operators. The reduced operators are decomposed into symmetry sectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operator</strong> (<em>Union</em><em>[</em><em>QubitOperator</em><em>, </em><em>List</em><em>[</em><em>QubitOperator</em><em>]</em><em>]</em>) – The input Pauli operator(s) to be
+reduced using symmetry.</p></li>
+<li><p><strong>num_qubits</strong> (<em>int</em>) – The total number of qubits in the system.</p></li>
+<li><p><strong>symm_clifford_list</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – A list of Clifford transformations corresponding to
+symmetry diagonalization.</p></li>
+<li><p><strong>symm_qubits</strong> (<em>List</em><em>[</em><em>int</em><em>]</em>) – The indices of qubits involved in symmetry.</p></li>
+<li><p><strong>symm_unitary</strong> (<em>QubitOperator</em>) – The unitary operator <img class="math" src="_images/math/64e462650796b20d8a1420e773c9f6d9f8df001c.png" alt="\hat{U}"/> constructed from the symmetry operators.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Union[QubitOperator, List[QubitOperator]]]:</dt><dd><p>A dictionary mapping symmetry sectors (defined as tuples of qubit states and parities)
+to the reduced operator(s).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[Tuple[Tuple[int, int], …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.transforms.qubit_reduction_state">
+<span class="sig-prename descclassname"><span class="pre">ofex.transforms.</span></span><span class="sig-name descname"><span class="pre">qubit_reduction_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">lil_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_clifford_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symm_unitary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ofex.state.html#ofex.state.BinaryFockVector" title="ofex.state.binary_fock.BinaryFockVector"><span class="pre">BinaryFockVector</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Number</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/transforms/pauli_qubit_reduction.html#qubit_reduction_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.transforms.qubit_reduction_state" title="Link to this definition">¶</a></dt>
+<dd><p>Reduces a quantum state by decomposing it with respect to symmetry sectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>State</em>) – The quantum state to reduce.</p></li>
+<li><p><strong>symm_clifford_list</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – A list of Clifford transformations corresponding to
+symmetry diagonalization.</p></li>
+<li><p><strong>symm_qubits</strong> (<em>List</em><em>[</em><em>int</em><em>]</em>) – The indices of qubits involved in symmetry.</p></li>
+<li><p><strong>symm_unitary</strong> (<em>QubitOperator</em>) – The unitary operator <img class="math" src="_images/math/64e462650796b20d8a1420e773c9f6d9f8df001c.png" alt="\hat{U}"/> constructed from the symmetry operators.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>SparseStateDict], Dict[Tuple[Tuple[int, int], …]: float]]:</dt><dd><p>A tuple containing:
+- The reduced states in sparse dictionary format.
+- The normalization factors for each reduced state.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[Dict[Tuple[Tuple[int, int], …]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <section id="module-ofex.transforms.fermion_factorization">
 <span id="ofex-transforms-fermion-factorization"></span><h2>ofex.transforms.fermion_factorization<a class="headerlink" href="#module-ofex.transforms.fermion_factorization" title="Link to this heading">¶</a></h2>
 <p>This module provides functions and tools for manipulating and factorizing fermionic Hamiltonians.</p>
@@ -899,6 +1032,9 @@ coefficient matrices.</p></li>
 <li><a class="reference internal" href="#ofex.transforms.qubit_to_fermion_state"><code class="docutils literal notranslate"><span class="pre">qubit_to_fermion_state()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.transforms.fermion_rotation_state"><code class="docutils literal notranslate"><span class="pre">fermion_rotation_state()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.transforms.fermion_rotation_operator"><code class="docutils literal notranslate"><span class="pre">fermion_rotation_operator()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.find_pauli_symmetry"><code class="docutils literal notranslate"><span class="pre">find_pauli_symmetry()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.qubit_reduction_operator"><code class="docutils literal notranslate"><span class="pre">qubit_reduction_operator()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.transforms.qubit_reduction_state"><code class="docutils literal notranslate"><span class="pre">qubit_reduction_state()</span></code></a></li>
 <li><a class="reference internal" href="#module-ofex.transforms.fermion_factorization">ofex.transforms.fermion_factorization</a><ul>
 <li><a class="reference internal" href="#ofex.transforms.fermion_factorization.ham_to_ei_spatial"><code class="docutils literal notranslate"><span class="pre">ham_to_ei_spatial()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.transforms.fermion_factorization.ei_to_ham_spatial"><code class="docutils literal notranslate"><span class="pre">ei_to_ham_spatial()</span></code></a></li>

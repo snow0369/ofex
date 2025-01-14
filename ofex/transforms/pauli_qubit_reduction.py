@@ -5,20 +5,21 @@ from typing import Union, List, Tuple, Dict
 import galois
 import numpy as np
 from galois import FieldArray
-from openfermion import QubitOperator
+from openfermion import QubitOperator, commutator
 from openfermion.transforms.opconversions.remove_symmetry_qubits import remove_indices
 
 from ofex.classical_algorithms.clique import find_max_clique
 from ofex.clifford import pauli_to_tableau, dot_tableau, diagonalizing_clifford_tableau, tableau_to_pauli, \
-    clifford_apply_pauli, clifford_simulation
+    clifford_apply_pauli, clifford_simulation, clifford_apply
 from ofex.clifford.clifford_tools import locality
 from ofex.clifford.standard_operators import hadamard
 from ofex.linalg.sparse_tools import apply_operator
+from ofex.operators.qubit_operator_tools import single_pauli_commute_chk
 from ofex.operators.symbolic_operator_tools import single_term
 from ofex.state.state_tools import to_sparse_dict, norm, compress_sparse, normalize
 from ofex.state.types import State, SparseStateDict
 from ofex.transforms.fermion_qubit import remove_indices_state
-from ofex.utils.binary_matrix import gf_concatenate, gf_eye, gf_is_zero
+from ofex.utils.binary_matrix import gf_concatenate, gf_eye, gf_is_zero, gf_is_equal
 
 __all__ = ["find_pauli_symmetry", "qubit_reduction_operator", "qubit_reduction_state"]
 
@@ -26,7 +27,8 @@ gf = galois.GF(2)
 
 
 def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
-                        num_qubits: int) \
+                        num_qubits: int,
+                        debug: bool = False,) \
         -> Tuple[FieldArray, List[str], List[int], QubitOperator]:
     r"""
     Identifies Pauli symmetry operators within a given (list of) QubitOperators.
@@ -38,17 +40,18 @@ def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
 
     .. math::
 
-        [\hat{S}_k, \hat{P}_j] = 0 \quad \forall k, j \mathrm{and thus, } [\hat{S}_k, \hat{H}] = 0 \forall k.
+        [\hat{S}_k, \hat{P}_j] = 0 \quad \forall k, j \quad\mathrm{thus, }\quad [\hat{S}_k, \hat{H}] = 0 \quad\forall k.
 
     Symmetry operators are selected with maximal mutual commutativity:
 
     .. math::
 
-        \mathcal{S}_M=\argmax_{\mathcal{S}}|\mathcal{S}|\quad \mathrm{s.t. } \mathcal{S}\subseteq \{\hat{S}_k: \forall k\} [\hat{S}_k,
-        \hat{S}_l] = 0 \quad \forall \hat{S}_k \hat{S}_l \in \mathcal{S}.
+        \mathcal{S}_M=arg\,max_{\mathcal{S}}|\mathcal{S}|\quad \mathrm{s.t. }\quad
+        \mathcal{S}\subseteq \{\hat{S}_k: \forall k\}, \quad [\hat{S}_k,
+        \hat{S}_l] = 0 \quad \forall \hat{S}_k, \hat{S}_l \in \mathcal{S}.
 
 
-    Symmetry operators are diagonalized as X-type by applying the following Clifford transformations:
+    Symmetry operators are diagonalized as X-type by applying the following Clifford transformation:
 
     .. math::
 
@@ -57,7 +60,7 @@ def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
     For each symmetry operator :math:`\hat{S}^{(X)}_k`, a qubit :math:`q(k)` is selected such that:
 
     .. math::
-        \{\hat{S}^{(X)}_k, \hat{Z}_{q(k)}\} = 0 \quad [\hat{S}^{(X)}_k, \hat{Z}_{q(l)}] = 0.
+        \{\hat{S}^{(X)}_k, \hat{Z}_{q(k)}\} = 0 \quad [\hat{S}^{(X)}_k, \hat{Z}_{q(l)}] = 0 \quad \forall k \neq l.
 
     Then the following unitary operator is constructed:
 
@@ -72,12 +75,13 @@ def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
     .. math::
         [\hat{H}_{\mathrm{sym}}, \hat{Z}_{q(k)}] = 0 \quad \forall k.
 
-    Refer to `arXiv:1701.08213 <https://arxiv.org/abs/1701.08213>` for more details.
+    Refer to `arXiv:1701.08213 <https://arxiv.org/abs/1701.08213>`_ for more details.
 
     Args:
         pauli_list (Union[List[QubitOperator], QubitOperator]): Input list of QubitOperators or 
             a single QubitOperator from which the symmetry is to be found.
         num_qubits (int): The number of qubits in the system.
+        debug (bool): If True, validate the symmetry operators found.
 
     Returns:
         Tuple[FieldArray, List[str], List[int], QubitOperator]: A tuple containing:
@@ -112,7 +116,9 @@ def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
     e_mat = gf_concatenate((gz.T, gx.T), axis=1)
 
     # Null space finding
-    symm = e_mat.null_space()
+    symm = e_mat.null_space().T
+    if debug:
+        assert gf_is_zero(e_mat @ symm)
 
     # Find the maximally compatible symmetries.
     # Since dot_tableau returns anticommutation, logical NOT is done by using 'ones'.
@@ -122,23 +128,54 @@ def find_pauli_symmetry(pauli_list: Union[List[QubitOperator], QubitOperator],
     # Find maximal mutually commuting symmetries (clique finding in the commutation graph).
     idxs_max_symm = list(find_max_clique(comm))
     symm = symm[:, idxs_max_symm]
+    if debug:
+        n_max_op = len(idxs_max_symm)
+        symm_p_list = tableau_to_pauli(symm)
+        for i, j in product(range(n_max_op), repeat=2):
+            assert dot_tableau(symm[:, i], symm[:, j]) == 0
+            assert single_pauli_commute_chk(symm_p_list[i], symm_p_list[j])
+
+        if isinstance(pauli_list, list):
+            pham = QubitOperator.accumulate(pauli_list)
+        else:
+            pham = pauli_list
+        for i in range(n_max_op):
+            comm = commutator(pham, symm_p_list[i])
+            comm.compress()
+            assert comm == QubitOperator.zero()
 
     # Perform gaussian elimination to generate z-only symmetry operators.
-    symm, _, symm_clifford_list = diagonalizing_clifford_tableau(symm)
+    if debug:
+        symm_after, _, symm_clifford_list = diagonalizing_clifford_tableau(symm)
+        symm_after_comp, _ = clifford_apply(symm, ph=None, clifford_hist=symm_clifford_list, inverse=False)
+        assert gf_is_equal(symm_after, symm_after_comp)
+        symm_comp, _ = clifford_apply(symm_after, ph=None, clifford_hist=symm_clifford_list, inverse=True)
+        assert gf_is_equal(symm, symm_comp)
 
+        symm = symm_after
+    else:
+        symm, _, symm_clifford_list = diagonalizing_clifford_tableau(symm)
     # Minimize the locality of symmetry operators by iteratively evaluating pairwise combinations 
     # and modifying the matrix such that the sum of operator localities is reduced.
     symm = minimize_locality(symm)
 
     # Find non-trivial qubits
-    non_trivial_qubits = gf(np.sum(locality(symm), axis=1))
+    non_trivial_qubits = np.argwhere(np.sum(locality(symm), axis=1)).squeeze()
 
     # Convert symmetry operator to X-type operators
     tmp_phase = gf.Zeros(symm.shape[1])
     for q in non_trivial_qubits:
-        hadamard(symm, tmp_phase, q, symm_clifford_list)
+        symm, tmp_phase = hadamard(symm, tmp_phase, int(q), symm_clifford_list)
 
     assert gf_is_zero(symm[num_qubits:, :])
+
+    if debug:
+        pham_clifford = clifford_apply_pauli(pham, num_qubits, symm_clifford_list, inverse=False)
+        symm_p_list = tableau_to_pauli(symm)
+        for i in range(symm.shape[1]):
+            comm = commutator(pham_clifford, symm_p_list[i])
+            comm.compress()
+            assert comm == QubitOperator.zero()
 
     # CHC† commutes with σ_z(q(i)) with the following qubits
     symm_qubits = select_symm_qubits(symm)
@@ -175,7 +212,7 @@ def minimize_locality(mat: FieldArray):
         for i, j in product(range(n_operators), repeat=2):
             if i == j:
                 continue
-            mul = (mat[:, i] + mat[:, j]) % 2
+            mul = mat[:, i] + mat[:, j]
             loc_mul = np.sum(locality(mul))
             # Reduction of locality if multiplied operator replaces the i(j)th operator.
             loc_red_i = loc_set[i] - loc_mul
@@ -227,7 +264,7 @@ def select_symm_qubits(mat: FieldArray) -> List[int]:
     # ], key = lambda x : np.sum(locality(x))))
     # For non-trivial qubits
     it_over = tuple([
-        tuple(np.argwhere(mat[:, i]).squeeze())
+        tuple(np.argwhere(mat[:, i]).squeeze(axis=1))
         for i in range(n_operators)
     ])
     # Minimize the number of overlapped qubits
@@ -293,7 +330,7 @@ def qubit_reduction_operator(operator: Union[QubitOperator, List[QubitOperator]]
                              symm_clifford_list: List[str],
                              symm_qubits: List[int],
                              symm_unitary: QubitOperator) \
-        -> Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator, List[QubitOperator]]]:
+        -> Dict[Tuple[Tuple[int, int], ...], Union[QubitOperator, List[QubitOperator]]]:
     r"""
     Reduces a Pauli operator or a list of Pauli operators based on identified symmetry properties.
 
@@ -307,20 +344,20 @@ def qubit_reduction_operator(operator: Union[QubitOperator, List[QubitOperator]]
         symm_clifford_list (List[str]): A list of Clifford transformations corresponding to 
             symmetry diagonalization.
         symm_qubits (List[int]): The indices of qubits involved in symmetry.
-        symm_unitary (QubitOperator): The unitary operator :math:`\hat{U}` representing the symmetries.
+        symm_unitary (QubitOperator): The unitary operator :math:`\hat{U}` constructed from the symmetry operators.
 
     Returns:
         Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator, List[QubitOperator]]]: 
             A dictionary mapping symmetry sectors (defined as tuples of qubit states and parities) 
             to the reduced operator(s).
     """
-    operator = clifford_apply_pauli(operator, num_qubits, symm_clifford_list)
+    operator = clifford_apply_pauli(operator, num_qubits, symm_clifford_list, inverse=False)
     is_list = isinstance(operator, list)
     if is_list:
         operator = [symm_unitary * op * symm_unitary for op in operator]
         operator = [edit_operator_for_symmetry(op, symm_qubits) for op in operator]
         operator = [{k: remove_indices(op[k], symm_qubits) for k in op.keys()} for op in operator]
-        keys = list(operator[0].terms.keys())
+        keys = list(operator[0].keys())
         ret_dict = {k: list() for k in keys}
         for k in keys:
             for op in operator:
@@ -329,7 +366,7 @@ def qubit_reduction_operator(operator: Union[QubitOperator, List[QubitOperator]]
     else:
         operator = symm_unitary * operator * symm_unitary
         operator = edit_operator_for_symmetry(operator, symm_qubits)
-        operator = {k: remove_indices(operator[k], symm_qubits) for k in operator.terms.keys()}
+        operator = {k: remove_indices(operator[k], symm_qubits) for k in operator.keys()}
         return operator
 
 
@@ -337,15 +374,16 @@ def qubit_reduction_state(state: State,
                           symm_clifford_list: List[str],
                           symm_qubits: List[int],
                           symm_unitary: QubitOperator) \
-        -> Tuple[Dict[Tuple[Tuple[int, int], ...]: SparseStateDict], Dict[Tuple[Tuple[int, int], ...]: float]]:
-    """
+        -> Tuple[Dict[Tuple[Tuple[int, int], ...], SparseStateDict], Dict[Tuple[Tuple[int, int], ...], float]]:
+    r"""
     Reduces a quantum state by decomposing it with respect to symmetry sectors.
 
     Args:
         state (State): The quantum state to reduce.
-        symm_clifford_list (List[str]): Clifford transformations applied during symmetry operations.
-        symm_qubits (List[int]): Indices of symmetry qubits.
-        symm_unitary (QubitOperator): The unitary operator representing the symmetries.
+        symm_clifford_list (List[str]): A list of Clifford transformations corresponding to
+            symmetry diagonalization.
+        symm_qubits (List[int]): The indices of qubits involved in symmetry.
+        symm_unitary (QubitOperator): The unitary operator :math:`\hat{U}` constructed from the symmetry operators.
 
     Returns:
         Tuple[Dict[Tuple[Tuple[int, int], ...]: SparseStateDict], Dict[Tuple[Tuple[int, int], ...]: float]]:
@@ -375,7 +413,7 @@ def qubit_reduction_state(state: State,
 
 def edit_operator_for_symmetry(operator: QubitOperator,
                                symm_qubits: List[int]) \
-        -> Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator]]:
+        -> Dict[Tuple[Tuple[int, int], ...], Union[QubitOperator]]:
     """
     Modifies an operator by decomposing it according to symmetry properties.
 
@@ -388,9 +426,11 @@ def edit_operator_for_symmetry(operator: QubitOperator,
     """
     # Similar but generalized version of
     # openfermion.transform.opconversion.remove_symmetry.edit_hamiltonian_for_spin().
-    if any([any([term == (q, "Y") or term == (q, "X") for term in operator.terms.keys()])
-            for q in symm_qubits]):
-        raise ValueError("Operator contains Y or X terms at symmetry qubits.")
+    operator.compress()
+    for q in symm_qubits:
+        for term, coeff in operator.terms.items():
+            if ((q, "Y") in term) or ((q, "X") in term):
+                raise ValueError(f"Operator contains Y or X terms at symmetry qubits: {term} {coeff}.")
 
     decompose_keys = [tuple([(qubit, parity) for qubit, parity in zip(symm_qubits, parity_list)])
                       for parity_list in product([-1, 1], repeat=len(symm_qubits))]

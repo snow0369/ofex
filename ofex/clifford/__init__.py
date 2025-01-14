@@ -10,7 +10,7 @@ The module includes:
     - Simulation and unitary matrix application for Clifford operators (`clifford_apply`, `clifford_qiskit`, `clifford_simulation`, `clifford_unitary_mat`).
 
 """
-from .clifford_tools import (pauli_to_tableau, tableau_to_pauli, dot_tableau, str_tableau, str_tableau_side_by_side)
+from .clifford_tools import pauli_to_tableau, tableau_to_pauli, dot_tableau, str_tableau, str_tableau_side_by_side
 from .pauli_diagonalization import diagonalizing_clifford_tableau, diagonalizing_clifford
 from .simulation import clifford_apply_pauli, clifford_apply, clifford_qiskit, clifford_simulation, clifford_unitary_mat
 

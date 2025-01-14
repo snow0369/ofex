@@ -270,7 +270,6 @@
 <span class="kn">from</span> <span class="nn">ofex.state.binary_fock</span> <span class="kn">import</span> <span class="n">BinaryFockVector</span>
 <span class="kn">from</span> <span class="nn">ofex.state.state_tools</span> <span class="kn">import</span> <span class="n">norm</span>
 <span class="kn">from</span> <span class="nn">ofex.state.types</span> <span class="kn">import</span> <span class="n">SparseStateDict</span>
-<span class="kn">from</span> <span class="nn">ofex.transforms.fermion_qubit</span> <span class="kn">import</span> <span class="n">fermion_to_qubit_state</span>
 <span class="kn">from</span> <span class="nn">ofex.utils.chem</span> <span class="kn">import</span> <span class="n">run_driver</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;hf_ground&quot;</span><span class="p">,</span> <span class="s2">&quot;cisd_ground&quot;</span><span class="p">,</span> <span class="s2">&quot;csf_states&quot;</span><span class="p">]</span>
@@ -278,10 +277,7 @@
 
 <div class="viewcode-block" id="hf_ground">
 <a class="viewcode-back" href="../../../ofex.state.html#ofex.state.chem_ref_state.hf_ground">[docs]</a>
-<span class="k">def</span> <span class="nf">hf_ground</span><span class="p">(</span><span class="n">mol</span><span class="p">:</span> <span class="n">MolecularData</span><span class="p">,</span>
-              <span class="n">active_idx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-              <span class="n">fermion_to_qubit_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-              <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparseStateDict</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">hf_ground</span><span class="p">(</span><span class="n">mol</span><span class="p">:</span> <span class="n">MolecularData</span><span class="p">,</span> <span class="n">active_idx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparseStateDict</span><span class="p">:</span>
     <span class="c1"># TODO: access attributes of `mol` and find the ground state.</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate the Hartree-Fock ground state as a sparse state dictionary.</span>
@@ -289,8 +285,6 @@
 <span class="sd">    Args:</span>
 <span class="sd">        mol: An instance of MolecularData which contains molecule information.</span>
 <span class="sd">        active_idx: List of indices specifying the active orbitals. If None, all orbitals are active.</span>
-<span class="sd">        fermion_to_qubit_map: Optional string specifying the mapping from fermions to qubits.</span>
-<span class="sd">        **kwargs: Additional arguments for fermion to qubit mapping.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        SparseStateDict: A dictionary representing the Hartree-Fock ground state.</span>
@@ -300,8 +294,6 @@
         <span class="n">active_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_spinorb</span><span class="p">))</span>
     <span class="n">fock_vector</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">n_electrons</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">active_idx</span><span class="p">]</span>
     <span class="n">state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">({</span><span class="n">BinaryFockVector</span><span class="p">(</span><span class="n">fock_vector</span><span class="p">):</span> <span class="mf">1.0</span><span class="p">})</span>
-    <span class="k">if</span> <span class="n">fermion_to_qubit_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">state</span> <span class="o">=</span> <span class="n">fermion_to_qubit_state</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">fermion_to_qubit_map</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">state</span></div>
 
 

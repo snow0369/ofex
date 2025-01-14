@@ -260,7 +260,7 @@
 <span class="sd">ensure its eigenspectrum resides in [-1, 1].</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">openfermion</span> <span class="kn">import</span> <span class="n">QubitOperator</span>
@@ -270,7 +270,7 @@
 <span class="kn">from</span> <span class="nn">ofex.operators.types</span> <span class="kn">import</span> <span class="n">SinglePauli</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;is_z_only&quot;</span><span class="p">,</span> <span class="s2">&quot;single_pauli_commute_chk&quot;</span><span class="p">,</span> <span class="s2">&quot;normalize_by_lcu_norm&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;is_z_only&quot;</span><span class="p">,</span> <span class="s2">&quot;single_pauli_commute_chk&quot;</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">_single_pauli_to_dict</span><span class="p">(</span><span class="n">op</span><span class="p">:</span> <span class="n">SinglePauli</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
@@ -339,58 +339,6 @@
     <span class="k">return</span> <span class="n">commute</span></div>
 
 
-
-<div class="viewcode-block" id="normalize_by_lcu_norm">
-<a class="viewcode-back" href="../../../ofex.operators.html#ofex.operators.qubit_operator_tools.normalize_by_lcu_norm">[docs]</a>
-<span class="k">def</span> <span class="nf">normalize_by_lcu_norm</span><span class="p">(</span><span class="n">ham</span><span class="p">:</span> <span class="n">QubitOperator</span><span class="p">,</span>
-                          <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                          <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Normalize a QubitOperator using different methods to calculate its Linear Combination of Unitaries (LCU) norm.</span>
-
-<span class="sd">    The eigenspectrum of the normalized operator is guaranteed to be less than one, while this computation is</span>
-<span class="sd">    much more efficient than normalization by spectral norm.</span>
-<span class="sd">    Better normalization makes the spectrum more separated within the range [-1, 1], which corresponds to </span>
-<span class="sd">    normalization using smaller norms.</span>
-
-<span class="sd">    This function supports multiple levels of normalization strategies. Before normalization, it ensures that</span>
-<span class="sd">    any constant term in the Hamiltonian is removed.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        ham (QubitOperator): The Hamiltonian to normalize.</span>
-<span class="sd">        level (int, optional): Specifies the normalization strategy:</span>
-<span class="sd">            - level = 0: Uses the Pauli 1-norm for normalization.</span>
-<span class="sd">            - level = 1: Applies the Sorted Insertion (SI) method based on commutation relationships.</span>
-<span class="sd">            - level = 2: Uses the optimally sorted insertion (SI) method that minimizes norms.</span>
-<span class="sd">        **kwargs: Additional arguments for optimization when `level=2`.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Tuple[QubitOperator, float]: A tuple where the first element is the normalized Hamiltonian,</span>
-<span class="sd">                                     and the second element is the calculated norm.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        ValueError: If the Hamiltonian contains a constant term or if the specified level is invalid.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ofex.measurement</span> <span class="kn">import</span> <span class="n">sorted_insertion</span><span class="p">,</span> <span class="n">optimal_sorted_insertion</span>
-
-    <span class="k">if</span> <span class="p">()</span> <span class="ow">in</span> <span class="n">ham</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">ham</span><span class="o">.</span><span class="n">terms</span><span class="p">[()],</span> <span class="mf">0.0</span><span class="p">):</span>
-            <span class="k">del</span> <span class="n">ham</span><span class="o">.</span><span class="n">terms</span><span class="p">[()]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make trace zero before the normalization (Remove the constant term).&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">ham</span><span class="o">.</span><span class="n">induced_norm</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">level</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">si_out</span> <span class="o">=</span> <span class="n">sorted_insertion</span><span class="p">(</span><span class="n">ham</span><span class="p">,</span> <span class="n">anticommute</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">si_out</span> <span class="o">=</span> <span class="n">optimal_sorted_insertion</span><span class="p">(</span><span class="n">ham</span><span class="p">,</span> <span class="n">anticommute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">l2_norm_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">frag</span><span class="o">.</span><span class="n">induced_norm</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">frag</span> <span class="ow">in</span> <span class="n">si_out</span><span class="p">]</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">l2_norm_list</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span>
-    <span class="k">return</span> <span class="n">ham</span><span class="o">/</span><span class="n">norm</span><span class="p">,</span> <span class="n">norm</span></div>
 
 </pre></div>
         </article>

@@ -250,59 +250,60 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for ofex.clifford.pauli_diagonalization</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 
+<span class="kn">import</span> <span class="nn">galois</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">galois</span> <span class="kn">import</span> <span class="n">FieldArray</span>
 <span class="kn">from</span> <span class="nn">openfermion</span> <span class="kn">import</span> <span class="n">QubitOperator</span>
 
-<span class="kn">from</span> <span class="nn">ofex.clifford.clifford_tools</span> <span class="kn">import</span> <span class="n">pauli_to_tableau</span><span class="p">,</span> <span class="n">gf</span><span class="p">,</span> <span class="n">str_tableau_side_by_side</span><span class="p">,</span> <span class="n">str_tableau</span>
+<span class="kn">from</span> <span class="nn">ofex.clifford.clifford_tools</span> <span class="kn">import</span> <span class="n">pauli_to_tableau</span><span class="p">,</span> <span class="n">str_tableau_side_by_side</span><span class="p">,</span> <span class="n">str_tableau</span>
 <span class="kn">from</span> <span class="nn">ofex.clifford.simulation</span> <span class="kn">import</span> <span class="n">clifford_apply</span>
 <span class="kn">from</span> <span class="nn">ofex.clifford.standard_operators</span> <span class="kn">import</span> <span class="n">hadamard</span><span class="p">,</span> <span class="n">clifford_op_str</span><span class="p">,</span> <span class="n">cx</span><span class="p">,</span> <span class="n">cz</span><span class="p">,</span> <span class="n">s_gate</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;diagonalizing_clifford&quot;</span><span class="p">]</span>
-
 <span class="kn">from</span> <span class="nn">ofex.utils.binary_matrix</span> <span class="kn">import</span> <span class="n">gf_is_zero</span><span class="p">,</span> <span class="n">gf_is_equal</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;diagonalizing_clifford_tableau&quot;</span><span class="p">,</span> <span class="s2">&quot;diagonalizing_clifford&quot;</span><span class="p">]</span>
+<span class="n">gf</span> <span class="o">=</span> <span class="n">galois</span><span class="o">.</span><span class="n">GF</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-<div class="viewcode-block" id="diagonalizing_clifford">
-<a class="viewcode-back" href="../../../ofex.clifford.html#ofex.clifford.diagonalizing_clifford">[docs]</a>
-<span class="k">def</span> <span class="nf">diagonalizing_clifford</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">],</span> <span class="n">QubitOperator</span><span class="p">],</span>
-                           <span class="n">num_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                           <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> \
+
+<div class="viewcode-block" id="diagonalizing_clifford_tableau">
+<a class="viewcode-back" href="../../../ofex.clifford.html#ofex.clifford.diagonalizing_clifford_tableau">[docs]</a>
+<span class="k">def</span> <span class="nf">diagonalizing_clifford_tableau</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">FieldArray</span><span class="p">,</span>
+                                   <span class="n">coeff_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> \
         <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FieldArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Diagonalizes a set of mutually commuting Pauli operators using Clifford gates.</span>
-<span class="sd">    </span>
-<span class="sd">    This function computes the Clifford operations needed to transform a set of commuting </span>
-<span class="sd">    Pauli operators into a diagonal form, represented by a Pauli tableau. It ensures </span>
-<span class="sd">    commutation among the input operators, generates the tableau, and applies gate </span>
-<span class="sd">    transformations step by step to achieve diagonalization.</span>
-<span class="sd">    </span>
+
+<span class="sd">    This function computes the Clifford operations needed to transform a set of commuting</span>
+<span class="sd">    Pauli operators into a diagonal form, represented by a Pauli tableau. It ensures</span>
+<span class="sd">    The operations ensure commutation among the input operators and apply transformations</span>
+<span class="sd">    step by step to achieve diagonalization. The resulting tableau contains Z-type operators</span>
+<span class="sd">    where the upper portion is set to zero.</span>
+
 <span class="sd">    Parameters:</span>
-<span class="sd">        pauli_list (Union[List[QubitOperator], QubitOperator]): A single or list of </span>
-<span class="sd">            mutually commuting Pauli operators.</span>
-<span class="sd">        num_qubits (int): The number of qubits involved in the operators.</span>
-<span class="sd">        debug (bool, optional): If True, outputs debug information for intermediate </span>
-<span class="sd">            transformation steps. Defaults to False.</span>
+<span class="sd">        mat (FieldArray): A binary matrix (Pauli tableau) representing the Pauli operators. </span>
+<span class="sd">        coeff_list (Optional[np.ndarray], optional): An array of coefficients corresponding </span>
+<span class="sd">            to the operators in the Pauli tableau. If None, a default array of ones is used. </span>
+<span class="sd">        debug (bool, optional): If set to True, additional debug information will be </span>
+<span class="sd">            printed for each step, showing intermediate transformations. Defaults to False.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[FieldArray, np.ndarray, List[str]]:</span>
 <span class="sd">            - mat (FieldArray): A Pauli tableau of diagonalized operators.</span>
 <span class="sd">                These are Z-type operators, and the upper half is zero.</span>
 <span class="sd">            - coeff (np.ndarray): The coefficients of the transformed Pauli operators.</span>
-<span class="sd">            - clifford_history (List[str]): A log of the Clifford operations (as strings) </span>
+<span class="sd">            - clifford_history (List[str]): A log of the Clifford operations (as strings)</span>
 <span class="sd">                applied during the diagonalization process.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If the input Pauli operators do not commute.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="n">a_mat</span> <span class="o">=</span> <span class="n">gf</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
     <span class="n">clifford_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">coeff_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">coeff_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">a_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="c1"># INIT</span>
-    <span class="n">a_mat</span><span class="p">,</span> <span class="n">a_coeff</span> <span class="o">=</span> <span class="n">pauli_to_tableau</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span>
-    <span class="n">a_mat</span> <span class="o">=</span> <span class="n">gf</span><span class="p">(</span><span class="n">a_mat</span><span class="p">)</span>
     <span class="n">num_qubits</span><span class="p">,</span> <span class="n">num_paulis</span> <span class="o">=</span> <span class="n">a_mat</span><span class="o">.</span><span class="n">shape</span>
     <span class="k">assert</span> <span class="n">num_qubits</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
     <span class="n">num_qubits</span> <span class="o">=</span> <span class="n">num_qubits</span> <span class="o">//</span> <span class="mi">2</span>
@@ -455,8 +456,51 @@
     <span class="c1"># Final check</span>
     <span class="n">a_mat</span><span class="p">,</span> <span class="n">a_ph</span> <span class="o">=</span> <span class="n">clifford_apply</span><span class="p">(</span><span class="n">a_mat</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">clifford_list</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">gf_is_zero</span><span class="p">(</span><span class="n">a_mat</span><span class="p">[:</span><span class="n">num_qubits</span><span class="p">,</span> <span class="p">:]):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">)</span>
-    <span class="n">a_coeff</span> <span class="o">=</span> <span class="n">a_coeff</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="n">p</span> <span class="k">else</span> <span class="mf">1.0</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">a_ph</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Non-commuting set!&quot;</span><span class="p">)</span>
+    <span class="n">coeff_list</span> <span class="o">=</span> <span class="n">coeff_list</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="n">p</span> <span class="k">else</span> <span class="mf">1.0</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">a_ph</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">a_mat</span><span class="p">,</span> <span class="n">coeff_list</span><span class="p">,</span> <span class="n">clifford_list</span></div>
+
+
+
+<div class="viewcode-block" id="diagonalizing_clifford">
+<a class="viewcode-back" href="../../../ofex.clifford.html#ofex.clifford.diagonalizing_clifford">[docs]</a>
+<span class="k">def</span> <span class="nf">diagonalizing_clifford</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">],</span> <span class="n">QubitOperator</span><span class="p">],</span>
+                           <span class="n">num_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                           <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FieldArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Diagonalizes a set of mutually commuting Pauli operators using Clifford gates.</span>
+<span class="sd">    </span>
+<span class="sd">    This function computes the Clifford operations needed to transform a set of commuting </span>
+<span class="sd">    Pauli operators into a diagonal form, represented by a Pauli tableau. It ensures </span>
+<span class="sd">    commutation among the input operators, generates the tableau, and applies gate </span>
+<span class="sd">    transformations step by step to achieve diagonalization.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        pauli_list (Union[List[QubitOperator], QubitOperator]): A single or list of </span>
+<span class="sd">            mutually commuting Pauli operators.</span>
+<span class="sd">        num_qubits (int): The number of qubits involved in the operators.</span>
+<span class="sd">        debug (bool, optional): If True, outputs debug information for intermediate </span>
+<span class="sd">            transformation steps. Defaults to False.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[FieldArray, np.ndarray, List[str]]:</span>
+<span class="sd">            - mat (FieldArray): A Pauli tableau of diagonalized operators.</span>
+<span class="sd">                These are Z-type operators, and the upper half is zero.</span>
+<span class="sd">            - coeff (np.ndarray): The coefficients of the transformed Pauli operators.</span>
+<span class="sd">            - clifford_history (List[str]): A log of the Clifford operations (as strings) </span>
+<span class="sd">                applied during the diagonalization process.</span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the input Pauli operators do not commute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># INIT</span>
+    <span class="n">a_mat</span><span class="p">,</span> <span class="n">a_coeff</span> <span class="o">=</span> <span class="n">pauli_to_tableau</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">a_mat</span><span class="p">,</span> <span class="n">a_coeff</span><span class="p">,</span> <span class="n">clifford_list</span> <span class="o">=</span> <span class="n">diagonalizing_clifford_tableau</span><span class="p">(</span><span class="n">a_mat</span><span class="p">,</span> <span class="n">a_coeff</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
     <span class="k">return</span> <span class="n">a_mat</span><span class="p">,</span> <span class="n">a_coeff</span><span class="p">,</span> <span class="n">clifford_list</span></div>
 
 </pre></div>

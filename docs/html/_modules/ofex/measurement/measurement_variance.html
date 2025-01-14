@@ -328,7 +328,7 @@
 <span class="sd">            Array defining measurement shot counts:</span>
 
 <span class="sd">            - If 1D (shape ``[n]``): Represents real shot counts ``m_{R,j}``; applicable for single-state variance.</span>
-<span class="sd">            - If 2D (shape ``[n, 2]``): Represents real ``m_{R,j}`` and imaginary ``m_{I,j}`` shot counts; used for</span>
+<span class="sd">            - If 2D (shape ``[2, n]``): Represents real ``m_{R,j}`` and imaginary ``m_{I,j}`` shot counts; used for</span>
 <span class="sd">              transition-state variance.</span>
 
 <span class="sd">        true_cov_dict (Optional[Union[PauliCovDict, TransitionPauliCovDict]]):</span>
@@ -342,8 +342,8 @@
 <span class="sd">            Total computed variance, calculated as a sum of contributions from all Pauli operator groups.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">shots</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">shots_real</span> <span class="o">=</span> <span class="n">shots</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">shots_imag</span> <span class="o">=</span> <span class="n">shots</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">shots_real</span> <span class="o">=</span> <span class="n">shots</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">shots_imag</span> <span class="o">=</span> <span class="n">shots</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">transition</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">elif</span> <span class="n">shots</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">shots_real</span> <span class="o">=</span> <span class="n">shots</span><span class="p">[:,</span> <span class="p">]</span>
@@ -364,10 +364,10 @@
                 <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">coeff_p</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">coeff_q</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">transition</span><span class="p">:</span>
-                    <span class="n">tot_var</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">coeff_p</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">coeff_q</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">true_cov_dict</span><span class="p">[</span><span class="n">cov_key</span><span class="p">]</span> <span class="o">/</span> <span class="n">shots_real</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="n">tot_var</span> <span class="o">+=</span> <span class="n">coeff_p</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">coeff_q</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">true_cov_dict</span><span class="p">[</span><span class="n">cov_key</span><span class="p">]</span> <span class="o">/</span> <span class="n">shots_real</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">re</span><span class="p">,</span> <span class="n">im</span> <span class="o">=</span> <span class="n">true_cov_dict</span><span class="p">[</span><span class="n">cov_key</span><span class="p">]</span>
-                    <span class="n">tot_var</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">coeff_p</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">coeff_q</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="p">(</span><span class="n">re</span> <span class="o">/</span> <span class="n">shots_real</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">im</span> <span class="o">/</span> <span class="n">shots_imag</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                    <span class="n">tot_var</span> <span class="o">+=</span> <span class="n">coeff_p</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">coeff_q</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="p">(</span><span class="n">re</span> <span class="o">/</span> <span class="n">shots_real</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">im</span> <span class="o">/</span> <span class="n">shots_imag</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">state1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input state(s) should be given unless true_cov_dict is provided.&quot;</span><span class="p">)</span>
@@ -376,6 +376,7 @@
                              <span class="s2">&quot;must be None otherwise.&quot;</span><span class="p">)</span>
         <span class="n">n_qubits</span> <span class="o">=</span> <span class="n">get_num_qubits</span><span class="p">(</span><span class="n">state1</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">grp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grp_ham</span><span class="p">):</span>
+            <span class="c1">#TODO: Parallelize here</span>
             <span class="n">op_grp</span> <span class="o">=</span> <span class="n">LinearQubitOperator</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">n_qubits</span><span class="o">=</span><span class="n">n_qubits</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">state2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">anticommute</span><span class="p">:</span>
@@ -399,7 +400,7 @@
                 <span class="n">mr</span><span class="p">,</span> <span class="n">mi</span> <span class="o">=</span> <span class="n">shots_real</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">shots_imag</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
                 <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">ov2</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
                 <span class="n">ov2</span> <span class="o">=</span> <span class="n">ov2</span><span class="o">.</span><span class="n">real</span>
-                <span class="n">tot_var</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">ov2</span> <span class="o">-</span> <span class="n">ov</span><span class="o">.</span><span class="n">real</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">mr</span> <span class="o">+</span> <span class="p">(</span><span class="n">ov2</span> <span class="o">-</span> <span class="n">ov</span><span class="o">.</span><span class="n">imag</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">mi</span><span class="p">)</span>
+                <span class="n">tot_var</span> <span class="o">+=</span> <span class="p">((</span><span class="n">ov2</span> <span class="o">-</span> <span class="n">ov</span><span class="o">.</span><span class="n">real</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">mr</span> <span class="o">+</span> <span class="p">(</span><span class="n">ov2</span> <span class="o">-</span> <span class="n">ov</span><span class="o">.</span><span class="n">imag</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">mi</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tot_var</span></div>
 
 
@@ -474,7 +475,11 @@
         <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fname_list</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                    <span class="n">loaded_cov_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">loaded_cov_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">EOFError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">e</span>
                 <span class="n">cov_dict_list</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">loaded_cov_dict</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cov_dict Loaded from </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>

@@ -261,6 +261,43 @@
 <p>This module provides tools and utilities for working with various quantum operators.</p>
 <p>It includes tools for handling Fermionic and Qubit operators, symbolic operator manipulations,
 ordering operations, and type definitions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.operators.normalize_by_lcu_norm">
+<span class="sig-prename descclassname"><span class="pre">ofex.operators.</span></span><span class="sig-name descname"><span class="pre">normalize_by_lcu_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/operators/qubit_operator_normalize.html#normalize_by_lcu_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.operators.normalize_by_lcu_norm" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize a QubitOperator using different methods to calculate its Linear Combination of Unitaries (LCU) norm.</p>
+<p>The eigenspectrum of the normalized operator is guaranteed to be less than one, while this computation is
+much more efficient than normalization by spectral norm.
+Better normalization makes the spectrum more separated within the range [-1, 1], which corresponds to
+normalization using smaller norms.</p>
+<p>This function supports multiple levels of normalization strategies. Before normalization, it ensures that
+any constant term in the Hamiltonian is removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ham</strong> (<em>QubitOperator</em>) – The Hamiltonian to normalize.</p></li>
+<li><p><strong>level</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies the normalization strategy:
+- level = 0: Uses the Pauli 1-norm for normalization.
+- level = 1: Applies the Sorted Insertion (SI) method based on commutation relationships.
+- level = 2: Uses the optimally sorted insertion (SI) method that minimizes norms.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments for optimization when <cite>level=2</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple where the first element is the normalized Hamiltonian,</dt><dd><p>and the second element is the calculated norm.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[QubitOperator, float]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the Hamiltonian contains a constant term or if the specified level is invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <section id="module-ofex.operators.fermion_operator_tools">
 <span id="ofex-operators-fermion-operator-tools"></span><h2>ofex.operators.fermion_operator_tools<a class="headerlink" href="#module-ofex.operators.fermion_operator_tools" title="Link to this heading">¶</a></h2>
 <p>This module contains a collection of tools for manipulating and analyzing fermionic operators.</p>
@@ -461,43 +498,6 @@ ensure its eigenspectrum resides in [-1, 1].</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – If either operator has an imaginary coefficient.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ofex.operators.qubit_operator_tools.normalize_by_lcu_norm">
-<span class="sig-prename descclassname"><span class="pre">ofex.operators.qubit_operator_tools.</span></span><span class="sig-name descname"><span class="pre">normalize_by_lcu_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QubitOperator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/operators/qubit_operator_tools.html#normalize_by_lcu_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.operators.qubit_operator_tools.normalize_by_lcu_norm" title="Link to this definition">¶</a></dt>
-<dd><p>Normalize a QubitOperator using different methods to calculate its Linear Combination of Unitaries (LCU) norm.</p>
-<p>The eigenspectrum of the normalized operator is guaranteed to be less than one, while this computation is
-much more efficient than normalization by spectral norm.
-Better normalization makes the spectrum more separated within the range [-1, 1], which corresponds to
-normalization using smaller norms.</p>
-<p>This function supports multiple levels of normalization strategies. Before normalization, it ensures that
-any constant term in the Hamiltonian is removed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ham</strong> (<em>QubitOperator</em>) – The Hamiltonian to normalize.</p></li>
-<li><p><strong>level</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies the normalization strategy:
-- level = 0: Uses the Pauli 1-norm for normalization.
-- level = 1: Applies the Sorted Insertion (SI) method based on commutation relationships.
-- level = 2: Uses the optimally sorted insertion (SI) method that minimizes norms.</p></li>
-<li><p><strong>**kwargs</strong> – Additional arguments for optimization when <cite>level=2</cite>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>A tuple where the first element is the normalized Hamiltonian,</dt><dd><p>and the second element is the calculated norm.</p>
-</dd>
-</dl>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Tuple[QubitOperator, float]</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the Hamiltonian contains a constant term or if the specified level is invalid.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -749,6 +749,7 @@ qubit, and fermionic operators in quantum computing.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">ofex.operators</a><ul>
+<li><a class="reference internal" href="#ofex.operators.normalize_by_lcu_norm"><code class="docutils literal notranslate"><span class="pre">normalize_by_lcu_norm()</span></code></a></li>
 <li><a class="reference internal" href="#module-ofex.operators.fermion_operator_tools">ofex.operators.fermion_operator_tools</a><ul>
 <li><a class="reference internal" href="#ofex.operators.fermion_operator_tools.cre_ann"><code class="docutils literal notranslate"><span class="pre">cre_ann()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.operators.fermion_operator_tools.is_number_only"><code class="docutils literal notranslate"><span class="pre">is_number_only()</span></code></a></li>
@@ -762,7 +763,6 @@ qubit, and fermionic operators in quantum computing.</p>
 <li><a class="reference internal" href="#module-ofex.operators.qubit_operator_tools">ofex.operators.qubit_operator_tools</a><ul>
 <li><a class="reference internal" href="#ofex.operators.qubit_operator_tools.is_z_only"><code class="docutils literal notranslate"><span class="pre">is_z_only()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.operators.qubit_operator_tools.single_pauli_commute_chk"><code class="docutils literal notranslate"><span class="pre">single_pauli_commute_chk()</span></code></a></li>
-<li><a class="reference internal" href="#ofex.operators.qubit_operator_tools.normalize_by_lcu_norm"><code class="docutils literal notranslate"><span class="pre">normalize_by_lcu_norm()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-ofex.operators.symbolic_operator_tools">ofex.operators.symbolic_operator_tools</a><ul>

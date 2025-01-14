@@ -18,16 +18,12 @@ from ofex.operators.fermion_operator_tools import one_body_excitation
 from ofex.state.binary_fock import BinaryFockVector
 from ofex.state.state_tools import norm
 from ofex.state.types import SparseStateDict
-from ofex.transforms.fermion_qubit import fermion_to_qubit_state
 from ofex.utils.chem import run_driver
 
 __all__ = ["hf_ground", "cisd_ground", "csf_states"]
 
 
-def hf_ground(mol: MolecularData,
-              active_idx: Optional[List[int]] = None,
-              fermion_to_qubit_map: Optional[str] = None,
-              **kwargs) -> SparseStateDict:
+def hf_ground(mol: MolecularData, active_idx: Optional[List[int]] = None) -> SparseStateDict:
     # TODO: access attributes of `mol` and find the ground state.
     """
     Generate the Hartree-Fock ground state as a sparse state dictionary.
@@ -35,8 +31,6 @@ def hf_ground(mol: MolecularData,
     Args:
         mol: An instance of MolecularData which contains molecule information.
         active_idx: List of indices specifying the active orbitals. If None, all orbitals are active.
-        fermion_to_qubit_map: Optional string specifying the mapping from fermions to qubits.
-        **kwargs: Additional arguments for fermion to qubit mapping.
 
     Returns:
         SparseStateDict: A dictionary representing the Hartree-Fock ground state.
@@ -46,8 +40,6 @@ def hf_ground(mol: MolecularData,
         active_idx = list(range(n_spinorb))
     fock_vector = [1 if idx < n_electrons else 0 for idx in active_idx]
     state = dict({BinaryFockVector(fock_vector): 1.0})
-    if fermion_to_qubit_map is not None:
-        state = fermion_to_qubit_state(state, fermion_to_qubit_map, **kwargs)
     return state
 
 

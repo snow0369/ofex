@@ -1,0 +1,759 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>ofex.transforms.pauli_qubit_reduction - ofex 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">ofex 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">ofex 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../modules.html">ofex</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ofex</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../ofex.html">ofex package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ofex package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.clifford.html">ofex.clifford</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.hamiltonian.html">ofex.hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.linalg.html">ofex.linalg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.measurement.html">ofex.measurement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.operators.html">ofex.operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.propagator.html">ofex.propagator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.sampling_simulation.html">ofex.sampling_simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.state.html">ofex.state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.transforms.html">ofex.transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.utils.html">ofex.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for ofex.transforms.pauli_qubit_reduction</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">import</span> <span class="nn">galois</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">galois</span> <span class="kn">import</span> <span class="n">FieldArray</span>
+<span class="kn">from</span> <span class="nn">openfermion</span> <span class="kn">import</span> <span class="n">QubitOperator</span><span class="p">,</span> <span class="n">commutator</span>
+<span class="kn">from</span> <span class="nn">openfermion.transforms.opconversions.remove_symmetry_qubits</span> <span class="kn">import</span> <span class="n">remove_indices</span>
+
+<span class="kn">from</span> <span class="nn">ofex.classical_algorithms.clique</span> <span class="kn">import</span> <span class="n">find_max_clique</span>
+<span class="kn">from</span> <span class="nn">ofex.clifford</span> <span class="kn">import</span> <span class="n">pauli_to_tableau</span><span class="p">,</span> <span class="n">dot_tableau</span><span class="p">,</span> <span class="n">diagonalizing_clifford_tableau</span><span class="p">,</span> <span class="n">tableau_to_pauli</span><span class="p">,</span> \
+    <span class="n">clifford_apply_pauli</span><span class="p">,</span> <span class="n">clifford_simulation</span><span class="p">,</span> <span class="n">clifford_apply</span>
+<span class="kn">from</span> <span class="nn">ofex.clifford.clifford_tools</span> <span class="kn">import</span> <span class="n">locality</span>
+<span class="kn">from</span> <span class="nn">ofex.clifford.standard_operators</span> <span class="kn">import</span> <span class="n">hadamard</span>
+<span class="kn">from</span> <span class="nn">ofex.linalg.sparse_tools</span> <span class="kn">import</span> <span class="n">apply_operator</span>
+<span class="kn">from</span> <span class="nn">ofex.operators.qubit_operator_tools</span> <span class="kn">import</span> <span class="n">single_pauli_commute_chk</span>
+<span class="kn">from</span> <span class="nn">ofex.operators.symbolic_operator_tools</span> <span class="kn">import</span> <span class="n">single_term</span>
+<span class="kn">from</span> <span class="nn">ofex.state.state_tools</span> <span class="kn">import</span> <span class="n">to_sparse_dict</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">compress_sparse</span><span class="p">,</span> <span class="n">normalize</span><span class="p">,</span> <span class="n">state_type_transform</span>
+<span class="kn">from</span> <span class="nn">ofex.state.types</span> <span class="kn">import</span> <span class="n">State</span><span class="p">,</span> <span class="n">SparseStateDict</span><span class="p">,</span> <span class="n">type_state</span>
+<span class="kn">from</span> <span class="nn">ofex.transforms.fermion_qubit</span> <span class="kn">import</span> <span class="n">remove_indices_state</span>
+<span class="kn">from</span> <span class="nn">ofex.utils.binary_matrix</span> <span class="kn">import</span> <span class="n">gf_concatenate</span><span class="p">,</span> <span class="n">gf_eye</span><span class="p">,</span> <span class="n">gf_is_zero</span><span class="p">,</span> <span class="n">gf_is_equal</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;find_pauli_symmetry&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit_reduction_operator&quot;</span><span class="p">,</span> <span class="s2">&quot;qubit_reduction_state&quot;</span><span class="p">]</span>
+
+<span class="n">gf</span> <span class="o">=</span> <span class="n">galois</span><span class="o">.</span><span class="n">GF</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="find_pauli_symmetry">
+<a class="viewcode-back" href="../../../ofex.transforms.html#ofex.transforms.find_pauli_symmetry">[docs]</a>
+<span class="k">def</span> <span class="nf">find_pauli_symmetry</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">],</span> <span class="n">QubitOperator</span><span class="p">],</span>
+                        <span class="n">num_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,)</span> \
+        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">FieldArray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">QubitOperator</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identifies Pauli symmetry operators within a given (list of) QubitOperators.</span>
+<span class="sd">    Pauli symmetry operators(:math:`\hat{S}_k`) commute with all input pauli operators(:math:`\hat{H}`):</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \hat{H}= \sum_j \alpha_j \hat{P}_j</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        [\hat{S}_k, \hat{P}_j] = 0 \quad \forall k, j \quad\mathrm{thus, }\quad [\hat{S}_k, \hat{H}] = 0 \quad\forall k.</span>
+
+<span class="sd">    Symmetry operators are selected with maximal mutual commutativity:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \mathcal{S}_M=arg\,max_{\mathcal{S}}|\mathcal{S}|\quad \mathrm{s.t. }\quad</span>
+<span class="sd">        \mathcal{S}\subseteq \{\hat{S}_k: \forall k\}, \quad [\hat{S}_k,</span>
+<span class="sd">        \hat{S}_l] = 0 \quad \forall \hat{S}_k, \hat{S}_l \in \mathcal{S}.</span>
+
+
+<span class="sd">    Symmetry operators are diagonalized as X-type by applying the following Clifford transformation:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \hat{S}^{(X)}_k = \hat{C} \hat{S}_k \hat{C}^{\dagger} \quad \forall \hat{S}_k \in \mathcal{S}_M.</span>
+
+<span class="sd">    For each symmetry operator :math:`\hat{S}^{(X)}_k`, a qubit :math:`q(k)` is selected such that:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \{\hat{S}^{(X)}_k, \hat{Z}_{q(k)}\} = 0 \quad [\hat{S}^{(X)}_k, \hat{Z}_{q(l)}] = 0 \quad \forall k \neq l.</span>
+
+<span class="sd">    Then the following unitary operator is constructed:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \hat{U} = \prod_{k=1}^M \frac{1}{\sqrt{2}}(\hat{S}^{(X)}_k + \hat{Z}_{q(k)}).</span>
+
+<span class="sd">    Which block diagonalizes the input Pauli operators:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \hat{H}_{\mathrm{sym}} = \hat{U} \hat{C} \hat{H} \hat{C}^{\dagger} \hat{U}^{\dagger}</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        [\hat{H}_{\mathrm{sym}}, \hat{Z}_{q(k)}] = 0 \quad \forall k.</span>
+
+<span class="sd">    Refer to `arXiv:1701.08213 &lt;https://arxiv.org/abs/1701.08213&gt;`_ for more details.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pauli_list (Union[List[QubitOperator], QubitOperator]): Input list of QubitOperators or </span>
+<span class="sd">            a single QubitOperator from which the symmetry is to be found.</span>
+<span class="sd">        num_qubits (int): The number of qubits in the system.</span>
+<span class="sd">        debug (bool): If True, validate the symmetry operators found.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[FieldArray, List[str], List[int], QubitOperator]: A tuple containing:</span>
+<span class="sd">            - The final symmetry operators in tableau form (FieldArray).</span>
+<span class="sd">            - The Clifford transformations :math:`\hat{C}` as a list of string representations.</span>
+<span class="sd">            - The indices of qubits :math:`q(k)` involved in symmetry operations.</span>
+<span class="sd">            - A unitary operator :math:`\hat{U}` block diagonalizing the input Pauli operators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check types and remove constant term.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">,</span> <span class="n">QubitOperator</span><span class="p">)</span> <span class="ow">and</span> <span class="p">()</span> <span class="ow">in</span> <span class="n">pauli_list</span><span class="o">.</span><span class="n">terms</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">pauli_list</span><span class="o">.</span><span class="n">terms</span><span class="p">[()]</span>
+        <span class="k">del</span> <span class="n">pauli_list</span><span class="o">.</span><span class="n">terms</span><span class="p">[()]</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s1">&#39;Constant term is ignored.&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">new_pauli_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">pauli_list</span><span class="p">:</span>
+            <span class="n">op</span><span class="p">,</span> <span class="n">coeff</span> <span class="o">=</span> <span class="n">single_term</span><span class="p">(</span><span class="n">pauli</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="p">():</span>
+                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s1">&#39;Constant term is ignored.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_pauli_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pauli</span><span class="p">)</span>
+        <span class="n">pauli_list</span> <span class="o">=</span> <span class="n">new_pauli_list</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span>
+
+    <span class="c1"># Set up the E matrix</span>
+    <span class="c1"># E = [E_x | E_z], E_x = G_z^T, E_z = G_x^T</span>
+    <span class="n">g_mat</span><span class="p">,</span> <span class="n">coeff_list</span> <span class="o">=</span> <span class="n">pauli_to_tableau</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span>
+    <span class="n">gx</span><span class="p">,</span> <span class="n">gz</span> <span class="o">=</span> <span class="n">g_mat</span><span class="p">[:</span><span class="n">num_qubits</span><span class="p">,</span> <span class="p">:],</span> <span class="n">g_mat</span><span class="p">[</span><span class="n">num_qubits</span><span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">e_mat</span> <span class="o">=</span> <span class="n">gf_concatenate</span><span class="p">((</span><span class="n">gz</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">gx</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Null space finding</span>
+    <span class="n">symm</span> <span class="o">=</span> <span class="n">e_mat</span><span class="o">.</span><span class="n">null_space</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">gf_is_zero</span><span class="p">(</span><span class="n">e_mat</span> <span class="o">@</span> <span class="n">symm</span><span class="p">)</span>
+
+    <span class="c1"># Find the maximally compatible symmetries.</span>
+    <span class="c1"># Since dot_tableau returns anticommutation, logical NOT is done by using &#39;ones&#39;.</span>
+    <span class="c1"># As we are not interested in self-commutation, which is trivial, we add &#39;eye&#39;.</span>
+    <span class="n">n_op</span> <span class="o">=</span> <span class="n">symm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">comm</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">Ones</span><span class="p">((</span><span class="n">n_op</span><span class="p">,</span> <span class="n">n_op</span><span class="p">))</span> <span class="o">+</span> <span class="n">gf_eye</span><span class="p">(</span><span class="n">n_op</span><span class="p">)</span> <span class="o">+</span> <span class="n">dot_tableau</span><span class="p">(</span><span class="n">symm</span><span class="p">,</span> <span class="n">symm</span><span class="p">)</span>
+    <span class="c1"># Find maximal mutually commuting symmetries (clique finding in the commutation graph).</span>
+    <span class="n">idxs_max_symm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">find_max_clique</span><span class="p">(</span><span class="n">comm</span><span class="p">))</span>
+    <span class="n">symm</span> <span class="o">=</span> <span class="n">symm</span><span class="p">[:,</span> <span class="n">idxs_max_symm</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">n_max_op</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idxs_max_symm</span><span class="p">)</span>
+        <span class="n">symm_p_list</span> <span class="o">=</span> <span class="n">tableau_to_pauli</span><span class="p">(</span><span class="n">symm</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_max_op</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">dot_tableau</span><span class="p">(</span><span class="n">symm</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">symm</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">assert</span> <span class="n">single_pauli_commute_chk</span><span class="p">(</span><span class="n">symm_p_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">symm_p_list</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">pham</span> <span class="o">=</span> <span class="n">QubitOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">pauli_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pham</span> <span class="o">=</span> <span class="n">pauli_list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_max_op</span><span class="p">):</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="n">commutator</span><span class="p">(</span><span class="n">pham</span><span class="p">,</span> <span class="n">symm_p_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">comm</span><span class="o">.</span><span class="n">compress</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">comm</span> <span class="o">==</span> <span class="n">QubitOperator</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+
+    <span class="c1"># Perform gaussian elimination to generate z-only symmetry operators.</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">symm_after</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">symm_clifford_list</span> <span class="o">=</span> <span class="n">diagonalizing_clifford_tableau</span><span class="p">(</span><span class="n">symm</span><span class="p">)</span>
+        <span class="n">symm_after_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">clifford_apply</span><span class="p">(</span><span class="n">symm</span><span class="p">,</span> <span class="n">ph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clifford_hist</span><span class="o">=</span><span class="n">symm_clifford_list</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">gf_is_equal</span><span class="p">(</span><span class="n">symm_after</span><span class="p">,</span> <span class="n">symm_after_comp</span><span class="p">)</span>
+        <span class="n">symm_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">clifford_apply</span><span class="p">(</span><span class="n">symm_after</span><span class="p">,</span> <span class="n">ph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clifford_hist</span><span class="o">=</span><span class="n">symm_clifford_list</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">gf_is_equal</span><span class="p">(</span><span class="n">symm</span><span class="p">,</span> <span class="n">symm_comp</span><span class="p">)</span>
+
+        <span class="n">symm</span> <span class="o">=</span> <span class="n">symm_after</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">symm</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">symm_clifford_list</span> <span class="o">=</span> <span class="n">diagonalizing_clifford_tableau</span><span class="p">(</span><span class="n">symm</span><span class="p">)</span>
+    <span class="c1"># Minimize the locality of symmetry operators by iteratively evaluating pairwise combinations </span>
+    <span class="c1"># and modifying the matrix such that the sum of operator localities is reduced.</span>
+    <span class="n">symm</span> <span class="o">=</span> <span class="n">minimize_locality</span><span class="p">(</span><span class="n">symm</span><span class="p">)</span>
+
+    <span class="c1"># Find non-trivial qubits</span>
+    <span class="n">non_trivial_qubits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">locality</span><span class="p">(</span><span class="n">symm</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+    <span class="c1"># Convert symmetry operator to X-type operators</span>
+    <span class="n">tmp_phase</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">Zeros</span><span class="p">(</span><span class="n">symm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">non_trivial_qubits</span><span class="p">:</span>
+        <span class="n">symm</span><span class="p">,</span> <span class="n">tmp_phase</span> <span class="o">=</span> <span class="n">hadamard</span><span class="p">(</span><span class="n">symm</span><span class="p">,</span> <span class="n">tmp_phase</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">symm_clifford_list</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">gf_is_zero</span><span class="p">(</span><span class="n">symm</span><span class="p">[</span><span class="n">num_qubits</span><span class="p">:,</span> <span class="p">:])</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">pham_clifford</span> <span class="o">=</span> <span class="n">clifford_apply_pauli</span><span class="p">(</span><span class="n">pham</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">,</span> <span class="n">symm_clifford_list</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">symm_p_list</span> <span class="o">=</span> <span class="n">tableau_to_pauli</span><span class="p">(</span><span class="n">symm</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">symm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">comm</span> <span class="o">=</span> <span class="n">commutator</span><span class="p">(</span><span class="n">pham_clifford</span><span class="p">,</span> <span class="n">symm_p_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">comm</span><span class="o">.</span><span class="n">compress</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="n">comm</span> <span class="o">==</span> <span class="n">QubitOperator</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+
+    <span class="c1"># CHC† commutes with σ_z(q(i)) with the following qubits</span>
+    <span class="n">symm_qubits</span> <span class="o">=</span> <span class="n">select_symm_qubits</span><span class="p">(</span><span class="n">symm</span><span class="p">)</span>
+    <span class="n">symm_unitary</span> <span class="o">=</span> <span class="n">construct_symmetry_unitary</span><span class="p">(</span><span class="n">symm</span><span class="p">,</span> <span class="n">symm_qubits</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">symm</span><span class="p">,</span> <span class="n">symm_clifford_list</span><span class="p">,</span> <span class="n">symm_qubits</span><span class="p">,</span> <span class="n">symm_unitary</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">minimize_locality</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">FieldArray</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Minimizes the locality of input symmetry operators by iteratively combining pairs of operators</span>
+<span class="sd">    to reduce the overall locality cost.</span>
+
+<span class="sd">    Locality is defined as the number of qubits involved in a symmetry operator. This function </span>
+<span class="sd">    evaluates pairwise combinations of the operators and reduces their locality while ensuring </span>
+<span class="sd">    the commutation relations are preserved.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mat (FieldArray): A 2N × M matrix (tableau representation) describing M symmetry operators</span>
+<span class="sd">            over N qubits.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        FieldArray: A modified 2N × M matrix where the symmetry operators have been optimized </span>
+<span class="sd">        to minimize their locality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+    <span class="n">n_qubits</span><span class="p">,</span> <span class="n">n_operators</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_qubits</span> <span class="o">//=</span> <span class="mi">2</span>
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">locality</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+    <span class="n">loc_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># locality for each operator</span>
+    <span class="n">loc_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">current_loc</span> <span class="o">=</span> <span class="n">loc_tot</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_operators</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">mul</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">mat</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span>
+            <span class="n">loc_mul</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">locality</span><span class="p">(</span><span class="n">mul</span><span class="p">))</span>
+            <span class="c1"># Reduction of locality if multiplied operator replaces the i(j)th operator.</span>
+            <span class="n">loc_red_i</span> <span class="o">=</span> <span class="n">loc_set</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">loc_mul</span>
+            <span class="n">loc_red_j</span> <span class="o">=</span> <span class="n">loc_set</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">loc_mul</span>
+
+            <span class="k">if</span> <span class="n">loc_red_i</span> <span class="o">&gt;</span> <span class="n">loc_red_j</span> <span class="ow">and</span> <span class="n">loc_red_i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># If reduction of ith operator is larger</span>
+                <span class="n">mat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span>  <span class="c1"># add_col(j, i)</span>
+                <span class="n">loc_set</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc_mul</span>
+                <span class="n">current_loc</span> <span class="o">-=</span> <span class="n">loc_red_i</span>
+            <span class="k">elif</span> <span class="n">loc_red_j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">mat</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">mat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>  <span class="c1"># add_col(i, j)</span>
+                <span class="n">loc_set</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc_mul</span>
+                <span class="n">current_loc</span> <span class="o">-=</span> <span class="n">loc_red_j</span>
+        <span class="k">if</span> <span class="n">current_loc</span> <span class="o">==</span> <span class="n">loc_tot</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">loc_tot</span> <span class="o">=</span> <span class="n">current_loc</span>
+    <span class="k">return</span> <span class="n">mat</span>
+
+
+<span class="k">def</span> <span class="nf">select_symm_qubits</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">FieldArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Selects a qubit :math:`q_k` for each symmetry operator :math:`\hat{S}_k` such that </span>
+<span class="sd">    the conditions for symmetry are satisfied.</span>
+
+<span class="sd">    Specifically, the selected qubits satisfy the following conditions for the symmetry </span>
+<span class="sd">    operator matrix:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \{\sigma_z(q_k), \hat{S}_k \} = 0  \quad \mathrm{and} \quad [\sigma_z(q_k), \hat{S}_j] = 0, \, j \neq k.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mat (FieldArray): A 2N × M matrix (tableau form) where N represents the number of </span>
+<span class="sd">            qubits and M is the number of symmetry operators.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[int]: A list containing indices of the selected qubits for each symmetry operator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Select qubit q_j for each symmetry operator τ_j such that</span>
+    <span class="c1"># [σ_z(q_j), τ_i] = 0 for i≠j</span>
+    <span class="c1"># {σ_z(q_j), τ_j} = 0</span>
+
+    <span class="n">n_qubits</span><span class="p">,</span> <span class="n">n_operators</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_qubits</span> <span class="o">=</span> <span class="n">n_qubits</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gf_is_zero</span><span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="n">n_qubits</span><span class="p">:,</span> <span class="p">:]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not a X-only matrix.&quot;</span><span class="p">)</span>
+    <span class="c1"># mat = np.column_stack(sorted([</span>
+    <span class="c1">#     mat[:, i] for i in range(n_operators)</span>
+    <span class="c1"># ], key = lambda x : np.sum(locality(x))))</span>
+    <span class="c1"># For non-trivial qubits</span>
+    <span class="n">it_over</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span>
+        <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">mat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_operators</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="c1"># Minimize the number of overlapped qubits</span>
+    <span class="n">opt_idxs</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">min_overlap</span> <span class="o">=</span> <span class="n">n_operators</span>
+    <span class="k">for</span> <span class="n">idxs</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">it_over</span><span class="p">):</span>
+        <span class="n">overlap</span> <span class="o">=</span> <span class="n">n_operators</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">idxs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">overlap</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">opt_idxs</span> <span class="o">=</span> <span class="n">idxs</span>
+            <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="n">min_overlap</span><span class="p">:</span>
+            <span class="n">opt_idxs</span> <span class="o">=</span> <span class="n">idxs</span>
+            <span class="n">min_overlap</span> <span class="o">=</span> <span class="n">overlap</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can not find p_i satisfying the criteria&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">opt_idxs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">construct_symmetry_unitary</span><span class="p">(</span><span class="n">symm</span><span class="p">:</span> <span class="n">FieldArray</span><span class="p">,</span>
+                               <span class="n">symm_qubits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> \
+        <span class="o">-&gt;</span> <span class="n">QubitOperator</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructs a unitary operator :math:`\hat{U}` that uses the identified symmetry operators </span>
+<span class="sd">    to block-diagonalize the input Pauli operators.</span>
+
+<span class="sd">    The unitary operator is of the form:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \hat{U} = \prod_{k=1}^M \frac{1}{\sqrt{2}} (\hat{S}^{(X)}_k + \hat{Z}_{q(k)}),</span>
+
+<span class="sd">    where :math:`\hat{S}^{(X)}_k` are the X-type transformed symmetry operators, and </span>
+<span class="sd">    :math:`q(k)` are the qubits corresponding to the symmetries.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        symm (FieldArray): A 2N × M tableau matrix representing the symmetry operators.</span>
+<span class="sd">        symm_qubits (List[int]): A list of qubit indices corresponding to the symmetries.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        QubitOperator: The unitary operator :math:`\hat{U}` constructed from the symmetry operators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># p_i_set = select_p_i(mat)</span>
+    <span class="n">n_qubits</span><span class="p">,</span> <span class="n">n_operators</span> <span class="o">=</span> <span class="n">symm</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_qubits</span> <span class="o">=</span> <span class="n">n_qubits</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">ret_pauli</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">symm_qubits</span><span class="p">):</span>
+        <span class="n">z_vec</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">Zeros</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_qubits</span><span class="p">)</span>
+        <span class="n">z_vec</span><span class="p">[</span><span class="n">p_i</span> <span class="o">+</span> <span class="n">n_qubits</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="n">QubitOperator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span>
+            <span class="n">tableau_to_pauli</span><span class="p">(</span>
+                <span class="n">gf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">symm</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">z_vec</span><span class="p">))),</span>
+                <span class="n">coeffs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ret_pauli</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span>
+    <span class="n">symm_unitary</span> <span class="o">=</span> <span class="n">QubitOperator</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ret_pauli</span><span class="p">:</span>
+        <span class="n">symm_unitary</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="n">symm_unitary</span>
+    <span class="k">return</span> <span class="n">symm_unitary</span>
+
+
+<div class="viewcode-block" id="qubit_reduction_operator">
+<a class="viewcode-back" href="../../../ofex.transforms.html#ofex.transforms.qubit_reduction_operator">[docs]</a>
+<span class="k">def</span> <span class="nf">qubit_reduction_operator</span><span class="p">(</span><span class="n">operator</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">]],</span>
+                             <span class="n">num_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                             <span class="n">symm_clifford_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                             <span class="n">symm_qubits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                             <span class="n">symm_unitary</span><span class="p">:</span> <span class="n">QubitOperator</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reduces a Pauli operator or a list of Pauli operators based on identified symmetry properties.</span>
+
+<span class="sd">    The reduction involves applying Clifford transformations, symmetry unitaries, and qubit </span>
+<span class="sd">    removal on the input operators. The reduced operators are decomposed into symmetry sectors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        operator (Union[QubitOperator, List[QubitOperator]]): The input Pauli operator(s) to be </span>
+<span class="sd">            reduced using symmetry.</span>
+<span class="sd">        num_qubits (int): The total number of qubits in the system.</span>
+<span class="sd">        symm_clifford_list (List[str]): A list of Clifford transformations corresponding to </span>
+<span class="sd">            symmetry diagonalization.</span>
+<span class="sd">        symm_qubits (List[int]): The indices of qubits involved in symmetry.</span>
+<span class="sd">        symm_unitary (QubitOperator): The unitary operator :math:`\hat{U}` constructed from the symmetry operators.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator, List[QubitOperator]]]: </span>
+<span class="sd">            A dictionary mapping symmetry sectors (defined as tuples of qubit states and parities) </span>
+<span class="sd">            to the reduced operator(s).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">operator</span> <span class="o">=</span> <span class="n">clifford_apply_pauli</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">,</span> <span class="n">symm_clifford_list</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">is_list</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_list</span><span class="p">:</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="p">[</span><span class="n">symm_unitary</span> <span class="o">*</span> <span class="n">op</span> <span class="o">*</span> <span class="n">symm_unitary</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">]</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="p">[</span><span class="n">edit_operator_for_symmetry</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">symm_qubits</span><span class="p">)</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">]</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="p">[{</span><span class="n">k</span><span class="p">:</span> <span class="n">remove_indices</span><span class="p">(</span><span class="n">op</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">symm_qubits</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">]</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">operator</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">:</span>
+                <span class="n">ret_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">op</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ret_dict</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="n">symm_unitary</span> <span class="o">*</span> <span class="n">operator</span> <span class="o">*</span> <span class="n">symm_unitary</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="n">edit_operator_for_symmetry</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">symm_qubits</span><span class="p">)</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">remove_indices</span><span class="p">(</span><span class="n">operator</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">symm_qubits</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">operator</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">operator</span></div>
+
+
+
+<div class="viewcode-block" id="qubit_reduction_state">
+<a class="viewcode-back" href="../../../ofex.transforms.html#ofex.transforms.qubit_reduction_state">[docs]</a>
+<span class="k">def</span> <span class="nf">qubit_reduction_state</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">State</span><span class="p">,</span>
+                          <span class="n">symm_clifford_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                          <span class="n">symm_qubits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                          <span class="n">symm_unitary</span><span class="p">:</span> <span class="n">QubitOperator</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="n">SparseStateDict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reduces a quantum state by decomposing it with respect to symmetry sectors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        state (State): The quantum state to reduce.</span>
+<span class="sd">        symm_clifford_list (List[str]): A list of Clifford transformations corresponding to</span>
+<span class="sd">            symmetry diagonalization.</span>
+<span class="sd">        symm_qubits (List[int]): The indices of qubits involved in symmetry.</span>
+<span class="sd">        symm_unitary (QubitOperator): The unitary operator :math:`\hat{U}` constructed from the symmetry operators.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[Dict[Tuple[Tuple[int, int], ...]: SparseStateDict], Dict[Tuple[Tuple[int, int], ...]: float]]:</span>
+<span class="sd">            A tuple containing:</span>
+<span class="sd">            - The reduced states in sparse dictionary format.</span>
+<span class="sd">            - The normalization factors for each reduced state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_type</span> <span class="o">=</span> <span class="n">type_state</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">clifford_simulation</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">symm_clifford_list</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">apply_operator</span><span class="p">(</span><span class="n">symm_unitary</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">to_sparse_dict</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="n">decompose_keys</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">parity</span><span class="p">)</span> <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">parity</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">symm_qubits</span><span class="p">,</span> <span class="n">parity_list</span><span class="p">)])</span>
+                      <span class="k">for</span> <span class="n">parity_list</span> <span class="ow">in</span> <span class="n">product</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">symm_qubits</span><span class="p">))]</span>
+    <span class="n">decompose_keys_binary</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">([(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">parity</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">parity</span> <span class="ow">in</span> <span class="n">k</span><span class="p">]):</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">decompose_keys</span><span class="p">}</span>
+    <span class="n">dec_states</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">decompose_keys</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">bin_vec</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">decompose_keys_binary</span><span class="p">[</span><span class="n">bin_vec</span><span class="p">[</span><span class="n">symm_qubits</span><span class="p">]]</span>
+        <span class="n">dec_states</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">bin_vec</span><span class="p">]</span> <span class="o">=</span> <span class="n">coeff</span>
+
+    <span class="n">norms</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">normalized_dec_states</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">dec_states</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">compress_sparse</span><span class="p">(</span><span class="n">remove_indices_state</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">symm_qubits</span><span class="p">,</span> <span class="n">check_symmetry_conserved</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">norms</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+        <span class="n">normalized_dec_states</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_type_transform</span><span class="p">(</span><span class="n">normalize</span><span class="p">(</span><span class="n">st</span><span class="p">),</span> <span class="n">input_type</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">normalized_dec_states</span><span class="p">,</span> <span class="n">norms</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">edit_operator_for_symmetry</span><span class="p">(</span><span class="n">operator</span><span class="p">:</span> <span class="n">QubitOperator</span><span class="p">,</span>
+                               <span class="n">symm_qubits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> \
+        <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modifies an operator by decomposing it according to symmetry properties.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        operator (QubitOperator): The input operator to edit.</span>
+<span class="sd">        symm_qubits (List[int]): Indices of symmetry qubits.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[Tuple[Tuple[int, int], ...]: Union[QubitOperator]]: A dictionary mapping symmetry sectors to decomposed operators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Similar but generalized version of</span>
+    <span class="c1"># openfermion.transform.opconversion.remove_symmetry.edit_hamiltonian_for_spin().</span>
+    <span class="n">operator</span><span class="o">.</span><span class="n">compress</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">symm_qubits</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">operator</span><span class="o">.</span><span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">q</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">term</span><span class="p">)</span> <span class="ow">or</span> <span class="p">((</span><span class="n">q</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">term</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Operator contains Y or X terms at symmetry qubits: </span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">coeff</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">decompose_keys</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([(</span><span class="n">qubit</span><span class="p">,</span> <span class="n">parity</span><span class="p">)</span> <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">parity</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">symm_qubits</span><span class="p">,</span> <span class="n">parity_list</span><span class="p">)])</span>
+                      <span class="k">for</span> <span class="n">parity_list</span> <span class="ow">in</span> <span class="n">product</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">symm_qubits</span><span class="p">))]</span>
+    <span class="n">non_trivial_qubits</span> <span class="o">=</span> <span class="p">[[</span><span class="n">qubit</span> <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">parity</span> <span class="ow">in</span> <span class="n">key</span> <span class="k">if</span> <span class="n">parity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">decompose_keys</span><span class="p">]</span>
+
+    <span class="n">new_terms</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">decompose_keys</span><span class="p">}</span>
+    <span class="n">new_hamiltonians</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">QubitOperator</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">decompose_keys</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">dec_key</span><span class="p">,</span> <span class="n">parity_qubits</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">decompose_keys</span><span class="p">,</span> <span class="n">non_trivial_qubits</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">operator</span><span class="o">.</span><span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">count_parity</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([(</span><span class="n">qubit</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">term</span> <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">parity_qubits</span><span class="p">])</span>
+            <span class="n">new_coeff</span> <span class="o">=</span> <span class="n">coeff</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">count_parity</span>
+            <span class="n">new_term</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">q</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span> <span class="ow">in</span> <span class="n">term</span> <span class="k">if</span> <span class="n">q</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">symm_qubits</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_term</span> <span class="ow">in</span> <span class="n">new_terms</span><span class="p">[</span><span class="n">dec_key</span><span class="p">]:</span>
+                <span class="n">new_terms</span><span class="p">[</span><span class="n">dec_key</span><span class="p">][</span><span class="n">new_term</span><span class="p">]</span> <span class="o">+=</span> <span class="n">new_coeff</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_terms</span><span class="p">[</span><span class="n">dec_key</span><span class="p">][</span><span class="n">new_term</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_coeff</span>
+        <span class="n">new_hamiltonians</span><span class="p">[</span><span class="n">dec_key</span><span class="p">]</span><span class="o">.</span><span class="n">terms</span> <span class="o">=</span> <span class="n">new_terms</span><span class="p">[</span><span class="n">dec_key</span><span class="p">]</span>
+        <span class="n">new_hamiltonians</span><span class="p">[</span><span class="n">dec_key</span><span class="p">]</span><span class="o">.</span><span class="n">compress</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">new_hamiltonians</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Gwonhak Lee
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

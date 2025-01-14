@@ -266,9 +266,9 @@
 <li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.dot_tableau"><code class="docutils literal notranslate"><span class="pre">dot_tableau()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.str_tableau"><code class="docutils literal notranslate"><span class="pre">str_tableau()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.str_tableau_side_by_side"><code class="docutils literal notranslate"><span class="pre">str_tableau_side_by_side()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.is_zero_gf"><code class="docutils literal notranslate"><span class="pre">is_zero_gf()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.is_equal_gf"><code class="docutils literal notranslate"><span class="pre">is_equal_gf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.diagonalizing_clifford_tableau"><code class="docutils literal notranslate"><span class="pre">diagonalizing_clifford_tableau()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.diagonalizing_clifford"><code class="docutils literal notranslate"><span class="pre">diagonalizing_clifford()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.clifford_apply_pauli"><code class="docutils literal notranslate"><span class="pre">clifford_apply_pauli()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.clifford_apply"><code class="docutils literal notranslate"><span class="pre">clifford_apply()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.clifford_qiskit"><code class="docutils literal notranslate"><span class="pre">clifford_qiskit()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.clifford.html#ofex.clifford.clifford_simulation"><code class="docutils literal notranslate"><span class="pre">clifford_simulation()</span></code></a></li>
@@ -327,6 +327,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ofex.operators.html">ofex.operators</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ofex.operators.html#ofex.operators.normalize_by_lcu_norm"><code class="docutils literal notranslate"><span class="pre">normalize_by_lcu_norm()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.operators.html#module-ofex.operators.fermion_operator_tools">ofex.operators.fermion_operator_tools</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="ofex.operators.html#ofex.operators.fermion_operator_tools.cre_ann"><code class="docutils literal notranslate"><span class="pre">cre_ann()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.operators.html#ofex.operators.fermion_operator_tools.is_number_only"><code class="docutils literal notranslate"><span class="pre">is_number_only()</span></code></a></li>
@@ -340,7 +341,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ofex.operators.html#module-ofex.operators.qubit_operator_tools">ofex.operators.qubit_operator_tools</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="ofex.operators.html#ofex.operators.qubit_operator_tools.is_z_only"><code class="docutils literal notranslate"><span class="pre">is_z_only()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.operators.html#ofex.operators.qubit_operator_tools.single_pauli_commute_chk"><code class="docutils literal notranslate"><span class="pre">single_pauli_commute_chk()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="ofex.operators.html#ofex.operators.qubit_operator_tools.normalize_by_lcu_norm"><code class="docutils literal notranslate"><span class="pre">normalize_by_lcu_norm()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.operators.html#module-ofex.operators.symbolic_operator_tools">ofex.operators.symbolic_operator_tools</a><ul>
@@ -441,6 +441,9 @@
 <li class="toctree-l2"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.qubit_to_fermion_state"><code class="docutils literal notranslate"><span class="pre">qubit_to_fermion_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.fermion_rotation_state"><code class="docutils literal notranslate"><span class="pre">fermion_rotation_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.fermion_rotation_operator"><code class="docutils literal notranslate"><span class="pre">fermion_rotation_operator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.find_pauli_symmetry"><code class="docutils literal notranslate"><span class="pre">find_pauli_symmetry()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.qubit_reduction_operator"><code class="docutils literal notranslate"><span class="pre">qubit_reduction_operator()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.qubit_reduction_state"><code class="docutils literal notranslate"><span class="pre">qubit_reduction_state()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="ofex.transforms.html#module-ofex.transforms.fermion_factorization">ofex.transforms.fermion_factorization</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.fermion_factorization.ham_to_ei_spatial"><code class="docutils literal notranslate"><span class="pre">ham_to_ei_spatial()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.transforms.html#ofex.transforms.fermion_factorization.ei_to_ham_spatial"><code class="docutils literal notranslate"><span class="pre">ei_to_ham_spatial()</span></code></a></li>

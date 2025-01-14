@@ -15,7 +15,7 @@ from ofex_algorithms.qksd.qksd_utils import trunc_eigh
 from ofex.measurement.iterative_coefficient_splitting import init_ics, run_ics
 from ofex.measurement import killer_shift_opt_fermion_hf
 from ofex.measurement.pauli_grouping import sorted_insertion
-from ofex.operators.qubit_operator_tools import normalize_by_lcu_norm
+from ofex.operators import normalize_by_lcu_norm
 from ofex.propagator import exact_rte, trotter_rte_by_si_ref
 from ofex.state.chem_ref_state import hf_ground, cisd_ground
 from ofex.state.state_tools import get_num_qubits
@@ -49,8 +49,8 @@ def _prepare():
     else:
         raise NotImplementedError
 
-    ref = hf_ground(mol, fermion_to_qubit_map=transform, **f2q_kwargs)
-    f_ref = hf_ground(mol, fermion_to_qubit_map=None)
+    f_ref = hf_ground(mol)
+    ref = fermion_to_qubit_state(f_ref, transform, **f2q_kwargs)
 
     # PySCF results may be different for every run. Thus, the objects need to be pickled.
     fname = f"./tmp_{mol_name}_{transform}.pkl"

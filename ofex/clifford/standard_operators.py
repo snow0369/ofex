@@ -1,11 +1,12 @@
 from typing import Tuple, Optional, List
 
 from galois import FieldArray
+import galois
 
-from ofex.clifford.clifford_tools import gf
+__all__ = ["clifford_op_str", "hadamard", "s_gate", "s_dag_gate", "cx", "cz", "qsw"]
 
+gf = galois.GF(2)
 
-__all__ = []
 
 def clifford_op_str(op, *args) -> str:
     """
@@ -26,7 +27,7 @@ def clifford_op_str(op, *args) -> str:
     Raises:
         ValueError: If the operation is not supported or the number of arguments does not match the required format.
     """
-    if op in ["H", "S"]:
+    if op in ["H", "S", "Sdag"]:
         if len(args) != 1:
             raise ValueError
         return f"{op}_{args[0]}"
@@ -89,6 +90,18 @@ def s_gate(arr: FieldArray, ph: FieldArray, idx: int, cliff_hist: Optional[List[
     arr[n_qubits + idx, :] = arr[idx, :] + arr[n_qubits + idx, :]
     if cliff_hist is not None:
         cliff_hist.append(clifford_op_str("S", idx))
+    return arr, ph
+
+
+def s_dag_gate(arr: FieldArray, ph: FieldArray, idx: int, cliff_hist: Optional[List[str]] = None) \
+        -> Tuple[FieldArray, FieldArray]:
+    arr, ph = gf(arr), gf(ph)
+    assert arr.shape[0] % 2 == 0
+    n_qubits, n_ops = arr.shape[0] // 2, arr.shape[1]
+    ph[:] = ph[:] + arr[idx, :] * (gf.Ones(n_ops) + arr[idx + n_qubits, :])
+    arr[n_qubits + idx, :] = arr[idx, :] + arr[n_qubits + idx, :]
+    if cliff_hist is not None:
+        cliff_hist.append(clifford_op_str("Sdag", idx))
     return arr, ph
 
 

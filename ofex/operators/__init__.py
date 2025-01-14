@@ -6,5 +6,7 @@ ordering operations, and type definitions.
 """
 
 from . import fermion_operator_tools, qubit_operator_tools, symbolic_operator_tools, ordering, types
+from .qubit_operator_normalize import normalize_by_lcu_norm
 
-__all__ = ["fermion_operator_tools", "qubit_operator_tools", "symbolic_operator_tools", "ordering", "types"]
+__all__ = ["fermion_operator_tools", "qubit_operator_tools", "symbolic_operator_tools", "ordering",
+           "normalize_by_lcu_norm", "types"]

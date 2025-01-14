@@ -69,5 +69,3 @@ imgmath_latex_preamble = r'''
 \usepackage{amssymb}
 \usepackage{braket}
 '''
-
-html_extra_path = ['.nojekyll']

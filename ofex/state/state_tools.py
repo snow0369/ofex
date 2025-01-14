@@ -24,7 +24,7 @@ from ofex.utils.dict_utils import dict_allclose, compare_dict
 
 __all__ = ["get_num_qubits", "get_state_dim", "get_sparsity", "pretty_print_state", "compare_states",
            "to_dense", "to_scipy_sparse", "to_sparse_dict", "state_type_transform",
-           "fock_vector_to_dense_state", "fock_vector_to_scipy_state",
+           "fock_vector_to_dense_state", "fock_vector_to_scipy_state", "state_to_fock_vector",
            "compress_sparse", "state_allclose", "norm", "normalize", "is_zero"]
 
 
@@ -356,6 +356,24 @@ def fock_vector_to_scipy_state(fock: BinaryFockVector) -> ScipySparse:
     state[fock.to_int()] = 1.0
     return state
 
+def state_to_fock_vector(state: State) -> BinaryFockVector:
+    """
+    Converts a quantum state to a binary Fock vector.
+
+    Args:
+        state (State): The quantum state to convert. The state must represent 
+            exactly one Fock vector in sparse dictionary format.
+
+    Returns:
+        BinaryFockVector: The binary Fock vector representation of the state.
+
+    Raises:
+        ValueError: If the state does not represent a single Fock vector.
+    """
+    state = to_sparse_dict(state)
+    if len(state) != 1:
+        raise ValueError("state is not a single fock vector")
+    return list(state.keys())[0]
 
 def compare_states(state_1: State, state_2: State,
                    str_len=40, atol=EQ_TOLERANCE, fermion=False) -> str:

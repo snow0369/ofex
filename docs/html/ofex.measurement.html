@@ -523,6 +523,37 @@ where each group corresponds to a QubitOperator with optimal norm distribution.<
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.pauli_idx_from_group">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">pauli_idx_from_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham_frag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/ofex/measurement/pauli_grouping.html#pauli_idx_from_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.pauli_idx_from_group" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the index mappings of Pauli operators to groups from the given Hamiltonian fragments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ham_frag</strong> (<em>List</em><em>[</em><em>QubitOperator</em><em>]</em>) – A list of QubitOperator fragments,
+where each fragment represents a grouping of terms.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>List[QubitOperator]: A list of Pauli operators sorted in descending order of their coefficients.</p></li>
+<li><dl class="simple">
+<dt>List[List[int]]: A list where each sublist contains the indices of Pauli operators present in the</dt><dd><p>corresponding group of <cite>ham_frag</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>List[List[int]]: A list where each sublist contains the indices of groups that a specific Pauli</dt><dd><p>operator belongs to.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="ofex.measurement.pauli_split_group">
 <span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">pauli_split_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticommute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'even'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ofex/measurement/pauli_grouping.html#pauli_split_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.pauli_split_group" title="Link to this definition">¶</a></dt>
 <dd><p>Splits the given Hamiltonian into groups of Pauli operators based on
@@ -556,6 +587,31 @@ process (default: False).</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tuple[List[QubitOperator], Tuple[List[QubitOperator], List[List[int]], List[List[int]]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ofex.measurement.shot_alloc_by_norm">
+<span class="sig-prename descclassname"><span class="pre">ofex.measurement.</span></span><span class="sig-name descname"><span class="pre">shot_alloc_by_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ham_frags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">QubitOperator</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tot_shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/ofex/measurement/pauli_grouping.html#shot_alloc_by_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ofex.measurement.shot_alloc_by_norm" title="Link to this definition">¶</a></dt>
+<dd><p>Allocates the total number of shots among Hamiltonian fragments proportionally
+based on their induced norms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ham_frags</strong> (<em>List</em><em>[</em><em>QubitOperator</em><em>]</em>) – A list of Hamiltonian fragments (QubitOperators)
+whose norms determine the shot allocation.</p></li>
+<li><p><strong>tot_shots</strong> (<em>float</em>) – The total number of measurement shots to be distributed
+across the Hamiltonian fragments.</p></li>
+<li><p><strong>transition</strong> (<em>bool</em>) – If True, calculates shot allocation proportionally to the
+product of induced norms. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing the allocated number of shots for each fragment.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -798,7 +854,9 @@ For detailed information about these types and their usage, please refer to <cit
 <li><a class="reference internal" href="#ofex.measurement.sorted_insertion"><code class="docutils literal notranslate"><span class="pre">sorted_insertion()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.measurement.iterative_sorted_insertion"><code class="docutils literal notranslate"><span class="pre">iterative_sorted_insertion()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.measurement.optimal_sorted_insertion"><code class="docutils literal notranslate"><span class="pre">optimal_sorted_insertion()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.pauli_idx_from_group"><code class="docutils literal notranslate"><span class="pre">pauli_idx_from_group()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.measurement.pauli_split_group"><code class="docutils literal notranslate"><span class="pre">pauli_split_group()</span></code></a></li>
+<li><a class="reference internal" href="#ofex.measurement.shot_alloc_by_norm"><code class="docutils literal notranslate"><span class="pre">shot_alloc_by_norm()</span></code></a></li>
 <li><a class="reference internal" href="#module-ofex.measurement.iterative_coefficient_splitting">ofex.measurement.iterative_coefficient_splitting</a><ul>
 <li><a class="reference internal" href="#ofex.measurement.iterative_coefficient_splitting.init_ics"><code class="docutils literal notranslate"><span class="pre">init_ics()</span></code></a></li>
 <li><a class="reference internal" href="#ofex.measurement.iterative_coefficient_splitting.run_ics"><code class="docutils literal notranslate"><span class="pre">run_ics()</span></code></a></li>

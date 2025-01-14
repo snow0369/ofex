@@ -262,13 +262,13 @@
 <span class="kn">from</span> <span class="nn">ofex.exceptions</span> <span class="kn">import</span> <span class="n">OfexTypeError</span>
 <span class="kn">from</span> <span class="nn">ofex.operators.symbolic_operator_tools</span> <span class="kn">import</span> <span class="n">single_term</span>
 <span class="kn">from</span> <span class="nn">ofex.operators.types</span> <span class="kn">import</span> <span class="n">SinglePauli</span>
+<span class="kn">from</span> <span class="nn">ofex.utils.binary_matrix</span> <span class="kn">import</span> <span class="n">gf_eye</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;pauli_to_tableau&quot;</span><span class="p">,</span> <span class="s2">&quot;tableau_to_pauli&quot;</span><span class="p">,</span> <span class="s2">&quot;dot_tableau&quot;</span><span class="p">,</span> <span class="s2">&quot;str_tableau&quot;</span><span class="p">,</span> <span class="s2">&quot;str_tableau_side_by_side&quot;</span><span class="p">,</span>
     <span class="s2">&quot;locality&quot;</span>
 <span class="p">]</span>
 
-<span class="kn">from</span> <span class="nn">ofex.utils.binary_matrix</span> <span class="kn">import</span> <span class="n">gf_eye</span>
 
 <span class="n">gf</span> <span class="o">=</span> <span class="n">galois</span><span class="o">.</span><span class="n">GF</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
@@ -544,15 +544,15 @@
 <span class="sd">    Computes the locality of each qubit by analyzing the tableau representation of Pauli operators.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        mat (FieldArray): A :math:`2N \times r` `FieldArray` matrix where :math:`N` is the number of qubits </span>
+<span class="sd">        mat (FieldArray): A :math:`2N \times r` `FieldArray` matrix where :math:`N` is the number of qubits</span>
 <span class="sd">                          and :math:`r` is the number of operators. The first :math:`N` rows represent</span>
-<span class="sd">                          the X components (:math:`G_x`) of the tableau, while the next :math:`N` rows </span>
+<span class="sd">                          the X components (:math:`G_x`) of the tableau, while the next :math:`N` rows</span>
 <span class="sd">                          represent the Z components (:math:`G_z`).</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        np.ndarray: A binary matrix of size :math:`N \times r` indicating the locality of each qubit</span>
-<span class="sd">                    for all Pauli operators in the tableau. An entry of 1 indicates locality </span>
-<span class="sd">                    (the corresponding Pauli operator acts non-trivially on the qubit), while 0 indicates </span>
+<span class="sd">                    for all Pauli operators in the tableau. An entry of 1 indicates locality</span>
+<span class="sd">                    (the corresponding Pauli operator acts non-trivially on the qubit), while 0 indicates</span>
 <span class="sd">                    no action on the corresponding qubit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_qubits</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>

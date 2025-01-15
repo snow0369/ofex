@@ -5,6 +5,8 @@ import numpy as np
 import sympy as sp
 from scipy.integrate import quad
 
+__all__ = ["uniform_inner_product", "first_chebyshev_inner_product",
+           "monomial_fourier_integral", "first_chebyshev_integral"]
 
 def _uniform_inner_product(x_max: float, numerical_integ: bool, a: sp.Expr, b: sp.Expr) -> complex:
     """

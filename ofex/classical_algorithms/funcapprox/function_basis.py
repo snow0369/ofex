@@ -9,6 +9,8 @@ from sympy import chebyshevt
 from ofex.classical_algorithms.funcapprox.integrals import uniform_inner_product, monomial_fourier_integral, \
     first_chebyshev_inner_product, first_chebyshev_integral
 
+__all__ = ['FunctionBasis', 'FourierBasis', 'FirstChebyshevBasis']
+
 
 class FunctionBasis(object):
     """
@@ -90,7 +92,7 @@ class FunctionBasis(object):
         s = self.overlap_matrix
         mu = self.projection(func)
         c = np.linalg.solve(s, mu)
-        opt_g: sp.Expr = sum([cf * b for cf, b in zip(c, self.basis)])
+        opt_g: sp.Expr = sp.Add(*(cf * b for cf, b in zip(c, self.basis)))
         func_norm_2 = self.inner_product(func, func)
 
         diff = (func_norm_2 - np.dot(mu.conj(), c))
@@ -147,7 +149,7 @@ class FunctionBasis(object):
             print("Reached max iter")
 
         assert np.isclose(diff.imag, 0.0), diff
-        opt_g: sp.Expr = sum([cf * b for cf, b in zip(c, self.basis)])
+        opt_g = sp.Add(*(cf * b for cf, b in zip(c, self.basis)))
         return opt_g, c, np.sqrt(diff.real)
 
 
@@ -201,6 +203,15 @@ class FirstChebyshevBasis(FunctionBasis):
     def __init__(self, n_cheby: int,
                  numerical_integ: bool = False, sym_x: Optional[sp.Symbol] = None,
                  debug: bool = False, ):
+        """
+        Initializes the FirstChebyshevBasis class.
+
+        Args:
+            n_cheby (int): Number of Chebyshev polynomials in the basis.
+            numerical_integ (bool): Whether to use numerical integration for inner products.
+            sym_x (Optional[sp.Symbol]): Symbol for the variable (defaults to 'x').
+            debug (bool): Whether to enable debug mode for consistency check.
+        """
         inner_product = first_chebyshev_inner_product(numerical_integ)
         if sym_x is None:
             sym_x = sp.Symbol('x')
@@ -217,10 +228,11 @@ class FirstChebyshevBasis(FunctionBasis):
 
 
 if __name__ == '__main__':
-    from algorithms.funcapprox.func_plt import plot_functions
+    from ofex.classical_algorithms.funcapprox.func_plt import plot_functions
 
 
     def function_basis_test():
+        x = sp.Symbol('x')
         f_basis_0 = FourierBasis(x_max=1.0, n_harmonics=4, deriv_order=0,
                                  numerical_integ=True, debug=False)
         f_basis_1 = FourierBasis(x_max=1.0, n_harmonics=4, deriv_order=1,

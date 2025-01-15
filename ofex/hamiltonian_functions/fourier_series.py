@@ -62,9 +62,10 @@ def hamiltonian_fourier_series(coeff: np.ndarray,
             rte_k = rte_k @ real_time_propagator
 
     rte_dag = deepcopy(real_time_propagator.conj().T)
+    rte_k = deepcopy(rte_dag)
     for idx, (pos_freq, pos_coeff) in enumerate(zip(pos_freqs, pos_coeff)):
         series += rte_dag * pos_coeff
         if idx < len(pos_freqs) - 1:
-            rte_dag = rte_dag @ real_time_propagator
+            rte_dag = rte_k @ rte_dag
 
     return series

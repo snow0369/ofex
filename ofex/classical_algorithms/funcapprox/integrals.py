@@ -104,7 +104,7 @@ def monomial_fourier_integral(omega, n, a, b):
     Returns:
         complex: The result of the integral as a complex number.
     """
-    # integrate x^n e^{iωx} from x=-a to b.
+    # integrate x^n e^{iωx} from x=a to b.
     if np.isclose(omega, 0):
         return (b ** (n + 1) - a ** (n + 1)) / (n + 1)
     elif n == 0:

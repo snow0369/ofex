@@ -8,6 +8,7 @@ from scipy.integrate import quad
 __all__ = ["uniform_inner_product", "first_chebyshev_inner_product",
            "monomial_fourier_integral", "first_chebyshev_integral"]
 
+
 def _uniform_inner_product(x_max: float, numerical_integ: bool, a: sp.Expr, b: sp.Expr) -> complex:
     """
     Computes the inner product of two symbolic expressions over a uniform grid.
@@ -73,7 +74,7 @@ def _first_chebyshev_inner_product(numerical_integ: bool, a: sp.Expr, b: sp.Expr
         x = list(syms)[0]
     else:
         raise ValueError(f"There are redundant symbols {a}, {b}")
-    b_norm = b / sp.sqrt(1 - x ** 2)
+    b_norm = 2 * b / sp.sqrt(1 - x ** 2)
     return _uniform_inner_product(x_max, numerical_integ, a, b_norm)
 
 

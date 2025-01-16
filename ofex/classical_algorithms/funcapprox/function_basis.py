@@ -1,6 +1,6 @@
 from itertools import product
 from numbers import Number
-from typing import List, Callable, Optional, Tuple, Union, Sequence
+from typing import List, Callable, Optional, Tuple, Union, Sequence, Dict
 
 import numpy as np
 import sympy as sp
@@ -64,6 +64,17 @@ class FunctionBasis(object):
                 self._overlap_matrix[idx1, idx2] = self.inner_product(b1, b2)
         return self._overlap_matrix
 
+    def iterate_basis_with_index(self, *args, **kwargs):
+        """
+        Iterates over group of functions in the basis along with its index.
+        By defaults, it yields a basis with one function at a time.
+        
+        Yields:
+            List[int]: Indices of basis function.
+        """
+        for idx, func in enumerate(self.basis):
+            yield [idx]
+
     def projection(self, func: sp.Expr) -> np.ndarray:
         """
         Projects a function onto the basis.
@@ -100,6 +111,72 @@ class FunctionBasis(object):
         if diff < 0 and np.isclose(diff, 0.0):
             diff = 0.0
         return opt_g, c, np.sqrt(diff.real)
+
+    def gradual_l2_minimization(self, func: sp.Expr, n_min=1, n_max=None, **kwargs) \
+            -> Dict[int, Tuple[sp.Expr, np.ndarray, float]]:
+        """
+        Performs L2-minimization by gradually increasing the basis size.
+    
+        Args:
+            func (sp.Expr): The target function for minimization.
+            n_min (int): The minimum number of basis functions to start with.
+            n_max (Optional[int]): The maximum number of basis functions to consider. 
+                                  If not specified, defaults to the total number of iterations
+                                  over basis groups.
+           **kwargs: Additional parameters passed to `iterate_basis_with_index`.
+
+       Returns:
+           Dict[int, Tuple[sp.Expr, np.ndarray, float]]:
+               A dictionary where keys are the number of basis functions used, and values are tuples containing:
+               - The approximate function.
+               - Coefficients for the basis functions.
+               - Residual error norm of the approximation.
+
+       Raises:
+           ValueError: If `n_min` is less than 1 or `n_max` is less than `n_min`.
+        """
+        if n_max is None:
+            n_max = sum(1 for _ in self.iterate_basis_with_index())
+        if n_min < 1:
+            raise ValueError(f"n_min must be greater than 0, got {n_min}")
+        if n_max < n_min:
+            raise ValueError(f"n_max must be greater than or equal to n_min, got {n_max} and {n_min}")
+        s = self.overlap_matrix
+        mu = self.projection(func)
+        func_norm_2 = self.inner_product(func, func)
+
+        basis_idx_list = list()
+        opt_list = dict()
+
+        basis_iterator = self.iterate_basis_with_index(**kwargs)
+        if n_min > 1:
+            for n, add_basis_idxs in enumerate(basis_iterator):
+                basis_idx_list += add_basis_idxs
+                if n == n_min - 1:
+                    break
+
+        for n, add_basis_idxs in enumerate(basis_iterator):
+            n += n_min
+            basis_idx_list += add_basis_idxs
+            sorted_idx_list = sorted(basis_idx_list)
+            sorted_basis_list = [self.basis[idx] for idx in sorted_idx_list]
+            s_n = s[np.ix_(sorted_idx_list, sorted_idx_list)]
+            mu_n = mu[sorted_idx_list]
+            c_n = np.linalg.solve(s_n, mu_n)
+
+            opt_g_n: sp.Expr = sp.Add(*(cf * b for cf, b in zip(c_n, sorted_basis_list)))
+
+            diff = (func_norm_2 - np.dot(mu_n.conj(), c_n))
+            assert np.isclose(diff.imag, 0.0), diff
+            if diff < 0 and np.isclose(diff, 0.0):
+                diff = 0.0
+
+            opt_list[n] = (opt_g_n, c_n, diff)
+
+            if n == n_max:
+                break
+
+        return opt_list
 
     def l2_minimization_regularized_1(self,
                                       func: sp.Expr,
@@ -186,17 +263,50 @@ class FourierBasis(FunctionBasis):
                 if idx_b1 > idx_b2:
                     continue
                 overlap_matrix[idx_b1, idx_b2] = monomial_fourier_integral(w2 - w1, d1 + d2, -x_max, x_max) / (
-                            2 * x_max)
+                        2 * x_max)
 
         for idx_b1, idx_b2 in product(range(len(basis)), repeat=2):
             if idx_b1 > idx_b2:
                 overlap_matrix[idx_b1, idx_b2] = overlap_matrix[idx_b2, idx_b1].conjugate()
 
+        self.n_harmonics, self.deriv_order = n_harmonics, deriv_order
+
         super().__init__(basis, inner_product)
         if debug:
-            assert np.allclose(self.overlap_matrix, overlap_matrix)
+            assert np.allclose(self.overlap_matrix, overlap_matrix), (self.overlap_matrix, overlap_matrix)
         else:
             self._overlap_matrix = overlap_matrix
+
+    def iterate_basis_with_index(self, max_deriv_order: Optional[int] = None):
+        """
+        Iterates over groups of functions in the Fourier basis along with their indices.
+        
+        Args:
+            max_deriv_order (Optional[int]): The maximum derivative order 
+                to include in the iteration. Defaults to the derivative 
+                order of the Fourier basis.
+        
+        Yields:
+            List[Tuple[int, sp.Expr]]: For each harmonic, a list of tuples 
+            containing the index and the corresponding basis function, including
+            derivatives up to the specified order if applicable.
+        """
+        if max_deriv_order is None:
+            max_deriv_order = self.deriv_order
+        n_omega = 2 * self.n_harmonics + 1
+        for idx_w in range(self.n_harmonics + 1):
+            idx_basis_pairs = list()
+            if idx_w == 0:
+                for d in range(max_deriv_order + 1):
+                    idx = self.n_harmonics + d * n_omega
+                    idx_basis_pairs.append(idx)
+            else:
+                for d in range(max_deriv_order + 1):
+                    idx_neg = self.n_harmonics - idx_w + d * n_omega
+                    assert idx_neg >= 0
+                    idx_pos = self.n_harmonics + idx_w + d * n_omega
+                    idx_basis_pairs += [idx_neg, idx_pos]
+            yield idx_basis_pairs
 
 
 class FirstChebyshevBasis(FunctionBasis):
@@ -222,7 +332,7 @@ class FirstChebyshevBasis(FunctionBasis):
 
         super().__init__(basis, inner_product)
         if debug:
-            assert np.allclose(self.overlap_matrix, overlap_matrix)
+            assert np.allclose(self.overlap_matrix, overlap_matrix), (self.overlap_matrix, overlap_matrix)
         else:
             self._overlap_matrix = overlap_matrix
 

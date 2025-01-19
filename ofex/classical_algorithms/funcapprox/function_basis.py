@@ -200,9 +200,8 @@ class FunctionBasis(object):
                 - Regularized residual error norm of the approximation.
         """
         if isinstance(reg_coeff, Number):
-            reg_coeff = [reg_coeff for _ in range(self.n_basis)]
+            reg_coeff = np.array([reg_coeff for _ in range(self.n_basis)])
         func_norm_2 = self.inner_product(func, func)
-        reg_coeff = np.array(reg_coeff)
         _, c0, diff0 = self.l2_minimization(func)
         c0_phase = c0 / np.abs(c0)
 
@@ -222,6 +221,7 @@ class FunctionBasis(object):
             diff = (func_norm_2 + c.conj().T @ s @ c - dot - dot.conjugate()) ** (1 / 2) + np.dot(c_abs, reg_coeff)
             if abs(diff - diff0) < conv_atol:
                 break
+            diff0 = diff
         else:
             print("Reached max iter")
 

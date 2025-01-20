@@ -19,11 +19,13 @@ Definitions:
 
 from __future__ import annotations
 
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, Dict
 
 import numpy as np
 import scipy
 from openfermion import QubitOperator, LinearQubitOperator, get_sparse_operator, FermionOperator
+from openfermion.config import EQ_TOLERANCE
+from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.sparse import spmatrix
 from scipy.sparse.linalg import LinearOperator
 
@@ -34,7 +36,7 @@ from ofex.state.types import State, is_dense_state, type_state, ScipySparse
 from ofex.utils.binary import hamming_weight
 
 __all__ = ["transition_amplitude", "expectation", "apply_operator", "diagonalization", "sparse_apply_operator",
-           "state_dot"]
+           "state_dot", "collect_degen_eigspace_hierarchy"]
 
 
 def transition_amplitude(operator: Union[QubitOperator, spmatrix, LinearOperator],
@@ -127,7 +129,7 @@ def apply_operator(operator: Union[QubitOperator, spmatrix, LinearOperator],
         raise AssertionError
 
 
-def diagonalization(operator:Union[QubitOperator, FermionOperator],
+def diagonalization(operator: Union[QubitOperator, FermionOperator],
                     n_qubits: int,
                     sparse_eig: bool,
                     n_eigen: Optional[int] = None,
@@ -228,10 +230,10 @@ def state_dot(state_1: State, state_2: State) -> complex:
     Compute the Hermitian dot product <state_1|state_2> between two quantum states.
     
     Args:
-        state_1: The first quantum state, which can be in any supported format defined 
-                 in `ofex.state.types` (e.g., numpy array, scipy sparse matrix, or dict).
-        state_2: The second quantum state in the computation, in the same formats 
-                 supported as `state_1`.
+        state_1 (State): The first quantum state, which can be in any supported format defined
+                         in `ofex.state.types` (e.g., numpy array, scipy sparse matrix, or dict).
+        state_2 (State): The second quantum state in the computation, in the same formats
+                         supported as `state_1`.
 
     Returns:
         A complex number representing the Hermitian dot product of `state_1` and `state_2`. 
@@ -251,3 +253,53 @@ def state_dot(state_1: State, state_2: State) -> complex:
         return state_2.conj().dot(state_1.T)[0].conjugate()
     else:
         return np.dot(state_1.conj(), state_2)
+
+
+def collect_degen_eigspace_hierarchy(eig_values: np.ndarray,
+                                     eig_vectors: np.ndarray,
+                                     degen_tol: float = 1e-8)\
+        -> Dict[complex, np.ndarray]:
+    """
+    Group eigenvalues and their corresponding eigenvectors into degenerate eigenspaces 
+    based on hierarchical clustering.
+
+    This function uses hierarchical clustering to group eigenvalues that are considered 
+    degenerate (close in value within a defined tolerance) and collects the corresponding 
+    eigenvectors into subspaces.
+
+    Args:
+        eig_values (np.ndarray): A 1D numpy array containing eigenvalues.
+        eig_vectors (np.ndarray): A 2D numpy array containing eigenvectors as columns, corresponding
+                     to the eigenvalues in `eig_values`.
+        degen_tol (float): A float defining the maximum allowable distance between eigenvalues
+                   to consider them degenerate. Defaults to 1e-8.
+
+    Returns:
+        A dictionary where each key is a representative eigenvalue (the first one in 
+        each cluster), and the value is a 2D numpy array containing the eigenvectors 
+        (columns) associated with the degenerate eigenspace.
+    """
+    # Step 1: Compute hierarchical clustering
+    # Convert eigenvalues to 2D array (required by scipy linkage)
+    if np.allclose(eig_values.imag, 0.0, atol=EQ_TOLERANCE):
+        eig_values = eig_values.real
+        eig_values_reshaped = eig_values.reshape(-1, 1)
+    else:
+        # Convert complex numbers to 2D real representation: (real, imag)
+        eig_values_reshaped = np.column_stack((eig_values.real, eig_values.imag))
+
+    Z = linkage(eig_values_reshaped, method='single')  # 'single' linkage for minimum distance clustering
+
+    # Step 2: Assign clusters based on degen_tol
+    cluster_labels = fcluster(Z, t=degen_tol, criterion='distance')
+
+    # Step 3: Group eigenvectors by cluster
+    eig_dict = {}
+    for cluster_id in np.unique(cluster_labels):
+        cluster_indices = np.where(cluster_labels == cluster_id)[0]
+        # Representative eigenvalue: the first eigenvalue in the cluster
+        representative_eig = eig_values[cluster_indices[0]]
+        # Stack corresponding eigenvectors
+        eig_dict[representative_eig] = eig_vectors[:, cluster_indices]
+
+    return eig_dict

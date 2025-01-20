@@ -313,7 +313,7 @@ class FourierBasis(FunctionBasis):
             if idx_b1 > idx_b2:
                 overlap_matrix[idx_b1, idx_b2] = overlap_matrix[idx_b2, idx_b1].conjugate()
 
-        self.n_harmonics, self.deriv_order = n_harmonics, deriv_order
+        self.omega_list, self.n_harmonics, self.deriv_order = np.array(omega_list), n_harmonics, deriv_order
 
         super().__init__(basis, inner_product)
         if debug:

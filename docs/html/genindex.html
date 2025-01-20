@@ -200,8 +200,10 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="modules.html">ofex</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ofex</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="ofex.html">ofex package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ofex package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="ofex.classical_algorithms.html">ofex.classical_algorithms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.clifford.html">ofex.clifford</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.hamiltonian.html">ofex.hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ofex.hamiltonian_functions.html">ofex.hamiltonian_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.linalg.html">ofex.linalg</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.measurement.html">ofex.measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ofex.operators.html">ofex.operators</a></li>
@@ -295,6 +297,8 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="ofex.transforms.html#ofex.transforms.fermion_factorization.calculate_reflect_norm">calculate_reflect_norm() (in module ofex.transforms.fermion_factorization)</a>
 </li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.chebyshev_filter_fourier">chebyshev_filter_fourier() (in module ofex.classical_algorithms.funcapprox)</a>
+</li>
         <li><a href="ofex.state.html#ofex.state.chem_ref_state.cisd_ground">cisd_ground() (in module ofex.state.chem_ref_state)</a>
 </li>
         <li><a href="ofex.operators.html#ofex.operators.symbolic_operator_tools.clean_imaginary">clean_imaginary() (in module ofex.operators.symbolic_operator_tools)</a>
@@ -312,6 +316,8 @@
         <li><a href="ofex.clifford.html#ofex.clifford.clifford_unitary_mat">clifford_unitary_mat() (in module ofex.clifford)</a>
 </li>
         <li><a href="ofex.operators.html#ofex.operators.symbolic_operator_tools.coeff">coeff() (in module ofex.operators.symbolic_operator_tools)</a>
+</li>
+        <li><a href="ofex.linalg.html#ofex.linalg.sparse_tools.collect_degen_eigspace_hierarchy">collect_degen_eigspace_hierarchy() (in module ofex.linalg.sparse_tools)</a>
 </li>
         <li><a href="ofex.utils.html#ofex.utils.dict_utils.compare_dict">compare_dict() (in module ofex.utils.dict_utils)</a>
 </li>
@@ -413,9 +419,15 @@
 </li>
         <li><a href="ofex.transforms.html#ofex.transforms.fermion_to_qubit_state_general">fermion_to_qubit_state_general() (in module ofex.transforms)</a>
 </li>
+        <li><a href="ofex.transforms.html#ofex.transforms.find_pauli_symmetry">find_pauli_symmetry() (in module ofex.transforms)</a>
+</li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.first_chebyshev_inner_product">first_chebyshev_inner_product() (in module ofex.classical_algorithms.funcapprox)</a>
+</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="ofex.transforms.html#ofex.transforms.find_pauli_symmetry">find_pauli_symmetry() (in module ofex.transforms)</a>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.first_chebyshev_integral">first_chebyshev_integral() (in module ofex.classical_algorithms.funcapprox)</a>
+</li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FirstChebyshevBasis">FirstChebyshevBasis (class in ofex.classical_algorithms.funcapprox)</a>
 </li>
         <li><a href="ofex.state.html#ofex.state.fock_to_int">fock_to_int() (in module ofex.state)</a>
 </li>
@@ -423,7 +435,11 @@
 </li>
         <li><a href="ofex.state.html#ofex.state.state_tools.fock_vector_to_scipy_state">fock_vector_to_scipy_state() (in module ofex.state.state_tools)</a>
 </li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FourierBasis">FourierBasis (class in ofex.classical_algorithms.funcapprox)</a>
+</li>
         <li><a href="ofex.measurement.html#ofex.measurement.fragment_variance">fragment_variance() (in module ofex.measurement)</a>
+</li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis">FunctionBasis (class in ofex.classical_algorithms.funcapprox)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -433,6 +449,8 @@
   <h2>G</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.gaussian_function_fourier">gaussian_function_fourier() (in module ofex.classical_algorithms.funcapprox)</a>
+</li>
         <li><a href="ofex.state.html#ofex.state.state_tools.get_num_qubits">get_num_qubits() (in module ofex.state.state_tools)</a>
 </li>
     </ul></td>
@@ -440,6 +458,8 @@
         <li><a href="ofex.state.html#ofex.state.state_tools.get_sparsity">get_sparsity() (in module ofex.state.state_tools)</a>
 </li>
         <li><a href="ofex.state.html#ofex.state.state_tools.get_state_dim">get_state_dim() (in module ofex.state.state_tools)</a>
+</li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis.gradual_l2_minimization">gradual_l2_minimization() (ofex.classical_algorithms.funcapprox.FunctionBasis method)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -459,6 +479,8 @@
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ofex.hamiltonian_functions.html#ofex.hamiltonian_functions.hamiltonian_fourier_series">hamiltonian_fourier_series() (in module ofex.hamiltonian_functions)</a>
+</li>
         <li><a href="ofex.utils.html#ofex.utils.binary.hamming_weight">hamming_weight() (in module ofex.utils.binary)</a>
 </li>
         <li><a href="ofex.hamiltonian.html#ofex.hamiltonian.heisenberg_1d">heisenberg_1d() (in module ofex.hamiltonian)</a>
@@ -487,10 +509,10 @@
 </li>
         <li><a href="ofex.state.html#ofex.state.types.is_dense_state">is_dense_state() (in module ofex.state.types)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="ofex.operators.html#ofex.operators.fermion_operator_tools.is_number_only">is_number_only() (in module ofex.operators.fermion_operator_tools)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="ofex.state.html#ofex.state.types.is_scipy_sparse_state">is_scipy_sparse_state() (in module ofex.state.types)</a>
 </li>
         <li><a href="ofex.state.html#ofex.state.types.is_sparse_state">is_sparse_state() (in module ofex.state.types)</a>
@@ -499,6 +521,12 @@
 </li>
         <li><a href="ofex.state.html#ofex.state.state_tools.is_zero">is_zero() (in module ofex.state.state_tools)</a>
 </li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FourierBasis.iterate_basis_with_index">iterate_basis_with_index() (ofex.classical_algorithms.funcapprox.FourierBasis method)</a>
+
+        <ul>
+          <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis.iterate_basis_with_index">(ofex.classical_algorithms.funcapprox.FunctionBasis method)</a>
+</li>
+        </ul></li>
         <li><a href="ofex.measurement.html#ofex.measurement.iterative_sorted_insertion">iterative_sorted_insertion() (in module ofex.measurement)</a>
 </li>
     </ul></td>
@@ -529,6 +557,12 @@
   <h2>L</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis.l2_minimization">l2_minimization() (ofex.classical_algorithms.funcapprox.FunctionBasis method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis.l2_minimization_regularized">l2_minimization_regularized() (ofex.classical_algorithms.funcapprox.FunctionBasis method)</a>
+</li>
         <li><a href="ofex.utils.html#ofex.utils.chem.linear_geometry">linear_geometry() (in module ofex.utils.chem)</a>
 </li>
     </ul></td>
@@ -547,6 +581,12 @@
         <ul>
           <li><a href="ofex.html#module-ofex">ofex</a>
 </li>
+          <li><a href="ofex.classical_algorithms.html#module-ofex.classical_algorithms">ofex.classical_algorithms</a>
+</li>
+          <li><a href="ofex.classical_algorithms.html#module-ofex.classical_algorithms.clique">ofex.classical_algorithms.clique</a>
+</li>
+          <li><a href="ofex.classical_algorithms.html#module-ofex.classical_algorithms.funcapprox">ofex.classical_algorithms.funcapprox</a>
+</li>
           <li><a href="ofex.clifford.html#module-ofex.clifford">ofex.clifford</a>
 </li>
           <li><a href="ofex.html#module-ofex.constant">ofex.constant</a>
@@ -554,6 +594,8 @@
           <li><a href="ofex.html#module-ofex.exceptions">ofex.exceptions</a>
 </li>
           <li><a href="ofex.hamiltonian.html#module-ofex.hamiltonian">ofex.hamiltonian</a>
+</li>
+          <li><a href="ofex.hamiltonian_functions.html#module-ofex.hamiltonian_functions">ofex.hamiltonian_functions</a>
 </li>
           <li><a href="ofex.linalg.html#module-ofex.linalg">ofex.linalg</a>
 </li>
@@ -610,6 +652,8 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="ofex.utils.html#ofex.utils.chem.molecule_example">molecule_example() (in module ofex.utils.chem)</a>
 </li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.monomial_fourier_integral">monomial_fourier_integral() (in module ofex.classical_algorithms.funcapprox)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -618,6 +662,8 @@
   <h2>N</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis.n_basis">n_basis (ofex.classical_algorithms.funcapprox.FunctionBasis property)</a>
+</li>
         <li><a href="ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP.n_ring">n_ring (ofex.hamiltonian.PolyacenePPP attribute)</a>
 </li>
         <li><a href="ofex.utils.html#ofex.utils.dict_utils.nested_dict_assign">nested_dict_assign() (in module ofex.utils.dict_utils)</a>
@@ -626,10 +672,10 @@
 </li>
         <li><a href="ofex.operators.html#ofex.operators.fermion_operator_tools.normal_ordered_single">normal_ordered_single() (in module ofex.operators.fermion_operator_tools)</a>
 </li>
-        <li><a href="ofex.state.html#ofex.state.state_tools.normalize">normalize() (in module ofex.state.state_tools)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ofex.state.html#ofex.state.state_tools.normalize">normalize() (in module ofex.state.state_tools)</a>
+</li>
         <li><a href="ofex.operators.html#ofex.operators.normalize_by_lcu_norm">normalize_by_lcu_norm() (in module ofex.operators)</a>
 </li>
         <li><a href="ofex.state.html#ofex.state.BinaryFockVector.num_qubits">num_qubits (ofex.state.BinaryFockVector property)</a>
@@ -653,6 +699,27 @@
 
         <ul>
           <li><a href="ofex.html#module-ofex">module</a>
+</li>
+        </ul></li>
+        <li>
+    ofex.classical_algorithms
+
+        <ul>
+          <li><a href="ofex.classical_algorithms.html#module-ofex.classical_algorithms">module</a>
+</li>
+        </ul></li>
+        <li>
+    ofex.classical_algorithms.clique
+
+        <ul>
+          <li><a href="ofex.classical_algorithms.html#module-ofex.classical_algorithms.clique">module</a>
+</li>
+        </ul></li>
+        <li>
+    ofex.classical_algorithms.funcapprox
+
+        <ul>
+          <li><a href="ofex.classical_algorithms.html#module-ofex.classical_algorithms.funcapprox">module</a>
 </li>
         </ul></li>
         <li>
@@ -681,6 +748,13 @@
 
         <ul>
           <li><a href="ofex.hamiltonian.html#module-ofex.hamiltonian">module</a>
+</li>
+        </ul></li>
+        <li>
+    ofex.hamiltonian_functions
+
+        <ul>
+          <li><a href="ofex.hamiltonian_functions.html#module-ofex.hamiltonian_functions">module</a>
 </li>
         </ul></li>
         <li>
@@ -753,6 +827,8 @@
           <li><a href="ofex.operators.html#module-ofex.operators.qubit_operator_tools">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     ofex.operators.symbolic_operator_tools
 
@@ -767,8 +843,6 @@
           <li><a href="ofex.operators.html#module-ofex.operators.types">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     ofex.propagator
 
@@ -874,6 +948,8 @@
 </li>
         <li><a href="ofex.operators.html#ofex.operators.ordering.order_abs_coeff">order_abs_coeff() (in module ofex.operators.ordering)</a>
 </li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis.overlap_matrix">overlap_matrix (ofex.classical_algorithms.funcapprox.FunctionBasis property)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -896,6 +972,8 @@
           <li><a href="ofex.sampling_simulation.html#ofex.sampling_simulation.sampling_base.ProbDist.pickle">(ofex.sampling_simulation.sampling_base.ProbDist method)</a>
 </li>
         </ul></li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.plot_functions">plot_functions() (in module ofex.classical_algorithms.funcapprox)</a>
+</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="ofex.hamiltonian.html#ofex.hamiltonian.PolyacenePPP">PolyacenePPP (class in ofex.hamiltonian)</a>
@@ -909,6 +987,8 @@
         <li><a href="ofex.state.html#ofex.state.BinaryFockVector.pretty_string">pretty_string() (ofex.state.BinaryFockVector method)</a>
 </li>
         <li><a href="ofex.sampling_simulation.html#ofex.sampling_simulation.sampling_base.ProbDist">ProbDist (class in ofex.sampling_simulation.sampling_base)</a>
+</li>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.FunctionBasis.projection">projection() (ofex.classical_algorithms.funcapprox.FunctionBasis method)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -1065,6 +1145,10 @@
 <section id="U" class="genindex-section">
   <h2>U</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="ofex.classical_algorithms.html#ofex.classical_algorithms.funcapprox.uniform_inner_product">uniform_inner_product() (in module ofex.classical_algorithms.funcapprox)</a>
+</li>
+    </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="ofex.sampling_simulation.html#ofex.sampling_simulation.sampling_base.JointProbDist.unpickle">unpickle() (ofex.sampling_simulation.sampling_base.JointProbDist class method)</a>
 

@@ -201,8 +201,10 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../modules.html">ofex</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of ofex</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../ofex.html">ofex package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of ofex package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.classical_algorithms.html">ofex.classical_algorithms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../ofex.clifford.html">ofex.clifford</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../ofex.hamiltonian.html">ofex.hamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ofex.hamiltonian_functions.html">ofex.hamiltonian_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../ofex.linalg.html">ofex.linalg</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../ofex.measurement.html">ofex.measurement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../ofex.operators.html">ofex.operators</a></li>
@@ -271,11 +273,13 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">openfermion</span> <span class="kn">import</span> <span class="n">QubitOperator</span><span class="p">,</span> <span class="n">LinearQubitOperator</span><span class="p">,</span> <span class="n">get_sparse_operator</span><span class="p">,</span> <span class="n">FermionOperator</span>
+<span class="kn">from</span> <span class="nn">openfermion.config</span> <span class="kn">import</span> <span class="n">EQ_TOLERANCE</span>
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">linkage</span><span class="p">,</span> <span class="n">fcluster</span>
 <span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
 <span class="kn">from</span> <span class="nn">scipy.sparse.linalg</span> <span class="kn">import</span> <span class="n">LinearOperator</span>
 
@@ -286,7 +290,7 @@
 <span class="kn">from</span> <span class="nn">ofex.utils.binary</span> <span class="kn">import</span> <span class="n">hamming_weight</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;transition_amplitude&quot;</span><span class="p">,</span> <span class="s2">&quot;expectation&quot;</span><span class="p">,</span> <span class="s2">&quot;apply_operator&quot;</span><span class="p">,</span> <span class="s2">&quot;diagonalization&quot;</span><span class="p">,</span> <span class="s2">&quot;sparse_apply_operator&quot;</span><span class="p">,</span>
-           <span class="s2">&quot;state_dot&quot;</span><span class="p">]</span>
+           <span class="s2">&quot;state_dot&quot;</span><span class="p">,</span> <span class="s2">&quot;collect_degen_eigspace_hierarchy&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="transition_amplitude">
@@ -390,7 +394,7 @@
 
 <div class="viewcode-block" id="diagonalization">
 <a class="viewcode-back" href="../../../ofex.linalg.html#ofex.linalg.sparse_tools.diagonalization">[docs]</a>
-<span class="k">def</span> <span class="nf">diagonalization</span><span class="p">(</span><span class="n">operator</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">FermionOperator</span><span class="p">],</span>
+<span class="k">def</span> <span class="nf">diagonalization</span><span class="p">(</span><span class="n">operator</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">FermionOperator</span><span class="p">],</span>
                     <span class="n">n_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                     <span class="n">sparse_eig</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
                     <span class="n">n_eigen</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -497,10 +501,10 @@
 <span class="sd">    Compute the Hermitian dot product &lt;state_1|state_2&gt; between two quantum states.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        state_1: The first quantum state, which can be in any supported format defined </span>
-<span class="sd">                 in `ofex.state.types` (e.g., numpy array, scipy sparse matrix, or dict).</span>
-<span class="sd">        state_2: The second quantum state in the computation, in the same formats </span>
-<span class="sd">                 supported as `state_1`.</span>
+<span class="sd">        state_1 (State): The first quantum state, which can be in any supported format defined</span>
+<span class="sd">                         in `ofex.state.types` (e.g., numpy array, scipy sparse matrix, or dict).</span>
+<span class="sd">        state_2 (State): The second quantum state in the computation, in the same formats</span>
+<span class="sd">                         supported as `state_1`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A complex number representing the Hermitian dot product of `state_1` and `state_2`. </span>
@@ -520,6 +524,59 @@
         <span class="k">return</span> <span class="n">state_2</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">state_1</span><span class="o">.</span><span class="n">T</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">conjugate</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">state_1</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">state_2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="collect_degen_eigspace_hierarchy">
+<a class="viewcode-back" href="../../../ofex.linalg.html#ofex.linalg.sparse_tools.collect_degen_eigspace_hierarchy">[docs]</a>
+<span class="k">def</span> <span class="nf">collect_degen_eigspace_hierarchy</span><span class="p">(</span><span class="n">eig_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                     <span class="n">eig_vectors</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                     <span class="n">degen_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-8</span><span class="p">)</span>\
+        <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group eigenvalues and their corresponding eigenvectors into degenerate eigenspaces </span>
+<span class="sd">    based on hierarchical clustering.</span>
+
+<span class="sd">    This function uses hierarchical clustering to group eigenvalues that are considered </span>
+<span class="sd">    degenerate (close in value within a defined tolerance) and collects the corresponding </span>
+<span class="sd">    eigenvectors into subspaces.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        eig_values (np.ndarray): A 1D numpy array containing eigenvalues.</span>
+<span class="sd">        eig_vectors (np.ndarray): A 2D numpy array containing eigenvectors as columns, corresponding</span>
+<span class="sd">                     to the eigenvalues in `eig_values`.</span>
+<span class="sd">        degen_tol (float): A float defining the maximum allowable distance between eigenvalues</span>
+<span class="sd">                   to consider them degenerate. Defaults to 1e-8.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A dictionary where each key is a representative eigenvalue (the first one in </span>
+<span class="sd">        each cluster), and the value is a 2D numpy array containing the eigenvectors </span>
+<span class="sd">        (columns) associated with the degenerate eigenspace.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Step 1: Compute hierarchical clustering</span>
+    <span class="c1"># Convert eigenvalues to 2D array (required by scipy linkage)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">eig_values</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">EQ_TOLERANCE</span><span class="p">):</span>
+        <span class="n">eig_values</span> <span class="o">=</span> <span class="n">eig_values</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">eig_values_reshaped</span> <span class="o">=</span> <span class="n">eig_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Convert complex numbers to 2D real representation: (real, imag)</span>
+        <span class="n">eig_values_reshaped</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">eig_values</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">eig_values</span><span class="o">.</span><span class="n">imag</span><span class="p">))</span>
+
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span><span class="n">eig_values_reshaped</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">)</span>  <span class="c1"># &#39;single&#39; linkage for minimum distance clustering</span>
+
+    <span class="c1"># Step 2: Assign clusters based on degen_tol</span>
+    <span class="n">cluster_labels</span> <span class="o">=</span> <span class="n">fcluster</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">degen_tol</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Step 3: Group eigenvectors by cluster</span>
+    <span class="n">eig_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">cluster_id</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">cluster_labels</span><span class="p">):</span>
+        <span class="n">cluster_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cluster_labels</span> <span class="o">==</span> <span class="n">cluster_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Representative eigenvalue: the first eigenvalue in the cluster</span>
+        <span class="n">representative_eig</span> <span class="o">=</span> <span class="n">eig_values</span><span class="p">[</span><span class="n">cluster_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="c1"># Stack corresponding eigenvectors</span>
+        <span class="n">eig_dict</span><span class="p">[</span><span class="n">representative_eig</span><span class="p">]</span> <span class="o">=</span> <span class="n">eig_vectors</span><span class="p">[:,</span> <span class="n">cluster_indices</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">eig_dict</span></div>
 
 </pre></div>
         </article>

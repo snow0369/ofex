@@ -123,17 +123,18 @@ class FunctionBasis(object):
             n_max (Optional[int]): The maximum number of basis functions to consider. 
                                   If not specified, defaults to the total number of iterations
                                   over basis groups.
-           **kwargs: Additional parameters passed to `iterate_basis_with_index`.
+            **kwargs: Additional parameters passed to `iterate_basis_with_index`.
 
-       Returns:
-           Dict[int, Tuple[sp.Expr, np.ndarray, float]]:
-               A dictionary where keys are the number of basis functions used, and values are tuples containing:
-               - The approximate function.
-               - Coefficients for the basis functions.
-               - Residual error norm of the approximation.
+        Returns:
+            Dict[int, Tuple[sp.Expr, np.ndarray, float]]:
+                A dictionary where keys are the number of basis functions used, and values are tuples containing:
+                - The approximate function.
+                - Coefficients for the basis functions.
+                - Residual error norm of the approximation.
 
-       Raises:
-           ValueError: If `n_min` is less than 1 or `n_max` is less than `n_min`.
+        Raises:
+            ValueError: If `n_min` is less than 1 or `n_max` is less than `n_min`.
+
         """
         if n_max is None:
             n_max = sum(1 for _ in self.iterate_basis_with_index())
@@ -184,7 +185,7 @@ class FunctionBasis(object):
                                     max_iter: int = 1000,
                                     conv_atol: float = 1e-6) \
             -> Tuple[sp.Expr, np.ndarray, float]:
-        """
+        r"""
         Performs L2-minimization with a regularization term.
         
         This method finds an optimal linear combination of basis functions with regularization. 

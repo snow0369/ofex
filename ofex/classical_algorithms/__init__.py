@@ -1,3 +1,3 @@
-from . import clique
+from . import clique, funcapprox
 
-__all__ = ["clique"]
+__all__ = ["clique", "funcapprox"]

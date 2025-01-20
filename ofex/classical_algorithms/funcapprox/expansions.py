@@ -75,7 +75,7 @@ def chebyshev_filter_fourier(n_fourier: int,
     
     .. math::
 
-        f_n(x) = T_n\left( 1 + 2\frac{\cos 2\pi (x-c)/p - \cos 2\pi w/p}{1 + \cos 2\pi w/p} \right) / \mathcal{Ν},
+        f_n(x) = \mathcal{N}^{-1}T_n\left( 1 + 2\frac{\cos 2\pi (x-c)/p - \cos 2\pi w/p}{1 + \cos 2\pi w/p} \right),
 
     where :math:`\mathcal{N}` is the normalizer that ensures the peak value of the filter is equal to `peak_height`.
     The resulting Fourier series is represented as:

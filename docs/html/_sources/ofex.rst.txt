@@ -10,8 +10,10 @@ ofex package
 .. toctree::
    :maxdepth: 3
 
+   ofex.classical_algorithms
    ofex.clifford
    ofex.hamiltonian
+   ofex.hamiltonian_functions
    ofex.linalg
    ofex.measurement
    ofex.operators

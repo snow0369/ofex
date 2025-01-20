@@ -6,9 +6,9 @@ from networkx import Graph
 
 from ofex.utils.graph import graph_from_edge_list
 
-
 # https://arxiv.org/abs/2001.05983
 __all__ = ["find_max_clique"]
+
 
 def find_max_clique(edges: Union[List[Tuple[Any, Any]], np.ndarray],
                     nodes: Optional[List[Any]] = None) -> set:

@@ -57,7 +57,8 @@ def exact_expop(op: Union[QubitOperator, np.ndarray, spmatrix],
 def exact_rte(ham: Union[QubitOperator, np.ndarray, spmatrix],
               t: float,
               n_qubits: Optional[int] = None,
-              exact_sparse=False):
+              exact_sparse=False)\
+        -> Union[spmatrix, np.ndarray]:
     """
     Compute the real-time evolution operator for a given Hamiltonian.
 
@@ -77,7 +78,8 @@ def exact_rte(ham: Union[QubitOperator, np.ndarray, spmatrix],
 def exact_ite(ham: Union[QubitOperator, np.ndarray, spmatrix],
               beta: float,
               n_qubits: Optional[int] = None,
-              exact_sparse=False):
+              exact_sparse=False)\
+        -> Union[spmatrix, np.ndarray]:
     """
     Compute the imaginary-time evolution operator for a given Hamiltonian.
 

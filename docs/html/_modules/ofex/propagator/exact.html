@@ -311,7 +311,8 @@
 <span class="k">def</span> <span class="nf">exact_rte</span><span class="p">(</span><span class="n">ham</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">],</span>
               <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
               <span class="n">n_qubits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-              <span class="n">exact_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+              <span class="n">exact_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>\
+        <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">spmatrix</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the real-time evolution operator for a given Hamiltonian.</span>
 
@@ -334,7 +335,8 @@
 <span class="k">def</span> <span class="nf">exact_ite</span><span class="p">(</span><span class="n">ham</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">QubitOperator</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">spmatrix</span><span class="p">],</span>
               <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
               <span class="n">n_qubits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-              <span class="n">exact_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+              <span class="n">exact_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>\
+        <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">spmatrix</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the imaginary-time evolution operator for a given Hamiltonian.</span>
 

@@ -181,7 +181,6 @@ class FunctionBasis(object):
     def l2_minimization_regularized(self,
                                     func: sp.Expr,
                                     reg_coeff: Union[Sequence[float], float],
-                                    order: int,
                                     max_iter: int = 1000,
                                     conv_atol: float = 1e-6) \
             -> Tuple[sp.Expr, np.ndarray, float]:
@@ -191,22 +190,6 @@ class FunctionBasis(object):
         This method finds an optimal linear combination of basis functions with regularization. 
         Different methods are utilized for first and second-order minimization.
         
-        For 1st order regularization:
-        
-        .. math::
-            \min_{\vec{c}} \left[\|f\|^2 + \vec{c}^{\dagger}\mathbf{S}\vec{c} 
-            - (\vec{c}^{\dagger}\vec{\mu} + \vec{\mu}^{\dagger}\vec{c})\right]^{1/2} 
-            + \sum_k |c_k| \|\epsilon_k\|.
-        
-        The solution satisfies:
-        
-        .. math::
-            \mathbf{S} \vec{c}^{\mathrm{(opt)}} = \vec{\mu} - \vec{\delta}(\vec{c}^{\mathrm{(opt)}}).
-        
-        An iterative method is used to achieve convergence.
-        
-        For 2nd order regularization:
-        
         .. math::
             \min_{\vec{c}} \left[\|f(x)\|^2 + \vec{c}^{\dagger}\mathbf{S}\vec{c}
             - (\vec{c}^{\dagger}\vec{\mu} + \vec{\mu}^{\dagger}\vec{c}) 
@@ -215,13 +198,14 @@ class FunctionBasis(object):
         which leads to the linear equation:
         
         .. math::
-            (\mathbf{S} + \mathbf{E}) \vec{c} = \vec{\mu}.
+            (\mathbf{S} + \mathbf{E}) \vec{c} = \vec{\mu}
+
+        where :math:`\mathbf{E}` is a diagonal matrix with regularization coefficients.
         
         Args:
             func (sp.Expr): The target function for minimization.
             reg_coeff (Union[Sequence[float], float]): Regularization coefficients. 
                 Positive values only (either a single value or a sequence matching the basis size).
-            order (int): Specifies the regularization order (1 or 2).
             max_iter (int, optional): Maximum number of iterations for the 1st order optimization 
                 (default is 1000).
             conv_atol (float, optional): Convergence absolute tolerance for the iterative method 
@@ -245,7 +229,8 @@ class FunctionBasis(object):
         s = self.overlap_matrix
         mu = self.projection(func)
 
-        if order == 1:
+        order = 2
+        if order == 1:  # Deprecated
             c = np.linalg.solve(s, mu)
             diff = (func_norm_2 - np.dot(mu.conj(), c))
             assert np.isclose(diff.imag, 0.0), diff

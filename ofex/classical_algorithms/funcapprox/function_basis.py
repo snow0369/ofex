@@ -272,7 +272,7 @@ class FunctionBasis(object):
                 print("Reached max iter")
 
         elif order == 2:
-            e_mat = np.outer(reg_coeff, reg_coeff)
+            e_mat = np.diag(reg_coeff ** 2)
             c = np.linalg.solve(s + e_mat, mu)
             diff = (func_norm_2 - np.dot(c.conj(), s @ c))
 

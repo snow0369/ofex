@@ -2,6 +2,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 import sympy as sp
+from numpy.polynomial.polynomial import Polynomial
 from scipy.special import chebyt
 
 __all__ = ["gaussian_function_fourier", "chebyshev_filter_fourier"]
@@ -12,7 +13,7 @@ def gaussian_function_fourier(n_fourier: int,
                               center: float = 0.0,
                               period: float = 2.0,
                               peak_height: float = 1.0,
-                              sym_x: Optional[sp.Symbol] = None,)\
+                              sym_x: Optional[sp.Symbol] = None, ) \
         -> Tuple[sp.Expr, np.ndarray, np.ndarray]:
     r"""
     Computes the Fourier series representation of a Gaussian function.
@@ -45,7 +46,7 @@ def gaussian_function_fourier(n_fourier: int,
             - `coeff` (np.ndarray): The Fourier series coefficients as a complex-valued numpy array.
             - `freqs` (np.ndarray): The corresponding frequencies for the Fourier series coefficients.
     """
-    
+
     if sym_x is None:
         sym_x = sp.Symbol("x")
 
@@ -54,7 +55,7 @@ def gaussian_function_fourier(n_fourier: int,
     coeff = np.exp(-0.5 * (width * freqs) ** 2) * np.exp(-1j * freqs * center)
     basis = [sp.exp(1j * f * sym_x) for f in freqs]
     sp_series = sp.Add(*(c * b for c, b in zip(coeff, basis)))
-    normalizer = sp_series.subs({sym_x: center})
+    normalizer = complex(sp_series.subs({sym_x: center}))
 
     sp_series = peak_height * sp_series / normalizer
     coeff *= peak_height / normalizer
@@ -67,7 +68,7 @@ def chebyshev_filter_fourier(n_fourier: int,
                              center: float = 0.0,
                              period: float = 2.0,
                              peak_height: float = 1.0,
-                             sym_x: Optional[sp.Symbol] = None,)\
+                             sym_x: Optional[sp.Symbol] = None, ) \
         -> Tuple[sp.Expr, np.ndarray, np.ndarray]:
     r"""
     Constructs a Chebyshev bandpass filter using its Fourier series representation.
@@ -100,7 +101,7 @@ def chebyshev_filter_fourier(n_fourier: int,
             - `coeff` (np.ndarray): The Fourier series coefficients as a complex-valued numpy array.
             - `freqs` (np.ndarray): The corresponding frequencies for the Fourier series coefficients.
     """
-    
+
     #   Tn(1+2[cos(2π(x-c)/p) - cos(2πw/p)]/[1 + cos(2πw/p)]) / Normalizer
     # = Tn(1+2[cos z - cos a]/[1 + cos a]) / Normalizer
     if sym_x is None:
@@ -116,37 +117,84 @@ def chebyshev_filter_fourier(n_fourier: int,
 
     # y = 1 + 2[cos z - cos a] / [1 + cos a]
     #   = [2cos z + (1 - b)] / [1 + b]
-    y = np.poly1d(np.array([2, 1 - b])/(1 + b))
+    y = np.poly1d(np.array([2, 1 - b]) / (1 + b))
     y0 = y(1)  # y₀ = 1 + 2[1 - cos a] / [1 + cos a]
 
     # Tn(y)
-    tn = chebyt(n_fourier)
-    tn = np.polyval(tn, y)
-    tn = peak_height * tn / tn(y0)  # normalize
+    if n_fourier > 35:
+        # Perform High-precision calculation
+        raise NotImplementedError("High-precision Chebyshev filter not implemented yet")
+        tn = _chebyt_product(n_fourier)
+        tny = np.polyval(tn, y)
+    else:
+        tn = chebyt(n_fourier)
+        tny = np.polyval(tn, y)
+        tny0 = tny(y0)
+        tny = tny / tny0  # normalize
 
-    mon_c = tn.c[::-1]  # tn(y) = Σₖ mon_c[k] cosᵏ(z)
-    mon_by_cheby = _monomial_by_chebyshev(n_fourier + 1)  # cosᵏ(z) = Σₗ d[k, l] Tₗ(cos z) =  Σₗ d[k, l] cos(lz)
-    cheby_c = mon_c @ mon_by_cheby
+    mon_c = tny.c[::-1]  # tn(y) = Σₖ mon_c[k] cosᵏ(z)
+    if n_fourier > 35:
+        mon_by_cheby = _monomial_by_chebyshev_high_precision(n_fourier + 1)
+        cheby_c = mon_c.astype(np.complex128) @ mon_by_cheby
+    else:
+        mon_by_cheby = _monomial_by_chebyshev(n_fourier + 1)  # cosᵏ(z) = Σₗ d[k, l] Tₗ(cos z) =  Σₗ d[k, l] cos(lz)
+        cheby_c = mon_c @ mon_by_cheby
 
     # Cosine to complex exponential coefficients
     coeff = np.zeros(freqs.shape, dtype=complex)
-    coeff[:n_fourier] = cheby_c[:0:-1]/2
+    coeff[:n_fourier] = cheby_c[:0:-1] / 2
     coeff[n_fourier] = cheby_c[0]
-    coeff[n_fourier + 1:] = cheby_c[1:]/2
+    coeff[n_fourier + 1:] = cheby_c[1:] / 2
 
     # Shift by c
     coeff *= np.exp(-1j * freqs * center)
 
     basis = [sp.exp(1j * f * sym_x) for f in freqs]
     sp_series = sp.Add(*(c * b for c, b in zip(coeff, basis)))
+    normalizer = complex(sp_series.subs({sym_x: center}))
+
+    sp_series = peak_height * sp_series / normalizer
+    coeff *= peak_height / normalizer
 
     return sp_series, coeff, freqs
+
+
+def _chebyt_product(n):
+    """
+    Constructs the Chebyshev polynomial T_n(x) as a product of (x - x_k) where x_k are the roots.
+
+    Parameters:
+        n (int): Degree of the Chebyshev polynomial.
+
+    Returns:
+        np.ndarray: Coefficients of T_n(x) with the leading coefficient normalized to 1.
+    """
+    if n == 0:
+        return np.array([1])  # T_0(x) = 1
+    if n == 1:
+        return np.array([1, 0])  # T_1(x) = x
+
+    # Compute the roots
+    roots = np.cos((2 * np.arange(n) + 1) * np.pi / (2 * n))
+
+    # Start with the constant polynomial 1
+    poly = Polynomial([1.0])
+
+    # Multiply (x - root) for each root
+    for root in roots:
+        poly = poly * Polynomial([-root, 1.0])  # (x - root)
+
+    # Normalize the polynomial to ensure the leading coefficient is 1
+    coefficients = poly.coef
+    coefficients /= coefficients[-1]  # Normalize
+
+    return coefficients
 
 
 def _monomial_by_chebyshev(n):
     # https://en.wikipedia.org/wiki/Chebyshev_polynomials#Explicit_expressions
     # -> x^n = ...
-    cxk_to_ckx = np.zeros((n, n), dtype=complex)  # cos^k x = Σj c[k, j] Tj(cos x) = Σj c[k, j] cos jx
+    cxk_to_ckx = np.zeros((n, n), dtype=np.complex128)  # cos^k x = Σj c[k, j] Tj(cos x) = Σj c[k, j] cos jx
     for k in range(n):
         # naive_cheby = chebyt(k).c
         for j in range(k + 1):
@@ -158,4 +206,20 @@ def _monomial_by_chebyshev(n):
                 c *= (0.5 + (k + j) / (4 * l))
             c *= 2 ** (-(j + k) / 2)
             cxk_to_ckx[k, j] = c  # * naive_cheby[j]
+    return cxk_to_ckx
+
+
+def _monomial_by_chebyshev_high_precision(n):
+    cxk_to_ckx = np.zeros((n, n), dtype=np.complex128)
+    for k in range(n):
+        for j in range(k + 1):
+            if j % 2 != k % 2:
+                continue
+            log_c = 0.0
+            if j != 0:
+                log_c += np.log(2.0)
+            for l in range(1, (k - j) // 2 + 1):
+                log_c += np.log(0.5 + (k + j) / (4 * l))
+            log_c -= ((j + k) / 2) * np.log(2)
+            cxk_to_ckx[k, j] = np.exp(log_c)
     return cxk_to_ckx

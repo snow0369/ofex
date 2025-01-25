@@ -2,10 +2,50 @@ from typing import Optional, Tuple
 
 import numpy as np
 import sympy as sp
+from numpy.polynomial.chebyshev import Chebyshev
 from numpy.polynomial.polynomial import Polynomial
-from scipy.special import chebyt
+from scipy.special import chebyt, erf
 
-__all__ = ["gaussian_function_fourier", "chebyshev_filter_fourier"]
+__all__ = ["gaussian_function_fourier", "chebyshev_filter_fourier",
+           "gaussian_width_fit_to_chebyshev", "gaussian_find_n", "chebyshev_find_n", "chebyshev_fluctuation"]
+
+
+def gaussian_width_fit_to_chebyshev(n_cheby: int, width, period):
+    omega = 2 * np.pi / period
+    y = 1 + 2 * (1 - np.cos(omega * width)) / (1 + np.cos(omega * width))
+    tny = Chebyshev.basis(n_cheby)(y)
+    return width / np.sqrt(2 * np.log(tny))
+
+
+def gaussian_find_n(width, period, fluctuation, max_n = 100):
+    c = width * 2 * np.pi / (np.sqrt(2) * period) 
+    for n in range(1, max_n):
+        erf_val = erf(c * n)
+        err = abs((1-erf_val)/(c /(np.sqrt(np.pi) + erf_val))) # TOO High
+        if err < fluctuation:
+            break
+    else:
+        raise ValueError("No valid number of Fourier coefficients 'n' found that satisfies the fluctuation condition"
+                         "within the given maximum limit.")
+    return n
+
+
+def chebyshev_find_n(width, period, fluctuation, max_n = 100):
+    for n in range(max_n):
+        fluc_n = chebyshev_fluctuation(n, width, period)
+        if fluc_n < fluctuation:
+            break
+    else:
+        raise ValueError("No valid Chebyshev polynomial degree n found that satisfies the fluctuation condition"
+                         "within the maximum limit.")
+    return n
+
+
+def chebyshev_fluctuation(n, width, period):
+    omega = 2 * np.pi / period
+    y = 1 + 2 * (1 - np.cos(omega * width)) / (1 + np.cos(omega * width))
+    tny = Chebyshev.basis(n)(y)
+    return tny ** (-1)
 
 
 def gaussian_function_fourier(n_fourier: int,
@@ -13,7 +53,7 @@ def gaussian_function_fourier(n_fourier: int,
                               center: float = 0.0,
                               period: float = 2.0,
                               peak_height: float = 1.0,
-                              sym_x: Optional[sp.Symbol] = None, ) \
+                              sym_x: Optional[sp.Symbol] = None,) \
         -> Tuple[sp.Expr, np.ndarray, np.ndarray]:
     r"""
     Computes the Fourier series representation of a Gaussian function.
@@ -29,6 +69,12 @@ def gaussian_function_fourier(n_fourier: int,
 
         \tilde{f}(x) = \sum_{k=-n}^n c_k e^{2\pi ikx/p}.
 
+    Setting width_fit_to_chebyshev modifies the width so that the function coincides with the first sidelobe of the
+    chebysev filter.
+
+    .. math::
+
+        \tilde{w} = w \left[ 2 / \log T_n\left( 1 + 2\frac{1-\cos 2\pi w/p}{1 + \cos 2\pi w/p} \right) \right]
 
     Parameters:
         n_fourier (int): The number of Fourier coefficients on each side of the frequency spectrum
@@ -110,7 +156,7 @@ def chebyshev_filter_fourier(n_fourier: int,
     d_omega = 2 * np.pi / period
     freqs = np.linspace(-n_fourier * d_omega, n_fourier * d_omega, 2 * n_fourier + 1)
 
-    a = d_omega * width * np.pi
+    a = d_omega * width #  * np.pi
     b = np.cos(a)
     if np.isclose(b, -1.0):
         raise ValueError("Ill-conditioned Chebyshev filter")
@@ -121,24 +167,24 @@ def chebyshev_filter_fourier(n_fourier: int,
     y0 = y(1)  # y₀ = 1 + 2[1 - cos a] / [1 + cos a]
 
     # Tn(y)
-    if n_fourier > 35:
-        # Perform High-precision calculation
-        raise NotImplementedError("High-precision Chebyshev filter not implemented yet")
-        tn = _chebyt_product(n_fourier)
-        tny = np.polyval(tn, y)
-    else:
-        tn = chebyt(n_fourier)
-        tny = np.polyval(tn, y)
-        tny0 = tny(y0)
-        tny = tny / tny0  # normalize
+    #if n_fourier > 35:
+    #    # Perform High-precision calculation
+    #    raise NotImplementedError("High-precision Chebyshev filter not implemented yet")
+    #    tn = _chebyt_product(n_fourier)
+    #    tny = np.polyval(tn, y)
+    #else:
+    tn = chebyt(n_fourier)
+    tny = np.polyval(tn, y)
+    tny0 = tny(y0)
+    tny = tny / tny0  # normalize
 
     mon_c = tny.c[::-1]  # tn(y) = Σₖ mon_c[k] cosᵏ(z)
-    if n_fourier > 35:
-        mon_by_cheby = _monomial_by_chebyshev_high_precision(n_fourier + 1)
-        cheby_c = mon_c.astype(np.complex128) @ mon_by_cheby
-    else:
-        mon_by_cheby = _monomial_by_chebyshev(n_fourier + 1)  # cosᵏ(z) = Σₗ d[k, l] Tₗ(cos z) =  Σₗ d[k, l] cos(lz)
-        cheby_c = mon_c @ mon_by_cheby
+    #if n_fourier > 35:
+    #    mon_by_cheby = _monomial_by_chebyshev_high_precision(n_fourier + 1)
+    #    cheby_c = mon_c.astype(np.complex128) @ mon_by_cheby
+    #else:
+    mon_by_cheby = _monomial_by_chebyshev(n_fourier + 1)  # cosᵏ(z) = Σₗ d[k, l] Tₗ(cos z) =  Σₗ d[k, l] cos(lz)
+    cheby_c = mon_c @ mon_by_cheby
 
     # Cosine to complex exponential coefficients
     coeff = np.zeros(freqs.shape, dtype=complex)
@@ -155,6 +201,11 @@ def chebyshev_filter_fourier(n_fourier: int,
 
     sp_series = peak_height * sp_series / normalizer
     coeff *= peak_height / normalizer
+
+    if n_fourier > 35:
+        pass
+        # Numerically unstable.
+        # sp_series =
 
     return sp_series, coeff, freqs
 

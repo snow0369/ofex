@@ -4,24 +4,41 @@ import numpy as np
 import sympy as sp
 from numpy.polynomial.chebyshev import Chebyshev
 from numpy.polynomial.polynomial import Polynomial
+from scipy.optimize import minimize_scalar, minimize
 from scipy.special import chebyt, erf
 
 __all__ = ["gaussian_function_fourier", "chebyshev_filter_fourier",
            "gaussian_width_fit_to_chebyshev", "gaussian_find_n", "chebyshev_find_n", "chebyshev_fluctuation"]
 
+from sympy import diff, solve, lambdify, Abs, Piecewise
 
-def gaussian_width_fit_to_chebyshev(n_cheby: int, width, period):
+
+def gaussian_width_fit_to_chebyshev(n_cheby: int, width, period, precise=False):
     omega = 2 * np.pi / period
     y = 1 + 2 * (1 - np.cos(omega * width)) / (1 + np.cos(omega * width))
     tny = Chebyshev.basis(n_cheby)(y)
-    return width / np.sqrt(2 * np.log(tny))
+    new_width = width / np.sqrt(2 * np.log(tny))
+    if not precise:
+        return new_width
+
+    x = np.exp(1j * np.linspace(-n_cheby * omega * width, n_cheby * omega * width, 2 * n_cheby + 1))
+
+    def _diff_at_side(w):
+        _, c, _ = gaussian_function_fourier(n_cheby, w, center=0.0, period=period)
+        return abs(np.dot(c, x) - tny**(-1))
+
+    res = minimize(_diff_at_side, new_width, method="Powell", bounds=((new_width * 0.1, new_width),))
+    if res.success:
+        return res.x[0]
+    else:
+        raise ValueError(f"Optimization did not converged {res}")
 
 
-def gaussian_find_n(width, period, fluctuation, max_n = 100):
-    c = width * 2 * np.pi / (np.sqrt(2) * period) 
+def gaussian_find_n(width, period, fluctuation, max_n=100):
+    c = width * 2 * np.pi / (np.sqrt(2) * period)
     for n in range(1, max_n):
         erf_val = erf(c * n)
-        err = abs((1-erf_val)/(c /(np.sqrt(np.pi) + erf_val))) # TOO High
+        err = abs((1 - erf_val) / (c / (np.sqrt(np.pi) + erf_val)))  # TOO High
         if err < fluctuation:
             break
     else:
@@ -30,7 +47,18 @@ def gaussian_find_n(width, period, fluctuation, max_n = 100):
     return n
 
 
-def chebyshev_find_n(width, period, fluctuation, max_n = 100):
+def gaussian_find_n_numerical(width, period, fluctuation, side_edge, max_n=100):
+    for n in range(max(1, int(period / (width * 2 * np.pi))), max_n):
+        fluc_n = gaussian_fluctuation(n, width, period, side_edge)
+        if fluc_n < fluctuation:
+            break
+    else:
+        raise ValueError("No valid number of Fourier coefficients 'n' found that satisfies the fluctuation condition"
+                         "within the given maximum limit.")
+    return n, fluc_n
+
+
+def chebyshev_find_n(width, period, fluctuation, max_n=100):
     for n in range(max_n):
         fluc_n = chebyshev_fluctuation(n, width, period)
         if fluc_n < fluctuation:
@@ -48,12 +76,24 @@ def chebyshev_fluctuation(n, width, period):
     return tny ** (-1)
 
 
+def gaussian_fluctuation(n, width, period, side_edge):
+    x = sp.Symbol("x")
+    g, _, _ = gaussian_function_fourier(n, width, center=0.0, period=period, peak_height=1.0, sym_x=x)
+    abs_g_numeric = lambdify(x, Abs(g), 'numpy')
+    result = minimize_scalar(lambda x: -abs_g_numeric(x), bounds=(side_edge, side_edge + 2 * np.pi / (period * n)),
+                             method="bounded")
+    if result.success:
+        return -result.fun
+    else:
+        raise ValueError("Optimization did not converged")
+
+
 def gaussian_function_fourier(n_fourier: int,
                               width: float,
                               center: float = 0.0,
                               period: float = 2.0,
                               peak_height: float = 1.0,
-                              sym_x: Optional[sp.Symbol] = None,) \
+                              sym_x: Optional[sp.Symbol] = None, ) \
         -> Tuple[sp.Expr, np.ndarray, np.ndarray]:
     r"""
     Computes the Fourier series representation of a Gaussian function.
@@ -98,11 +138,19 @@ def gaussian_function_fourier(n_fourier: int,
 
     d_omega = 2 * np.pi / period
     freqs = np.linspace(-n_fourier * d_omega, n_fourier * d_omega, 2 * n_fourier + 1)
-    coeff = np.exp(-0.5 * (width * freqs) ** 2) * np.exp(-1j * freqs * center)
+
+    coeff = np.zeros(freqs.shape, dtype=complex)
+    for k in range(n_fourier + 1):
+        erf_factor = (width / period) * (
+                erf((period ** 2 - 4j * np.pi * k * width ** 2) / (np.sqrt(8) * period * width)) +
+                erf((period ** 2 + 4j * np.pi * k * width ** 2) / (np.sqrt(8) * period * width)))
+        coeff[n_fourier + k] = np.sqrt(np.pi / 2) * np.exp(-(d_omega * k * width) ** 2 / 2) * erf_factor
+    coeff[:n_fourier] = coeff[n_fourier + 1:][::-1]
+    coeff *= np.exp(-1j * freqs * center)
     basis = [sp.exp(1j * f * sym_x) for f in freqs]
     sp_series = sp.Add(*(c * b for c, b in zip(coeff, basis)))
-    normalizer = complex(sp_series.subs({sym_x: center}))
 
+    normalizer = complex(sp_series.subs({sym_x: center}))
     sp_series = peak_height * sp_series / normalizer
     coeff *= peak_height / normalizer
 
@@ -114,7 +162,8 @@ def chebyshev_filter_fourier(n_fourier: int,
                              center: float = 0.0,
                              period: float = 2.0,
                              peak_height: float = 1.0,
-                             sym_x: Optional[sp.Symbol] = None, ) \
+                             sym_x: Optional[sp.Symbol] = None,
+                             high_order_approx: bool = False,) \
         -> Tuple[sp.Expr, np.ndarray, np.ndarray]:
     r"""
     Constructs a Chebyshev bandpass filter using its Fourier series representation.
@@ -148,6 +197,11 @@ def chebyshev_filter_fourier(n_fourier: int,
             - `freqs` (np.ndarray): The corresponding frequencies for the Fourier series coefficients.
     """
 
+    #if n_fourier > 36:
+    #    raise NotImplementedError("Chebyshev filter with more than 35 coefficients is Numerically"
+    #                              "instable and not implemented.")
+        # Numerically unstable.
+
     #   Tn(1+2[cos(2π(x-c)/p) - cos(2πw/p)]/[1 + cos(2πw/p)]) / Normalizer
     # = Tn(1+2[cos z - cos a]/[1 + cos a]) / Normalizer
     if sym_x is None:
@@ -156,7 +210,7 @@ def chebyshev_filter_fourier(n_fourier: int,
     d_omega = 2 * np.pi / period
     freqs = np.linspace(-n_fourier * d_omega, n_fourier * d_omega, 2 * n_fourier + 1)
 
-    a = d_omega * width #  * np.pi
+    a = d_omega * width  #  * np.pi
     b = np.cos(a)
     if np.isclose(b, -1.0):
         raise ValueError("Ill-conditioned Chebyshev filter")
@@ -167,22 +221,12 @@ def chebyshev_filter_fourier(n_fourier: int,
     y0 = y(1)  # y₀ = 1 + 2[1 - cos a] / [1 + cos a]
 
     # Tn(y)
-    #if n_fourier > 35:
-    #    # Perform High-precision calculation
-    #    raise NotImplementedError("High-precision Chebyshev filter not implemented yet")
-    #    tn = _chebyt_product(n_fourier)
-    #    tny = np.polyval(tn, y)
-    #else:
     tn = chebyt(n_fourier)
     tny = np.polyval(tn, y)
     tny0 = tny(y0)
     tny = tny / tny0  # normalize
 
     mon_c = tny.c[::-1]  # tn(y) = Σₖ mon_c[k] cosᵏ(z)
-    #if n_fourier > 35:
-    #    mon_by_cheby = _monomial_by_chebyshev_high_precision(n_fourier + 1)
-    #    cheby_c = mon_c.astype(np.complex128) @ mon_by_cheby
-    #else:
     mon_by_cheby = _monomial_by_chebyshev(n_fourier + 1)  # cosᵏ(z) = Σₗ d[k, l] Tₗ(cos z) =  Σₗ d[k, l] cos(lz)
     cheby_c = mon_c @ mon_by_cheby
 
@@ -202,10 +246,19 @@ def chebyshev_filter_fourier(n_fourier: int,
     sp_series = peak_height * sp_series / normalizer
     coeff *= peak_height / normalizer
 
-    if n_fourier > 35:
-        pass
-        # Numerically unstable.
-        # sp_series =
+    if high_order_approx and n_fourier > 30:
+        fluct = chebyshev_fluctuation(n_fourier, width, period)
+        """
+        appx = (fluct *
+                sp.chebyshevt(n_fourier,
+                              (np.tan(a/2)**2 +
+                               (d_omega * (sym_x - center - period/2 * sp.sign(sp.sin(d_omega * (sym_x - center)))))**2
+                               / (1 + np.cos(a)))))
+        """
+        appx = fluct * sp.chebyshevt(n_fourier,
+                                     1 + 2 * (sp.cos(d_omega * (sym_x-center)) - sp.cos(d_omega * a))/(1 + sp.cos(a)))
+        sp_series = Piecewise((sp_series, sp.cos(d_omega * (sym_x - center)) > -1/np.sqrt(2)), (appx, True))
+        coefff, freqs = None, None
 
     return sp_series, coeff, freqs
 

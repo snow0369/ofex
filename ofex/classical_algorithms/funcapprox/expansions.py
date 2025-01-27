@@ -197,11 +197,6 @@ def chebyshev_filter_fourier(n_fourier: int,
             - `freqs` (np.ndarray): The corresponding frequencies for the Fourier series coefficients.
     """
 
-    #if n_fourier > 36:
-    #    raise NotImplementedError("Chebyshev filter with more than 35 coefficients is Numerically"
-    #                              "instable and not implemented.")
-        # Numerically unstable.
-
     #   Tn(1+2[cos(2π(x-c)/p) - cos(2πw/p)]/[1 + cos(2πw/p)]) / Normalizer
     # = Tn(1+2[cos z - cos a]/[1 + cos a]) / Normalizer
     if sym_x is None:

@@ -215,6 +215,17 @@ def chebyshev_filter_fourier(n_fourier: int,
     if np.isclose(b, -1.0):
         raise ValueError("Ill-conditioned Chebyshev filter")
 
+    if n_fourier > 39:
+        raise NotImplementedError("Chebyshev filter with more than 39 coefficients is Numerically instable"
+                                  "and not implemented.")
+
+    if high_order_approx and n_fourier > 30:
+        fluct = chebyshev_fluctuation(n_fourier, width, period)
+        func = fluct * sp.chebyshevt(n_fourier,
+                                     1 + 2 * (sp.cos(d_omega * (sym_x-center)) - sp.cos(a))/(1 + sp.cos(a)))
+        coeff, freqs = None, None
+        return func, coeff, freqs
+
     # y = 1 + 2[cos z - cos a] / [1 + cos a]
     #   = [2cos z + (1 - b)] / [1 + b]
     y = np.poly1d(np.array([2, 1 - b]) / (1 + b))
@@ -245,20 +256,6 @@ def chebyshev_filter_fourier(n_fourier: int,
 
     sp_series = peak_height * sp_series / normalizer
     coeff *= peak_height / normalizer
-
-    if high_order_approx and n_fourier > 30:
-        fluct = chebyshev_fluctuation(n_fourier, width, period)
-        """
-        appx = (fluct *
-                sp.chebyshevt(n_fourier,
-                              (np.tan(a/2)**2 +
-                               (d_omega * (sym_x - center - period/2 * sp.sign(sp.sin(d_omega * (sym_x - center)))))**2
-                               / (1 + np.cos(a)))))
-        """
-        appx = fluct * sp.chebyshevt(n_fourier,
-                                     1 + 2 * (sp.cos(d_omega * (sym_x-center)) - sp.cos(d_omega * a))/(1 + sp.cos(a)))
-        sp_series = Piecewise((sp_series, sp.cos(d_omega * (sym_x - center)) > -1/np.sqrt(2)), (appx, True))
-        coefff, freqs = None, None
 
     return sp_series, coeff, freqs
 

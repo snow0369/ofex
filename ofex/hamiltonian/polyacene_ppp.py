@@ -264,12 +264,12 @@ class PolyacenePPP:
         """
         fock = [0 for _ in range(self.num_spin_orbitals)]
         for an in self.atom_name:
-            if (not parity) and an[0] == "L" and int(an[1:]) % 2 == 0 or \
-                    an[0] == "U" and int(an[1:]) % 2 == 1:
+            if (not parity) and (an[0] == "L" and int(an[1:]) % 2 == 0 or \
+                    an[0] == "U" and int(an[1:]) % 2 == 1):
                 fock[self.spin_idx(an, SPIN_DOWN)] = 1
                 fock[self.spin_idx(an, SPIN_UP)] = 1
-            elif parity and an[0] == "L" and int(an[1:]) % 2 == 1 or \
-                    an[0] == "U" and int(an[1:]) % 2 == 0:
+            elif parity and (an[0] == "L" and int(an[1:]) % 2 == 1 or \
+                    an[0] == "U" and int(an[1:]) % 2 == 0):
                 fock[self.spin_idx(an, SPIN_DOWN)] = 1
                 fock[self.spin_idx(an, SPIN_UP)] = 1
         assert sum(fock) == self.n_electrons

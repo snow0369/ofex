@@ -1,11 +1,12 @@
 from typing import Optional, Tuple
 
 import numpy as np
+import scipy
 import sympy as sp
 from numpy.polynomial.chebyshev import Chebyshev
 from numpy.polynomial.polynomial import Polynomial
-from scipy.optimize import minimize_scalar, minimize
-from scipy.special import chebyt, erf
+from scipy.optimize import minimize_scalar, minimize, fsolve
+from scipy.special import chebyt, erf, i0, lambertw
 
 __all__ = ["gaussian_function_fourier", "chebyshev_filter_fourier",
            "gaussian_width_fit_to_chebyshev", "gaussian_find_n", "chebyshev_find_n", "chebyshev_fluctuation"]
@@ -24,17 +25,15 @@ def gaussian_width_fit_to_chebyshev(n_cheby: int, width, period, precise=False):
     x = np.exp(1j * np.linspace(-n_cheby * omega * width, n_cheby * omega * width, 2 * n_cheby + 1))
 
     def _diff_at_side(w):
+        if isinstance(w, np.ndarray):
+            w = w.item()
         _, c, _ = gaussian_function_fourier(n_cheby, w, center=0.0, period=period)
-        return abs(np.dot(c, x) - tny**(-1))
+        return abs(np.dot(c, x) - tny ** (-1))
 
-    res = minimize(_diff_at_side, new_width, method="Powell", bounds=((new_width * 0.1, new_width),))
-    if res.success:
-        return res.x[0]
-    else:
-        raise ValueError(f"Optimization did not converged {res}")
+    return fsolve(_diff_at_side, new_width)[0]
 
 
-def gaussian_find_n(width, period, fluctuation, max_n=100):
+def gaussian_find_n(width, period, fluctuation, max_n=300):
     c = width * 2 * np.pi / (np.sqrt(2) * period)
     for n in range(1, max_n):
         erf_val = erf(c * n)
@@ -47,7 +46,7 @@ def gaussian_find_n(width, period, fluctuation, max_n=100):
     return n
 
 
-def gaussian_find_n_numerical(width, period, fluctuation, side_edge, max_n=100):
+def gaussian_find_n_numerical(width, period, fluctuation, side_edge, max_n=300):
     for n in range(max(1, int(period / (width * 2 * np.pi))), max_n):
         fluc_n = gaussian_fluctuation(n, width, period, side_edge)
         if fluc_n < fluctuation:
@@ -58,7 +57,7 @@ def gaussian_find_n_numerical(width, period, fluctuation, side_edge, max_n=100):
     return n, fluc_n
 
 
-def chebyshev_find_n(width, period, fluctuation, max_n=100):
+def chebyshev_find_n(width, period, fluctuation, max_n=1000):
     for n in range(max_n):
         fluc_n = chebyshev_fluctuation(n, width, period)
         if fluc_n < fluctuation:
@@ -163,7 +162,7 @@ def chebyshev_filter_fourier(n_fourier: int,
                              period: float = 2.0,
                              peak_height: float = 1.0,
                              sym_x: Optional[sp.Symbol] = None,
-                             high_order_approx: bool = False,) \
+                             high_order_approx: bool = False, ) \
         -> Tuple[sp.Expr, np.ndarray, np.ndarray]:
     r"""
     Constructs a Chebyshev bandpass filter using its Fourier series representation.
@@ -210,14 +209,19 @@ def chebyshev_filter_fourier(n_fourier: int,
     if np.isclose(b, -1.0):
         raise ValueError("Ill-conditioned Chebyshev filter")
 
-    if n_fourier > 39:
-        raise NotImplementedError("Chebyshev filter with more than 39 coefficients is Numerically instable"
-                                  "and not implemented.")
+    # if n_fourier > 39:
+    #     raise NotImplementedError("Chebyshev filter with more than 39 coefficients is Numerically instable"
+    #                               "and not implemented.")
 
     if high_order_approx and n_fourier > 30:
         fluct = chebyshev_fluctuation(n_fourier, width, period)
-        func = fluct * sp.chebyshevt(n_fourier,
-                                     1 + 2 * (sp.cos(d_omega * (sym_x-center)) - sp.cos(a))/(1 + sp.cos(a)))
+        z = 1 + 2 * (sp.cos(d_omega * (sym_x - center)) - sp.cos(a)) / (1 + sp.cos(a))
+        func = fluct * sp.Piecewise((sp.cos(n_fourier * sp.acos(z)), sp.Abs(z) < 1),
+                                    (((z - sp.sqrt(z ** 2 - 1)) ** n_fourier + (
+                                            z + sp.sqrt(z ** 2 - 1)) ** n_fourier) / 2,
+                                     sp.Abs(z) >= 1))
+        # func = fluct * sp.chebyshevt(n_fourier,
+        #                              1 + 2 * (sp.cos(d_omega * (sym_x-center)) - sp.cos(a))/(1 + sp.cos(a)))
         coeff, freqs = None, None
         return func, coeff, freqs
 
@@ -253,6 +257,79 @@ def chebyshev_filter_fourier(n_fourier: int,
     coeff *= peak_height / normalizer
 
     return sp_series, coeff, freqs
+
+
+def kaiser_filter_fourier(n_fourier: int,
+                          alpha: float,
+                          center: float = 0.0,
+                          period: float = 2.0,
+                          peak_height: float = 1.0,
+                          sym_x: Optional[sp.Symbol] = None, ):
+    if sym_x is None:
+        sym_x = sp.Symbol("x")
+
+    d_omega = 2 * np.pi / period
+    freqs = np.linspace(-n_fourier * d_omega, n_fourier * d_omega, 2 * n_fourier + 1, dtype=float)
+
+    max_freq = float(n_fourier * d_omega)
+    coeffs = i0(alpha * np.sqrt(1 - (freqs / max_freq) ** 2)) / i0(alpha)
+    coeffs = coeffs.astype(complex)
+    coeffs *= np.exp(-1j * freqs * center)
+    basis = [sp.exp(1j * f * sym_x) for f in freqs]
+    sp_series = sp.Add(*(c * b for c, b in zip(coeffs, basis)))
+
+    normalizer = complex(sp_series.subs({sym_x: center}))
+    sp_series = peak_height * sp_series / normalizer
+    coeffs *= peak_height / normalizer
+
+    return sp_series, coeffs, freqs
+
+
+def kaiser_fluctuation(alpha):
+    # https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1163349
+    cos_theta = 0.217234
+    if np.isclose(alpha, 0.0):
+        return cos_theta
+    return alpha * cos_theta / np.sinh(alpha)
+
+
+def kaiser_find_alpha_from_fluct(target_fluctuation):
+    # Solve sinh(x)/x = k, where k = cos_theta/epsilon by newton method
+    max_iter, alpha_atol, fluct_atol = 1000, 1e-6, 1e-6
+
+    cos_theta = 0.217234
+    k = cos_theta / target_fluctuation
+    if k < 1.0:
+        raise ValueError("Target fluctuation is too large")
+    elif k > 1.5:
+        x = -lambertw(- 1 / (2 * k))
+    else:
+        x = np.sqrt(6 * (k - 1))
+
+    x = float(x)
+
+    def _diff_kaiser_fluctuation(_x):
+        return kaiser_fluctuation(_x) - target_fluctuation
+
+    x = fsolve(_diff_kaiser_fluctuation, x)
+    return float(x)
+
+
+def kaiser_find_alpha_from_width(n_fourier, target_width, period):
+    theta2 = 2.5535658
+    return np.sqrt((2 * np.pi * n_fourier * target_width / period) ** 2 - theta2 ** 2)
+
+
+def kaiser_width(n_fourier, alpha, period):
+    # f2 in
+    # https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1163349
+    theta2 = 2.5535658
+    return period * np.sqrt(theta2 ** 2 + alpha ** 2) / (2 * np.pi * n_fourier)
+
+
+def kaiser_find_n(alpha, target_width, period):
+    theta2 = 2.5535658
+    return int(period * np.sqrt(theta2 ** 2 + alpha ** 2) / (2 * np.pi * target_width))
 
 
 def _chebyt_product(n):

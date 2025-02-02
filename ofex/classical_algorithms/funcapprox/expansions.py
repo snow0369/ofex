@@ -317,7 +317,10 @@ def kaiser_find_alpha_from_fluct(target_fluctuation):
 
 def kaiser_find_alpha_from_width(n_fourier, target_width, period):
     theta2 = 2.5535658
-    return np.sqrt((2 * np.pi * n_fourier * target_width / period) ** 2 - theta2 ** 2)
+    alpha2 = (2 * np.pi * n_fourier * target_width / period) ** 2 - theta2 ** 2
+    if alpha2 < 0:
+        raise ValueError("Target width or fourier basis is too large")
+    return np.sqrt(alpha2)
 
 
 def kaiser_width(n_fourier, alpha, period):

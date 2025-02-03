@@ -7,8 +7,8 @@ The module includes:
 """
 
 from .pauli_hamiltonian import zz_1d, heisenberg_1d, heisenberg_1d_ring
-from .polyacene_ppp import PolyacenePPP
+from .electronic_structures import PolyacenePPP, FermionicHubbard
 
 __all__ = [
-    "zz_1d", "heisenberg_1d", "heisenberg_1d_ring", "PolyacenePPP"
+    "zz_1d", "heisenberg_1d", "heisenberg_1d_ring", "PolyacenePPP", "FermionicHubbard"
 ]

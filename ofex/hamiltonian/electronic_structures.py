@@ -1,4 +1,5 @@
-from typing import List, Tuple, Dict, Union
+import abc
+from typing import List, Tuple, Dict, Union, Optional
 
 import numpy as np
 from openfermion import FermionOperator
@@ -7,12 +8,85 @@ from ofex.constant import EV_TO_HARTREE, DEG_TO_RADIAN
 from ofex.operators.fermion_operator_tools import one_body_excitation, one_body_number
 from ofex.state import BinaryFockVector
 
-__all__ = ["PolyacenePPP"]
+__all__ = ["PolyacenePPP", "FermionicHubbard"]
 
 SPIN_DOWN, SPIN_UP = 0, 1
 
 
-class PolyacenePPP:
+class CustomElectronicStructure(abc.ABC):
+    @property
+    @abc.abstractmethod
+    def n_qubits(self) -> int:
+        pass
+
+    @property
+    @abc.abstractmethod
+    def n_electrons(self) -> int:
+        pass
+
+    @abc.abstractmethod
+    def hf_state(self, *args) -> Dict[BinaryFockVector, complex]:
+        pass
+
+    @abc.abstractmethod
+    def get_molecular_hamiltonian(self) -> FermionOperator:
+        pass
+
+
+class FermionicHubbard(CustomElectronicStructure):
+    def __init__(self,
+                 n_sites: int,
+                 h: Union[float, np.ndarray],
+                 u: Optional[Union[float, np.ndarray]] = None,
+                 n_electrons: Optional[int] = None,):
+        if isinstance(h, float):
+            h = np.ones(n_sites - 1) * h
+        if u is None:
+            u = np.ones(n_sites)
+        elif isinstance(u, float):
+            u = np.ones(n_sites) * u
+        if len(h) != n_sites - 1:
+            raise ValueError
+        if len(u) != n_sites:
+            raise ValueError
+        if n_electrons is None:
+            n_electrons = n_sites
+        self.n_sites = n_sites
+        self.h = h
+        self.u = u
+        self._n_electrons = n_electrons
+
+    @property
+    def n_qubits(self) -> int:
+        return 2 * self.n_sites
+
+    @property
+    def n_electrons(self) -> int:
+        return self._n_electrons
+
+    def get_molecular_hamiltonian(self) -> FermionOperator:
+        h_op = FermionOperator()
+        for i in range(self.n_sites - 1):
+            h_op += one_body_excitation(i, i+1, spin_idx=False, hermitian=True) * self.h[i]
+        u_op = FermionOperator()
+        for i in range(self.n_sites):
+            u_op += one_body_number(i, spin_idx=False) * self.u[i]
+        return h_op + u_op
+
+    def hf_state(self):
+        fock = [1 for _ in range(self.n_electrons)] + [0 for _ in range(self.n_qubits - self.n_electrons)]
+        new_fock = [0 for _ in range(self.n_qubits)]
+        half = int(np.ceil(self.n_sites / 2))
+        for i in range(half):
+            new_fock[4 * i], new_fock[4 * i + 1] = fock[2 * i], fock[2 * i + 1]
+        for i in range(half, self.n_sites):
+            j = i - half
+            new_fock[4 * j + 2], new_fock[4 * j + 3] = fock[2 * i], fock[2 * i + 1]
+        assert sum(new_fock) == self.n_electrons
+        return {BinaryFockVector(new_fock): 1.0}
+
+
+class PolyacenePPP(CustomElectronicStructure):
     """
     The PolyacenePPP class represents a linear polyacene molecule described using the Pariser-Parr-Pople (PPP) model
     for quantum chemistry calculations. It provides methods for computing molecular Hamiltonians, electron-electron
@@ -265,11 +339,11 @@ class PolyacenePPP:
         fock = [0 for _ in range(self.num_spin_orbitals)]
         for an in self.atom_name:
             if (not parity) and (an[0] == "L" and int(an[1:]) % 2 == 0 or \
-                    an[0] == "U" and int(an[1:]) % 2 == 1):
+                                 an[0] == "U" and int(an[1:]) % 2 == 1):
                 fock[self.spin_idx(an, SPIN_DOWN)] = 1
                 fock[self.spin_idx(an, SPIN_UP)] = 1
             elif parity and (an[0] == "L" and int(an[1:]) % 2 == 1 or \
-                    an[0] == "U" and int(an[1:]) % 2 == 0):
+                             an[0] == "U" and int(an[1:]) % 2 == 0):
                 fock[self.spin_idx(an, SPIN_DOWN)] = 1
                 fock[self.spin_idx(an, SPIN_UP)] = 1
         assert sum(fock) == self.n_electrons
@@ -302,8 +376,8 @@ class PolyacenePPP:
         """
         fock_even = self.hf_state(parity=False)
         fock_odd = self.hf_state(parity=True)
-        return {BinaryFockVector(fock_odd): 1/np.sqrt(2),
-                BinaryFockVector(fock_even): 1/np.sqrt(2)}
+        return {BinaryFockVector(fock_odd): 1 / np.sqrt(2),
+                BinaryFockVector(fock_even): 1 / np.sqrt(2)}
 
     # </editor-fold>
 

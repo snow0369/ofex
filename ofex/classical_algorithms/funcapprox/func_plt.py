@@ -14,7 +14,8 @@ def plot_functions(func_list: Dict[str, sp.Expr],
                    range_plot_options: Optional[Dict[str, Dict[str, Any]]] = None,
                    x_points: Optional[Sequence[float]] = None,
                    title: Optional[str] = None,
-                   plot: bool = True):
+                   plot: bool = True,
+                   axes: Optional[plt.Axes] = None):
     """
     Plots one or more mathematical functions defined as SymPy expressions.
 
@@ -51,9 +52,14 @@ def plot_functions(func_list: Dict[str, sp.Expr],
         if not np.allclose(y_points[func_name].imag, 0.0):
             plt_imag = True
 
-    fig = plt.figure()
+    if axes is None:
+        fig = plt.figure()
+        if not plt_imag:
+            axes = [fig.add_subplot(111)]
+        else:
+            axes = fig.subplots(2)
+
     if not plt_imag:
-        axes = [fig.add_subplot(111)]
         plot_info = dict()
         for func_name, func in func_list.items():
             if plot_options is not None and func_name in plot_options:
@@ -76,7 +82,6 @@ def plot_functions(func_list: Dict[str, sp.Expr],
                                          label=func_name, alpha=0.2, **kwargs)
         axes[0].legend()
     else:
-        axes = fig.subplots(2)
         plot_info = dict()
         for func_name, func in func_list.items():
             if plot_options is not None and func_name in plot_options:

@@ -139,9 +139,12 @@ def molecule_example(molecule_name: str,
         kwargs.pop('multiplicity')
     charge = 0
 
+    desc = "tmp"
     if geometry is None:
         if param is None:
             param = default_param[molecule_name]
+        else:
+            desc = desc + str(param)
         if molecule_name == "H2":
             geometry = linear_geometry(['H', 'H'], param)
         elif molecule_name == "H4":
@@ -170,7 +173,7 @@ def molecule_example(molecule_name: str,
                         basis,
                         multiplicity,
                         charge,
-                        description="tmp",
+                        description=desc,
                         **kwargs)
     try:
         mol.load()

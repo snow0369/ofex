@@ -58,6 +58,10 @@ def plot_functions(func_list: Dict[str, sp.Expr],
             axes = [fig.add_subplot(111)]
         else:
             axes = fig.subplots(2)
+    elif not hasattr(axes, '__getitem__'):
+        axes = [axes]
+    if plt_imag and len(axes) != 2:
+        raise ValueError("Axes must have 2 axes for imaginary plots.")
 
     if not plt_imag:
         plot_info = dict()

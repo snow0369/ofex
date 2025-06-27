@@ -82,7 +82,8 @@ def gaussian_function_fourier(n_fourier: int,
                               center: float = 0.0,
                               period: float = 2.0,
                               peak_height: float = 1.0,
-                              sym_x: Optional[sp.Symbol] = None, ) \
+                              sym_x: Optional[sp.Symbol] = None,
+                              cutoff_coeff_atol: Optional[float] = None,) \
         -> Tuple[sp.Expr, np.ndarray, np.ndarray]:
     r"""
     Computes the Fourier series representation of a Gaussian function.
@@ -112,6 +113,7 @@ def gaussian_function_fourier(n_fourier: int,
         period (float, optional): Period of the Fourier series affecting frequency spacing. Defaults to 2.0.
         peak_height (float, optional): Peak height (gain) of the filter. Defaults to 1.0.
         sym_x (Optional[sp.Symbol], optional): Symbol for the symbolic Fourier series representation. Defaults to None.
+        cutoff_coeff_atol (Optional[float], optional): Cutoff coefficient tolerance. Defaults to None.
 
     Returns:
         Tuple[sp.Expr, np.ndarray, np.ndarray]: A tuple containing:
@@ -134,8 +136,17 @@ def gaussian_function_fourier(n_fourier: int,
         coeff[n_fourier + k] = np.sqrt(np.pi / 2) * np.exp(-(d_omega * k * width) ** 2 / 2) * erf_factor
     coeff[:n_fourier] = coeff[n_fourier + 1:][::-1]
     coeff *= np.exp(-1j * freqs * center)
-    basis = [sp.exp(1j * f * sym_x) for f in freqs]
-    sp_series = sp.Add(*(c * b for c, b in zip(coeff, basis)))
+
+    if cutoff_coeff_atol is not None:
+        keep_mask = np.abs(coeff) >= cutoff_coeff_atol
+        coeff = coeff * keep_mask
+        coeff_sp = coeff[keep_mask]
+        freqs_sp = freqs[keep_mask]
+        basis = [sp.exp(1j * f * sym_x) for f in freqs_sp]
+        sp_series = sp.Add(*(c * b for c, b in zip(coeff_sp, basis)))
+    else:
+        basis = [sp.exp(1j * f * sym_x) for f in freqs]
+        sp_series = sp.Add(*(c * b for c, b in zip(coeff, basis)))
 
     normalizer = complex(sp_series.subs({sym_x: center}))
     sp_series = peak_height * sp_series / normalizer

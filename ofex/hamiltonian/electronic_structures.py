@@ -1,14 +1,20 @@
 import abc
+import warnings
+from itertools import product, chain
 from typing import List, Tuple, Dict, Union, Optional
 
 import numpy as np
-from openfermion import FermionOperator
+from openfermion import FermionOperator, fermi_hubbard, up_index, down_index
 
 from ofex.constant import EV_TO_HARTREE, DEG_TO_RADIAN
+from ofex.hamiltonian.fermi_hubbard_rhf import build_spatial_hubbard_integrals, restricted_hf, transform_integrals, \
+    build_spin_orbital_ham
 from ofex.operators.fermion_operator_tools import one_body_excitation, one_body_number
 from ofex.state import BinaryFockVector
 
 __all__ = ["PolyacenePPP", "FermionicHubbard"]
+
+from ofex.transforms import fermion_rotation_operator
 
 SPIN_DOWN, SPIN_UP = 0, 1
 
@@ -35,55 +41,93 @@ class CustomElectronicStructure(abc.ABC):
 
 class FermionicHubbard(CustomElectronicStructure):
     def __init__(self,
-                 n_sites: int,
-                 h: Union[float, np.ndarray],
-                 u: Optional[Union[float, np.ndarray]] = None,
-                 n_electrons: Optional[int] = None,):
-        if isinstance(h, float):
-            h = np.ones(n_sites - 1) * h
-        if u is None:
-            u = np.ones(n_sites)
-        elif isinstance(u, float):
-            u = np.ones(n_sites) * u
-        if len(h) != n_sites - 1:
-            raise ValueError
-        if len(u) != n_sites:
-            raise ValueError
-        if n_electrons is None:
+                 x_dimension: int,
+                 y_dimension: int = 1,
+                 tunneling: float = 1.0,
+                 coulomb: float = 1.0,
+                 chemical_potential: float = 0.0,
+                 magnetic_field: float = 0.0,
+                 periodic: bool = True,
+                 n_electrons: Optional[int] = None,
+                 run_rhf: bool = False):
+        n_sites = x_dimension * y_dimension
+        if n_electrons is None:  # Default = Half Filled
             n_electrons = n_sites
+        self.x_dimension, self.y_dimension = x_dimension, y_dimension
         self.n_sites = n_sites
-        self.h = h
-        self.u = u
         self._n_electrons = n_electrons
+        self._n_qubits = 2 * n_sites
 
-    @property
-    def n_qubits(self) -> int:
-        return 2 * self.n_sites
+        self.tunneling, self.coulomb = tunneling, coulomb
+        self.chemical_potential, self.magnetic_field = chemical_potential, magnetic_field
+        self.periodic = periodic
+
+        self.run_rhf = run_rhf
+        self.hf_energy = None
+
+        if run_rhf:
+            if self.magnetic_field != 0.0:
+                raise ValueError
+            h_site, g_site = build_spatial_hubbard_integrals(self.x_dimension, self.y_dimension,
+                                                             self.tunneling, self.coulomb,
+                                                             self.chemical_potential,
+                                                             self.periodic)
+            # self.hamiltonian = fermi_hubbard(self.x_dimension, self.y_dimension, self.tunneling, self.coulomb,
+            #                                 self.chemical_potential, self.magnetic_field, self.periodic,
+            #                                 spinless=False, particle_hole_symmetry=False)
+            C_mo, eps_mo, hf_energy = restricted_hf(h_site, g_site, self.n_electrons)
+            h_mo, g_mo = transform_integrals(C_mo, h_site, g_site)
+            self.hamiltonian = build_spin_orbital_ham(h_mo, g_mo)
+            self.hf_energy = hf_energy
+            # self.hamiltonian = fermion_rotation_operator(self.hamiltonian, C_mo, spatial_v=True)
+        else:
+            self.hamiltonian = fermi_hubbard(self.x_dimension, self.y_dimension, self.tunneling, self.coulomb,
+                                             self.chemical_potential, self.magnetic_field, self.periodic,
+                                             spinless=False, particle_hole_symmetry=False)
+
+    def xy_to_spatial_idx(self, x, y) -> int:
+        return x + y * self.x_dimension
+
+    def spatial_idx_to_xy(self, site_idx) -> Tuple[int, int]:
+        return site_idx % self.x_dimension, site_idx // self.x_dimension
 
     @property
     def n_electrons(self) -> int:
         return self._n_electrons
 
+    @property
+    def n_qubits(self) -> int:
+        return self._n_qubits
+
     def get_molecular_hamiltonian(self) -> FermionOperator:
-        h_op = FermionOperator()
-        for i in range(self.n_sites - 1):
-            h_op += one_body_excitation(i, i+1, spin_idx=False, hermitian=True) * self.h[i]
-        u_op = FermionOperator()
-        for i in range(self.n_sites):
-            u_op += one_body_number(i, spin_idx=False) * self.u[i]
-        return h_op + u_op
+        return self.hamiltonian
 
     def hf_state(self):
-        fock = [1 for _ in range(self.n_electrons)] + [0 for _ in range(self.n_qubits - self.n_electrons)]
-        new_fock = [0 for _ in range(self.n_qubits)]
-        half = int(np.ceil(self.n_sites / 2))
-        for i in range(half):
-            new_fock[4 * i], new_fock[4 * i + 1] = fock[2 * i], fock[2 * i + 1]
-        for i in range(half, self.n_sites):
-            j = i - half
-            new_fock[4 * j + 2], new_fock[4 * j + 3] = fock[2 * i], fock[2 * i + 1]
-        assert sum(new_fock) == self.n_electrons
-        return {BinaryFockVector(new_fock): 1.0}
+        if not self.run_rhf:
+            warnings.warn("HF state is not prepared. Neel state is returned instead.")
+            return self.neel_state()
+        occ = [1] * self.n_electrons + [0] * (self.n_qubits - self.n_electrons)
+        return {BinaryFockVector(occ): 1.0}
+
+    def neel_state(self):
+        neel_pattern = []
+        complement_pattern = []
+        for x, y in product(range(self.x_dimension), range(self.y_dimension)):
+            site = self.xy_to_spatial_idx(x, y)
+            if (x + y) % 2 == 0:  # A-sublattice
+                neel_pattern.append(up_index(site))
+                complement_pattern.append(down_index(site))
+            else:  # B-sublattice
+                neel_pattern.append(down_index(site))
+                complement_pattern.append(up_index(site))
+
+        filling_order = list(chain(neel_pattern, complement_pattern))
+        occ = [0] * self.n_qubits
+        for orb_idx in filling_order[:self.n_electrons]:
+            occ[orb_idx] = 1
+        assert sum(occ) == self.n_electrons
+
+        return {BinaryFockVector(occ): 1.0}
 
 
 class PolyacenePPP(CustomElectronicStructure):

@@ -126,9 +126,9 @@ def gaussian_function_fourier(n_fourier: int,
         sym_x = sp.Symbol("x")
 
     d_omega = 2 * np.pi / period
-    freqs = np.linspace(-n_fourier * d_omega, n_fourier * d_omega, 2 * n_fourier + 1)
+    freqs = np.linspace(-n_fourier * d_omega, n_fourier * d_omega, 2 * n_fourier + 1, dtype=np.complex128)
 
-    coeff = np.zeros(freqs.shape, dtype=complex)
+    coeff = np.zeros(freqs.shape, dtype=np.complex128)
     for k in range(n_fourier + 1):
         erf_factor = (width / period) * (
                 erf((period ** 2 - 4j * np.pi * k * width ** 2) / (np.sqrt(8) * period * width)) +

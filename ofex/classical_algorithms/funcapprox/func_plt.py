@@ -1,13 +1,15 @@
-from typing import Dict, Optional, Sequence, Tuple, Any
+from typing import Dict, Optional, Sequence, Tuple, Any, Union, Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sp
 
+from numpy.polynomial import Chebyshev, Polynomial, Legendre, Laguerre, Hermite, HermiteE
+
 __all__ = ["plot_functions"]
 
 
-def plot_functions(func_list: Dict[str, sp.Expr],
+def plot_functions(func_list: Dict[str, Union[sp.Expr, Callable]],
                    x: sp.Symbol,
                    plot_options: Optional[Dict[str, Dict[str, Any]]] = None,
                    range_plot: Optional[Dict[str, Tuple[float, float]]] = None,
@@ -48,7 +50,15 @@ def plot_functions(func_list: Dict[str, sp.Expr],
     plt_imag = False
     y_points = dict()
     for func_name, func in func_list.items():
-        y_points[func_name] = sp.lambdify(x, func, "numpy")(x_points)
+        if isinstance(func, sp.Expr):
+            y_points[func_name] = sp.lambdify(x, func, "numpy")(x_points)
+        elif isinstance(func, (Chebyshev, Polynomial, Legendre, Laguerre, Hermite, HermiteE)):
+            y_points[func_name] = func(x_points)
+        elif callable(func):
+            y_points[func_name] = func(x_points)
+        else:
+            raise TypeError
+
         if not np.allclose(y_points[func_name].imag, 0.0):
             plt_imag = True
 

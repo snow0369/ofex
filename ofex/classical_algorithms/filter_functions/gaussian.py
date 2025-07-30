@@ -4,10 +4,11 @@ import numpy as np
 import sympy as sp
 from numpy.polynomial import Chebyshev
 from scipy.optimize import fsolve, minimize_scalar
-from scipy.special import erf
+from scipy.special import erf, ive
 from sympy import lambdify, Abs
 
-__all__ = ["gaussian_width_fit_to_chebyshev", "gaussian_fluctuation", "gaussian_function_fourier"]
+__all__ = ["gaussian_width_fit_to_chebyshev", "gaussian_fluctuation", "gaussian_function_fourier",
+           "gaussian_function_cheby"]
 
 
 def gaussian_width_fit_to_chebyshev(n_cheby: int, width, period, precise=False):
@@ -153,3 +154,41 @@ def gaussian_function_fourier(n_fourier: int,
     coeff *= peak_height / normalizer
 
     return sp_series, coeff, freqs
+
+
+def gaussian_function_cheby(n_poly, width, center=0.0, domain=2.0, peak_height=1.0):
+    """
+    Chebyshev-T coefficients of
+      F(x) = e^{-z} [ I0(z) + 2 Σ_{j=1}^{n/2} (-1)^j I_j(z) T_{2j}((x-μ)/p) ] * peak_height,
+    with z=1/(8*width^2).  Truncates small Bessel weights if atol>0.
+    """
+    if n_poly % 2 != 0:
+        raise ValueError("n_poly must be even.")
+    # keep u = (x-center)/domain within [-1,1] on x∈[-1,1]
+    if domain < 1 + abs(center):
+        raise ValueError("`domain` must be ≥ 1 + |center| to avoid blow‑up.")
+
+    # Bessel weights (scaled: ive(j,z) = exp(-z) * I_j(z))
+    z = 1.0 / (width**2)
+    j = np.arange(0, n_poly // 2 + 1)
+    I_scaled = ive(j, z)
+
+    w = np.empty_like(I_scaled, dtype=float)
+    w[0]  = I_scaled[0]
+    w[1:] = 2.0 * ((-1.0)**j[1:]) * I_scaled[1:]
+
+    # Build P(u) = Σ w_j T_{2j}(u) once (u is the inner variable)
+    c_u = np.zeros(n_poly + 1, dtype=float)   # degrees 0..n_poly
+    c_u[0]    = w[0]
+    c_u[2::2] = w[1:]                         # put weights on even degrees
+    P_u = Chebyshev(c_u)
+
+    # Compose once with the affine map u(x) = (x - center)/domain
+    lin = Chebyshev([-center / domain, 1.0 / domain])
+    P_x = P_u(lin) * peak_height              # <-- composition via call
+
+    coef = P_x.coef
+    if coef.size < n_poly + 1:
+        coef = np.pad(coef, (0, n_poly + 1 - coef.size))
+
+    return P_x, coef
